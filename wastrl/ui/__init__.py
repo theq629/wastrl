@@ -59,8 +59,10 @@ class Window:
 		self._dim = dim
 		self._console = tdl.Console(*dim) if self._dim != (0, 0) else None
 
-	def _draw(self):
-		self._on_redraw._trigger(self._console)
+	def _draw(self, dest_con):
+		if self._console is not None:
+			self._on_redraw._trigger(self._console)
+			dest_con.blit(self._console, self._pos[0], self._pos[1], self._dim[0], self._dim[1], 0, 0)
 
 class View:
 	__slots__ = (
@@ -96,6 +98,8 @@ class View:
 	def _tdl_event(self, event):
 		if event.type == 'KEYDOWN' and event.key != 'TEXT':
 			key_name = event.char if event.key == 'CHAR' else event.key
+			if event.shift:
+				key_name = "shift+" + key_name
 			if self._on_key._trigger(key_name):
 				return True
 			else:
@@ -107,10 +111,11 @@ class View:
 	def _resize(self, dim):
 		self._console = tdl.Console(*dim) if dim != (0, 0) else None
 
-	def _draw(self):
-		for win in self._windows:
-			win._draw()
-			self._console.blit(win._console, 0, 0, win._dim[0], win._dim[1], win._pos[0], win._pos[1])
+	def _draw(self, dest_con):
+		if self._console is not None:
+			for win in self._windows:
+				win._draw(self._console)
+			dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
 
 class Display:
 	__slots__ = (
@@ -179,6 +184,5 @@ class Display:
 
 	def _draw(self):
 		for view in self._views:
-			view._draw()
-			self._root_console.blit(view._console, 0, 0, self._dim[0], self._dim[1], 0, 0)
+			view._draw(self._root_console)
 		tdl.flush()
