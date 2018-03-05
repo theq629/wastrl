@@ -1,5 +1,6 @@
 import numpy
 from .. import ui
+from ..game import things
 
 class TopBarWin(ui.Window):
 	__slots__ = ()
@@ -15,7 +16,8 @@ class MapWin(ui.Window):
 	__slots__ = (
 		'_game',
 		'_view_centre',
-		'_max_height'
+		'_max_height',
+		'_draw_cell'
 	)
 
 	def __init__(self, game, view_centre, *args, **kwargs):
@@ -25,6 +27,7 @@ class MapWin(ui.Window):
 		self._max_height = max(numpy.nditer(self._game.height))
 		self.on_redraw.add(self.redraw)
 		self.on_key.add(self.key)
+		self._draw_cell = self.draw_terrain_cell
 
 	def redraw(self, console):
 		world_dim = tuple(reversed(self._game.height.shape))
@@ -34,8 +37,15 @@ class MapWin(ui.Window):
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_offset[0] + screen_x, world_offset[1] + screen_y
-				c = int(255 * (self._game.height[world_y, world_x] / self._max_height))
-				console.draw_char(screen_x, screen_y, char='.', fg=(c, c, c))
+				self._draw_cell(console, screen_x, screen_y, world_x, world_y)
+
+	def draw_terrain_cell(self, console, screen_x, screen_y, world_x, world_y):
+		terrain = self._game.terrain[world_x, world_y]
+		console.draw_char(screen_x, screen_y, char=things.characters[terrain], fg=things.colours[terrain])
+
+	def draw_height_cell(self,console,  screen_x, screen_y, world_x, world_y):
+		c = int(255 * (self._game.height[world_y, world_x] / self._max_height))
+		console.draw_char(screen_x, screen_y, char='.', fg=(c, c, c))
 
 	def key(self, key):
 		if key == 'UP' or key == 'k':
@@ -61,6 +71,12 @@ class MapWin(ui.Window):
 			return True
 		elif key == 'shift+RIGHT' or key == 'shift+l':
 			self._view_centre[0] += 10
+			return True
+		elif key == '1':
+			self._draw_cell = self.draw_terrain_cell
+			return True
+		elif key == '2':
+			self._draw_cell = self.draw_height_cell
 			return True
 
 class MainView(ui.View):

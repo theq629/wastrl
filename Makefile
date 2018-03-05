@@ -8,6 +8,6 @@ setup:
 	VIRTUALENV=$(VIRTUALENV) PIP=$(PIP) ./setup.sh
 
 run:
-	$(PYTHON) -m wastrl
+	$(PYTHON) -m wastrl.client
 
 .DUMMY: run setup
