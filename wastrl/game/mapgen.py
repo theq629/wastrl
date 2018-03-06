@@ -111,7 +111,7 @@ def run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset)
 			terrain[x, y] = things.water
 			tcod.heightmap_dig_hill(blocking, x, y, 4, 100)
 
-def make_walk_map(terrain, height, dim, water_cost=10):
+def make_walk_map(terrain, height, dim, water_cost=100):
 	walkability = tcod.heightmap_new(*dim)
 	tcod.heightmap_copy(height, walkability)
 	for x in range(dim[0]):
