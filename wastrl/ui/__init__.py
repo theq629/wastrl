@@ -113,6 +113,7 @@ class View:
 		'_windows',
 		'_console',
 		'_keybindings',
+		'_open',
 		'_on_resize',
 		'_on_key',
 		'_on_before_redraw',
@@ -124,6 +125,7 @@ class View:
 		self._windows = _ControlledCollection()
 		self._console = None
 		self._keybindings = keybindings
+		self._open = True
 		self._on_resize = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
 		self._on_before_redraw = EventHandler()
@@ -156,6 +158,7 @@ class View:
 		return self._on_after_redraw
 
 	def close(self):
+		self._open = False
 		for display in self._displays:
 			display._views._remove(self)
 		self._displays = []
@@ -180,11 +183,12 @@ class View:
 
 	def _draw(self, dest_con):
 		self._on_before_redraw._trigger()
-		if self._console is not None:
-			for win in self._windows:
-				win._draw(self._console)
-			dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
-		self._on_after_redraw._trigger()
+		if self._open:
+			if self._console is not None:
+				for win in self._windows:
+					win._draw(self._console)
+				dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
+			self._on_after_redraw._trigger()
 
 class _ViewCollection(_ControlledCollection):
 	__slots__ = (
@@ -198,11 +202,17 @@ class _ViewCollection(_ControlledCollection):
 	def add(self, view):
 		super().add(view)
 		view._displays.append(self._display)
+		if self._display._running:
+			view._on_resize._trigger(self._display._dim)
+			self._display._draw()
 
 	def _remove(self, view):
 		super()._remove(view)
-		if len(self) == 0:
-			self._display.quit()
+		view._displays.remove(self._display)
+		if self._display._running:
+			self._display._draw()
+			if len(self) == 0:
+				self._display.quit()
 
 class Display:
 	__slots__ = (

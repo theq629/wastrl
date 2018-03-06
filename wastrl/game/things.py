@@ -38,5 +38,6 @@ def goal():
 def player():
 	return data.Thing({
 		props.graphics: props.Graphics(char='@', colour=0xffffff),
+		props.is_player: True,
 		props.action_points: 5
 	})

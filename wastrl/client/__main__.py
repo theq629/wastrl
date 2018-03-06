@@ -6,8 +6,9 @@ from ..ui import basic as basic_ui
 from ..ui import keys
 from .. import game
 from . import main_view
+from . import end_view
 from . import commands
-from . import intro
+from . import texts
 
 prog_name = "wastrl"
 prog_author = "theq629"
@@ -62,6 +63,7 @@ if __name__ == '__main__':
 	the_game = game.Game(args.rng_seed)
 
 	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl") as disp:
-		disp.views.add(main_view.MainView(disp, the_game, keybindings=keybindings['main']))
+		disp.views.add(end_view.EndView(disp, the_game, keybindings=keybindings['dialogs']))
+		disp.views.add(main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main']))
 		if args.do_intro:
-			disp.views.add(basic_ui.TextView("Wastrl", intro.intro, keybindings=keybindings['dialogs']))
+			disp.views.add(basic_ui.TextView("Wastrl", texts.intro, keybindings=keybindings['dialogs']))

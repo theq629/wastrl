@@ -26,7 +26,7 @@ class _HandlerCollection:
 		return self._items.__iter__()
 
 	def _prepare(self):
-		self._items.sort()
+		self._items.sort(key=lambda pf: pf[0])
 		self._prepared = True
 
 class Event:

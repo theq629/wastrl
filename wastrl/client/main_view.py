@@ -1,5 +1,6 @@
 import numpy
 from .. import ui
+from .. import game
 from ..game import properties as props
 from ..game import events
 from ..game import actions
@@ -108,14 +109,16 @@ class MapWin(ui.Window):
 class MainView(ui.View):
 	__slots__ = (
 		'_display',
+		'_full_keybindings',
 		'_game',
 		'_top_bar_win',
 		'_map_win'
 	)
 
-	def __init__(self, display, the_game, *args, **kwargs):
+	def __init__(self, display, full_keybindings, the_game, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._display = display
+		self._full_keybindings = full_keybindings
 		self._game = the_game
 		self._top_bar_win = TopBarWin(self._game)
 		self._map_win = MapWin(self._game, keybindings=self.keybindings)
@@ -124,6 +127,8 @@ class MainView(ui.View):
 		self.on_resize.add(self.resize)
 		self.on_before_redraw.add(self.update_game)
 		events.act.on.add(self.take_player_action)
+		events.win.on.add(self.win_or_lose, priority=99)
+		events.lose.on.add(self.win_or_lose, priority=99)
 		self.on_key[commands.quit].add(self._display.quit)
 
 	def take_player_action(self, thing, available_ap):
@@ -133,6 +138,9 @@ class MainView(ui.View):
 			return actions
 		else:
 			return None
+
+	def win_or_lose(self, player):
+		self.close()
 
 	def update_game(self):
 		self._game.update()

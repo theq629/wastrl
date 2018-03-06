@@ -37,6 +37,13 @@ def handle_thing_turns(min_ap=1):
 	
 	try_start_new_turn()
 
+@events.turn.on.handle(1000)
+def check_win():
+	for player, player_pos in props.is_player.join(props.position):
+		for goal, goal_pos in props.is_goal.join(props.position):
+			if goal_pos == player_pos:
+				events.win.trigger(player)
+
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
