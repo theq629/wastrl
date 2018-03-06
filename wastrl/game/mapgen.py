@@ -111,6 +111,15 @@ def run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset)
 			terrain[x, y] = things.water
 			tcod.heightmap_dig_hill(blocking, x, y, 4, 100)
 
+def make_walk_map(terrain, height, dim, water_cost=10):
+	walkability = tcod.heightmap_new(*dim)
+	tcod.heightmap_copy(height, walkability)
+	for x in range(dim[0]):
+		for y in range(dim[1]):
+			if terrain[x, y] == things.water:
+				walkability[y, x] = water_cost
+	return walkability
+
 def make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, pather, rng):
 	for i in range(num_guaranteed_paths):
 		points = iter(choose_guaranteed_path_points(height, dim, starting_point, ending_point, num_mountain_ranges, rng))
@@ -118,8 +127,7 @@ def make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, nu
 		for point in points:
 			path = pather.get_path(last_point[0], last_point[1], point[0], point[1])
 			for x, y in path:
-				if terrain[x, y] != things.water:
-					terrain[x, y] = things.desert
+				terrain[x, y] = things.desert
 			last_point = point
 
 def make_deserts(terrain, height, dim, num_deserts, pather, rng, min_length=5, max_length=40, max_r=40, min_radius=8):
@@ -140,14 +148,7 @@ def make_cities(terrain, dim, num_cities, rng, x_margin):
 			terrain[p] = things.city
 	return tuple(make())
 
-def make_roads(terrain, height, city_points, dim, rng, roads_per_city=3, road_change_prob=0.25):
-	blocking = tcod.heightmap_new(*dim)
-	tcod.heightmap_copy(height, blocking)
-	for x in range(dim[0]):
-		for y in range(dim[1]):
-			if terrain[x, y] == things.water:
-				blocking[y, x] = 10
-	pather = tcod.path.AStar(blocking)
+def make_roads(terrain, height, city_points, dim, pather, rng, roads_per_city=3, road_change_prob=0.25):
 	def draw_road(path):
 		drawing = True
 		for x, y in path:
@@ -194,11 +195,13 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	terrain = tilemap.Tilemap(dim, init=lambda _: things.desert)
 	assign_base_terrain(terrain, norm_height, dim, terrain_info)
 	run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset=range_dist)
-	make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, height_pather, rng)
+	walkability = make_walk_map(terrain, height, dim)
+	walk_pather = tcod.path.AStar(walkability)
+	make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, walk_pather, rng)
 	make_deserts(terrain, height, dim, num_deserts, height_pather, rng)
 	city_points = make_cities(terrain, dim, num_cities, rng, range_dist)
 	city_points += (ending_point,)
-	make_roads(terrain, height, city_points, dim, rng)
+	make_roads(terrain, height, city_points, dim, walk_pather, rng)
 
 	terrain[ending_point] = things.goal
 
