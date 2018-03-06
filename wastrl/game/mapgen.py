@@ -4,23 +4,30 @@ from ..tdlfixes import heightmaps
 from . import tilemap
 from . import things
 
-# TODO: add more bounds checking
 # TODO: make roads less likely to cross lakes
 
 def rand_point(dim, rng):
 	return rng.randint(0, dim[0] - 1), rng.randint(0, dim[1] - 1)
+
+def is_valid_point(dim, point):
+	return all(point[i] >= 0 and point[i] < dim[i] for i in range(2))
+
+def clamp_point(dim, point):
+	return tuple(max(0, min(dim[i] - 1, point[i])) for i in range(2))
 
 def rand_grouped_blobs(dim, num, pather, rng, min_length, max_length, max_r, min_radius):
 	def iter_points():
 		for i in range(num):
 			length = rng.randint(min_length, max_length)
 			start = rand_point(dim, rng)
-			end = start[0] + rng.randint(-length, length), start[1] + rng.randint(-length, length)
+			end = clamp_point(dim, (start[0] + rng.randint(-length, length), start[1] + rng.randint(-length, length)))
 			for x, y in pather.get_path(start[0], start[1], end[0], end[1]):
 				dx = rng.randint(-max_r, max_r)
 				dy = rng.randint(-max_r, max_r)
 				r = rng.randint(min_radius, max(min_radius, max_r - max(abs(dx), abs(dy))))
-				yield x + dx, y, r
+				p = x + dx, y
+				if is_valid_point(dim, p):
+					yield p, r
 	return tuple(iter_points())
 
 def choose_guaranteed_path_points(height, dim, starting_point, ending_point, num_mountain_ranges, rng, max_x_variation=10):
@@ -28,8 +35,9 @@ def choose_guaranteed_path_points(height, dim, starting_point, ending_point, num
 	pos_x = int(point_dist / 2)
 	yield starting_point
 	for i in range(num_mountain_ranges + 1):
-		pos_y = rng.randint(0, dim[1])
+		pos_y = rng.randint(0, dim[1] - 1)
 		x = pos_x + rng.randint(-max_x_variation, max_x_variation)
+		x, _ = clamp_point(dim, (x, pos_y))
 		yield x, pos_y
 		pos_x += point_dist
 	yield ending_point
@@ -61,11 +69,12 @@ def carve_mountains(height, dim, num_mountain_ranges, pather, rng, max_dist_from
 			j += rng.randint(1, 5)
 			dx = rng.randint(-max_dist_from_spine, max_dist_from_spine)
 			r = rng.randint(min_radius, max(min_radius, max_dist_from_spine - abs(dx)))
-			tcod.heightmap_dig_hill(height, x + dx, y, r, carve_height)
+			if is_valid_point(dim, (x + dx, y)):
+				tcod.heightmap_dig_hill(height, x + dx, y, r, carve_height)
 
 def carve_lakes(height, dim, num_lakes, pather, rng, min_length=5, max_length=20, max_r=10, min_radius=4, carve_depth=-1):
 	def iter_points():
-		for x, y, r in rand_grouped_blobs(dim, num_lakes, pather, rng, min_length, max_length, max_r, min_radius):
+		for (x, y), r in rand_grouped_blobs(dim, num_lakes, pather, rng, min_length, max_length, max_r, min_radius):
 			tcod.heightmap_dig_hill(height, x, y, r, carve_depth)
 			yield x, y
 	return tuple(iter_points())
@@ -94,7 +103,7 @@ def run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset)
 	pather = tcod.path.AStar(blocking)
 	for i in range(num_rivers):
 		start = lake_points[rng.randint(0, len(lake_points) - 1)]
-		end = max(0, min(dim[0], start[0] + rng.randint(-max_x_offset, max_x_offset))), rng.randint(0, dim[1] - 1)
+		end = clamp_point(dim, (max(0, min(dim[0], start[0] + rng.randint(-max_x_offset, max_x_offset))), rng.randint(0, dim[1] - 1)))
 		left_source = False
 		for x, y in pather.get_path(start[0], start[1], end[0], end[1]):
 			if (terrain[x, y] == things.water and left_source) or terrain[x, y] == things.mountains:
@@ -117,7 +126,7 @@ def make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, nu
 
 def make_deserts(terrain, height, dim, num_deserts, pather, rng, min_length=5, max_length=40, max_r=40, min_radius=8):
 	template = tcod.heightmap_new(*dim)
-	for x, y, r in rand_grouped_blobs(dim, num_deserts, pather, rng, min_length, max_length, max_r, min_radius):
+	for (x, y), r in rand_grouped_blobs(dim, num_deserts, pather, rng, min_length, max_length, max_r, min_radius):
 		tcod.heightmap_dig_hill(template, x, y, r, 10)
 	for x in range(dim[0]):
 		for y in range(dim[1]):
@@ -128,7 +137,7 @@ def make_deserts(terrain, height, dim, num_deserts, pather, rng, min_length=5, m
 def make_cities(terrain, dim, num_cities, rng, x_margin):
 	def make():
 		for i in range(num_cities):
-			p = rng.randint(x_margin, dim[0] - 1), rng.randint(0, dim[1])
+			p = rng.randint(x_margin, dim[0] - 1), rng.randint(0, dim[1] - 1)
 			yield p
 			terrain[p] = things.city
 	return tuple(make())
@@ -162,8 +171,8 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	margin = int(dim[1] / 4)
 	range_dist = int(dim[0] / (num_mountain_ranges + 1))
 	max_point_offset = int(range_dist / 10)
-	ending_point = (int(range_dist / 2) + rng.randint(-max_point_offset, max_point_offset), rng.randint(margin, dim[1] - margin))
-	starting_point = (dim[0] - int(range_dist / 2) + rng.randint(-max_point_offset, max_point_offset), rng.randint(margin, dim[1] - margin))
+	ending_point = clamp_point(dim, (int(range_dist / 2) + rng.randint(-max_point_offset, max_point_offset), rng.randint(margin, dim[1] - margin)))
+	starting_point = clamp_point(dim, (dim[0] - int(range_dist / 2) + rng.randint(-max_point_offset, max_point_offset), rng.randint(margin, dim[1] - margin)))
 
 	noise = tcod.noise.Noise(2, seed=rng)
 	height = make_base_heightmap(dim, noise)
