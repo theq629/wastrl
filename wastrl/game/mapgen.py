@@ -98,7 +98,7 @@ def assign_base_terrain(terrain, height, dim, terrain_info):
 def run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset):
 	blocking = tcod.heightmap_new(*dim)
 	tcod.heightmap_copy(height, blocking)
-	pather = tcod.path.AStar(blocking)
+	pather = tcod.path.AStar(blocking, diagonal=100)
 	for i in range(num_rivers):
 		start = lake_points[rng.randint(0, len(lake_points) - 1)]
 		end = clamp_point(dim, (max(0, min(dim[0], start[0] + rng.randint(-max_x_offset, max_x_offset))), rng.randint(0, dim[1] - 1)))
