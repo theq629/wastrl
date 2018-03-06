@@ -4,8 +4,6 @@ from ..tdlfixes import heightmaps
 from . import tilemap
 from . import things
 
-# TODO: make roads less likely to cross lakes
-
 def rand_point(dim, rng):
 	return rng.randint(0, dim[0] - 1), rng.randint(0, dim[1] - 1)
 
@@ -142,7 +140,14 @@ def make_cities(terrain, dim, num_cities, rng, x_margin):
 			terrain[p] = things.city
 	return tuple(make())
 
-def make_roads(terrain, city_points, dim, pather, rng, roads_per_city=3, road_change_prob=0.25):
+def make_roads(terrain, height, city_points, dim, rng, roads_per_city=3, road_change_prob=0.25):
+	blocking = tcod.heightmap_new(*dim)
+	tcod.heightmap_copy(height, blocking)
+	for x in range(dim[0]):
+		for y in range(dim[1]):
+			if terrain[x, y] == things.water:
+				blocking[y, x] = 10
+	pather = tcod.path.AStar(blocking)
 	def draw_road(path):
 		drawing = True
 		for x, y in path:
@@ -193,7 +198,7 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	make_deserts(terrain, height, dim, num_deserts, height_pather, rng)
 	city_points = make_cities(terrain, dim, num_cities, rng, range_dist)
 	city_points += (ending_point,)
-	make_roads(terrain, city_points, dim, height_pather, rng)
+	make_roads(terrain, height, city_points, dim, rng)
 
 	terrain[ending_point] = things.goal
 
