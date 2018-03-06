@@ -20,7 +20,6 @@ def handle_thing_turns(min_ap=1):
 	
 	try_start_new_turn()
 
-	# TODO: add easy function for zipping
 	for thing in _to_act_this_turn:
 		cur_ap = props.action_points_this_turn[thing]
 		actions = events.act.trigger(thing, cur_ap)

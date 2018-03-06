@@ -71,6 +71,9 @@ class ValuedProperty:
 	def __len__(self):
 		return len(self._storage)
 
+	def __contains__(self, key):
+		return key in self._storage
+
 	def keys(self):
 		return self._storage.keys()
 
@@ -83,6 +86,20 @@ class ValuedProperty:
 	def __iter__(self):
 		return self._storage.__iter__()
 
+	def join_keys(self, *others):
+		for key, value in self._storage.items():
+			try:
+				yield (key, value) + tuple(other[key] for other in others)
+			except KeyError:
+				pass
+
+	def join_values(self, *others):
+		for key, value in self._storage.items():
+			try:
+				yield (key, value) + tuple(other[value] for other in others)
+			except KeyError:
+				pass
+
 class SetProperty:
 	__slots__ = (
 		'_storage',
@@ -94,6 +111,9 @@ class SetProperty:
 	def __len__(self):
 		return len(self._storage)
 
+	def __contains__(self, key):
+		return key in self._storage
+
 	def add(self, key):
 		return self._storage.add(key)
 
@@ -102,6 +122,13 @@ class SetProperty:
 
 	def __iter__(self):
 		return self._storage.__iter__()
+
+	def join(self, *others):
+		for key in self._storage:
+			try:
+				yield (key,) + tuple(other[key] for other in others)
+			except KeyError:
+				pass
 
 class Thing:
 	_next_thing_index = 0

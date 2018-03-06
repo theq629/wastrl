@@ -54,15 +54,10 @@ class MapWin(ui.Window):
 				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
 
 		# TODO: cache
-		# TODO: add easy joins on properties
-		for thing, graphic in props.graphics.items():
-			try:
-				world_x, world_y = props.position[thing]
-				screen_x, screen_y = world_x - world_offset[0], world_y - world_offset[1]
-				if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
-					console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
-			except KeyError:
-				pass
+		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
+			screen_x, screen_y = world_x - world_offset[0], world_y - world_offset[1]
+			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
+				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
 
 	def view_centre(self):
 		if self._free_view:
