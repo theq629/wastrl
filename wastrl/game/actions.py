@@ -14,8 +14,15 @@ class Move:
 		self._ap = self._calc_ap(delta)
 
 	def _calc_ap(self, delta):
-		x, y = delta
-		return math.sqrt(x**2 + y**2)
+		dx, dy = delta
+		m = math.sqrt(dx**2 + dy**2)
+		x, y = props.position[self._actor]
+		x, y = x + dx, y + dy
+		t = props.terrain_at[x, y]
+		try:
+			return props.walk_over_ap[t] * m
+		except KeyError:
+			return None
 	
 	@property
 	def ap(self):

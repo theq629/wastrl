@@ -25,10 +25,11 @@ def handle_thing_turns(min_ap=1):
 		cur_ap = props.action_points_this_turn[thing]
 		actions = events.act.trigger(thing, cur_ap)
 		for action in actions:
-			if cur_ap < action.ap:
-				break
-			cur_ap -= action.ap
-			action.trigger()
+			if action.ap is not None:
+				if cur_ap < action.ap:
+					break
+				cur_ap -= action.ap
+				action.trigger()
 		print("thing %i acting: %s actions, %i ap remaining" % (thing.index, str(len(actions)) if actions is not None else 'no', cur_ap), file=sys.stderr)
 		props.action_points_this_turn[thing] = cur_ap
 		if cur_ap <= min_ap:
@@ -41,6 +42,8 @@ class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points = mapgen.gen(self.rng)
+
+		props.terrain_at.map = self.terrain
 
 		for point in city_points:
 			city = things.city()
