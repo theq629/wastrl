@@ -1,6 +1,6 @@
 import tdl
 
-class ControlledCollection:
+class _ControlledCollection:
 	__slots__ = (
 		'_items',
 	)
@@ -17,7 +17,7 @@ class ControlledCollection:
 	def __iter__(self):
 		return self._items.__iter__()
 
-class EventHandler(ControlledCollection):
+class EventHandler(_ControlledCollection):
 	def _trigger(self, *args, **kwargs):
 		for f in self:
 			if f(*args, **kwargs):
@@ -69,14 +69,18 @@ class View:
 		'_windows',
 		'_console',
 		'_on_resize',
-		'_on_key'
+		'_on_key',
+		'_on_before_redraw',
+		'_on_after_redraw'
 	)
 
 	def __init__(self):
-		self._windows = ControlledCollection()
+		self._windows = _ControlledCollection()
 		self._console = None
 		self._on_resize = EventHandler()
 		self._on_key = EventHandler()
+		self._on_before_redraw = EventHandler()
+		self._on_after_redraw = EventHandler()
 		self._on_resize.add(self._resize)
 		self._resize((0, 0))
 
@@ -91,6 +95,14 @@ class View:
 	@property
 	def on_key(self):
 		return self._on_key
+
+	@property
+	def on_before_redraw(self):
+		return self._on_before_redraw
+
+	@property
+	def on_after_redraw(self):
+		return self._on_after_redraw
 
 	def add(self, window):
 		self._windows.append(window)
@@ -112,10 +124,12 @@ class View:
 		self._console = tdl.Console(*dim) if dim != (0, 0) else None
 
 	def _draw(self, dest_con):
+		self._on_before_redraw._trigger()
 		if self._console is not None:
 			for win in self._windows:
 				win._draw(self._console)
 			dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
+		self._on_after_redraw._trigger()
 
 class Display:
 	__slots__ = (
@@ -133,7 +147,7 @@ class Display:
 			'title': title
 		}
 		self._root_console = None
-		self._views = ControlledCollection()
+		self._views = _ControlledCollection()
 		self._running = False
 
 	@property

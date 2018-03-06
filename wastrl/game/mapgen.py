@@ -205,4 +205,4 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 
 	terrain[ending_point] = things.goal
 
-	return norm_height, terrain
+	return norm_height, terrain, starting_point, ending_point

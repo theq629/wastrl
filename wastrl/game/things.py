@@ -6,8 +6,9 @@
 	water,
 	road,
 	city,
-	goal
-) = range(8)
+	goal,
+	player
+) = range(9)
 
 characters = {
 	mountains: '^',
@@ -17,7 +18,8 @@ characters = {
 	water: '.',
 	road: '.',
 	city: '#',
-	goal: '#'
+	goal: '#',
+	player: '@'
 }
 
 colours = {
@@ -28,5 +30,6 @@ colours = {
 	water: 0x22b6f2,
 	road: 0x222222,
 	city: 0xaaaaaa,
-	goal: 0xffffff
+	goal: 0xffffff,
+	player: 0xffffff
 }
