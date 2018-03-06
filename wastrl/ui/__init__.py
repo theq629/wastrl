@@ -17,6 +17,9 @@ class _ControlledCollection:
 	def __iter__(self):
 		return self._items.__iter__()
 
+	def _remove(self, x):
+		self._items.remove(x)
+
 class EventHandler(_ControlledCollection):
 	def _trigger(self, *args, **kwargs):
 		for f in self:
@@ -106,6 +109,7 @@ class Window:
 
 class View:
 	__slots__ = (
+		'_displays',
 		'_windows',
 		'_console',
 		'_keybindings',
@@ -116,6 +120,7 @@ class View:
 	)
 
 	def __init__(self, keybindings={}):
+		self._displays = []
 		self._windows = _ControlledCollection()
 		self._console = None
 		self._keybindings = keybindings
@@ -150,6 +155,11 @@ class View:
 	def on_after_redraw(self):
 		return self._on_after_redraw
 
+	def close(self):
+		for display in self._displays:
+			display._views._remove(self)
+		self._displays = []
+
 	def add(self, window):
 		self._windows.append(window)
 
@@ -158,13 +168,12 @@ class View:
 			key_name = event.char if event.key == 'CHAR' else event.key
 			if event.shift:
 				key_name = "shift+" + key_name
-			if self._on_key._trigger(key_name):
-				return True
-			else:
+			if not self._on_key._trigger(key_name):
 				for win in self._windows:
 					if win._on_key._trigger(key_name):
-						return True
-			return False
+						break
+			return True
+		return False
 
 	def _resize(self, dim):
 		self._console = tdl.Console(*dim) if dim != (0, 0) else None
@@ -176,6 +185,24 @@ class View:
 				win._draw(self._console)
 			dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
 		self._on_after_redraw._trigger()
+
+class _ViewCollection(_ControlledCollection):
+	__slots__ = (
+		'_display',
+	)
+
+	def __init__(self, display):
+		super().__init__()
+		self._display = display
+
+	def add(self, view):
+		super().add(view)
+		view._displays.append(self._display)
+
+	def _remove(self, view):
+		super()._remove(view)
+		if len(self) == 0:
+			self._display.quit()
 
 class Display:
 	__slots__ = (
@@ -193,7 +220,7 @@ class Display:
 			'title': title
 		}
 		self._root_console = None
-		self._views = _ControlledCollection()
+		self._views = _ViewCollection(self)
 		self._running = False
 
 	@property
@@ -237,7 +264,7 @@ class Display:
 			self.quit()
 			return
 		for event in tdl.event.get():
-			for view in self._views:
+			for view in reversed(self._views._items):
 				if view._tdl_event(event):
 					return True
 		return False

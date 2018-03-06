@@ -43,3 +43,7 @@ shift+KP7 = move_view_nw
 shift+KP9 = move_view_ne
 shift+KP1 = move_view_sw
 shift+KP3 = move_view_se
+
+[dialogs]
+ENTER = close
+SPACE = close

@@ -2,10 +2,12 @@ import os
 import sys
 import appdirs
 from .. import ui
+from ..ui import basic as basic_ui
 from ..ui import keys
 from .. import game
 from . import main_view
 from . import commands
+from . import intro
 
 prog_name = "wastrl"
 prog_author = "theq629"
@@ -15,7 +17,7 @@ def int_pair(s):
 	return (int(x), int(y))
 
 def load_keys():
-	sections = { "main" }
+	sections = { "main", "dialogs" }
 	path = os.path.join(appdirs.user_data_dir(prog_name, prog_author), "keys")
 	if not os.path.exists(path):
 		print(f"warning: keys config file does not exist: {path}", file=sys.stderr)
@@ -49,6 +51,10 @@ if __name__ == '__main__':
 		dest = "rng_seed", type = int, default = 0,
 		help = "Seed for randomness."
 	)
+	parser.add_argument('-I', '--skip-intro',
+		dest = "do_intro", default = True, action = 'store_false',
+		help = "Skip the intro message."
+	)
 	args = parser.parse_args()
 
 	keybindings = load_keys()
@@ -57,3 +63,5 @@ if __name__ == '__main__':
 
 	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl") as disp:
 		disp.views.add(main_view.MainView(disp, the_game, keybindings=keybindings['main']))
+		if args.do_intro:
+			disp.views.add(basic_ui.TextView("Wastrl", intro.intro, keybindings=keybindings['dialogs']))

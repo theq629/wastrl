@@ -1,0 +1,2 @@
+title = 0xffff00
+text = 0xaaaaaa

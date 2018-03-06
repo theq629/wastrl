@@ -1,3 +1,5 @@
+from ..ui.basic import commands as basic_ui_commands
+
 quit = 'quit'
 centre_view = 'centre_view'
 pass_turn = 'pass_turn'
@@ -17,3 +19,5 @@ move_view_nw = 'move_view_nw'
 move_view_ne = 'move_view_ne'
 move_view_sw = 'move_view_sw'
 move_view_se = 'move_view_se'
+
+close = basic_ui_commands.close
