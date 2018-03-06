@@ -51,7 +51,7 @@ class Event:
 			value = self._fold_f(value, f(*args, **kwargs))
 		return value
 
-class Property:
+class ValuedProperty:
 	__slots__ = (
 		'_storage',
 	)
@@ -80,6 +80,29 @@ class Property:
 	def items(self):
 		return self._storage.items()
 
+	def __iter__(self):
+		return self._storage.__iter__()
+
+class SetProperty:
+	__slots__ = (
+		'_storage',
+	)
+
+	def __init__(self):
+		self._storage = set()
+
+	def __len__(self):
+		return len(self._storage)
+
+	def add(self, key):
+		return self._storage.add(key)
+
+	def remove(self, key):
+		return self._storage.remove(key)
+
+	def __iter__(self):
+		return self._storage.__iter__()
+
 class Thing:
 	_next_thing_index = 0
 
@@ -87,9 +110,14 @@ class Thing:
 		'_index',
 	)
 
-	def __init__(self):
+	def __init__(self, setup={}):
 		self._index = Thing._next_thing_index
 		Thing._next_thing_index += 1
+		for property, value in setup.items():
+			if hasattr(property, '__setitem__'):
+				property[self] = value
+			elif value:
+				property.add(self)
 
 	@property
 	def index(self):

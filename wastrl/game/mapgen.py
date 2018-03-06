@@ -145,7 +145,7 @@ def make_cities(terrain, dim, num_cities, rng, x_margin):
 		for i in range(num_cities):
 			p = rng.randint(x_margin, dim[0] - 1), rng.randint(0, dim[1] - 1)
 			yield p
-			terrain[p] = things.city
+			terrain[p] = things.road
 	return tuple(make())
 
 def make_roads(terrain, height, city_points, dim, pather, rng, roads_per_city=3, road_change_prob=0.25):
@@ -154,7 +154,7 @@ def make_roads(terrain, height, city_points, dim, pather, rng, roads_per_city=3,
 		for x, y in path:
 			if rng.uniform(0, 1) < road_change_prob:
 				drawing = not drawing
-			if drawing and terrain[x, y] != things.city:
+			if drawing:
 				terrain[x, y] = things.road
 			elif terrain[x, y] == things.water:
 				terrain[x, y] = things.desert
@@ -203,6 +203,4 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	city_points += (ending_point,)
 	make_roads(terrain, height, city_points, dim, walk_pather, rng)
 
-	terrain[ending_point] = things.goal
-
-	return terrain, starting_point, ending_point
+	return terrain, starting_point, ending_point, city_points

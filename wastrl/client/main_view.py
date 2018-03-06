@@ -1,8 +1,9 @@
 import numpy
 from .. import ui
-from .. import game
+from ..game import properties as props
+from ..game import events
+from ..game import actions
 from . import commands
-from ..game import things
 
 class TopBarWin(ui.Window):
 	__slots__ = (
@@ -15,7 +16,7 @@ class TopBarWin(ui.Window):
 		self.on_redraw.add(self.redraw)
 
 	def redraw(self, console):
-		ap = game.has_actions_this_turn[self._game.player]
+		ap = props.action_points_this_turn[self._game.player]
 		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
 		console.clear()
 		console.draw_str(0, 0, f'AP: {ap_str}')
@@ -49,13 +50,14 @@ class MapWin(ui.Window):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_offset[0] + screen_x, world_offset[1] + screen_y
 				terrain = self._game.terrain[world_x, world_y]
-				console.draw_char(screen_x, screen_y, char=things.characters[terrain], fg=things.colours[terrain])
+				graphic = props.graphics[terrain]
+				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
 
 		# TODO: cache
 		# TODO: add easy joins on properties
-		for thing, graphic in game.graphics.items():
+		for thing, graphic in props.graphics.items():
 			try:
-				world_x, world_y = game.position[thing]
+				world_x, world_y = props.position[thing]
 				screen_x, screen_y = world_x - world_offset[0], world_y - world_offset[1]
 				if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
 					console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
@@ -66,7 +68,7 @@ class MapWin(ui.Window):
 		if self._free_view:
 			return self._view_centre
 		else:
-			pos = game.position[self._game.player]
+			pos = props.position[self._game.player]
 			self._view_centre = pos
 			return pos
 
@@ -94,12 +96,12 @@ class MapWin(ui.Window):
 		self._free_view = False
 
 	def player_skip(self):
-		self._player_actions.append(game.SkipTurn(self._game.player))
+		self._player_actions.append(actions.SkipTurn(self._game.player))
 
 	def player_mover(self, delta):
 		def handler():
 			self._free_view = False
-			self._player_actions.append(game.Move(self._game.player, delta))
+			self._player_actions.append(actions.Move(self._game.player, delta))
 		return handler
 
 	def view_mover(self, delta, multiplier=10):
@@ -126,7 +128,7 @@ class MainView(ui.View):
 		self.windows.add(self._map_win)
 		self.on_resize.add(self.resize)
 		self.on_before_redraw.add(self.update_game)
-		game.act.on.add(self.take_player_action)
+		events.act.on.add(self.take_player_action)
 		self.on_key[commands.quit].add(self._display.quit)
 
 	def take_player_action(self, thing, available_ap):
