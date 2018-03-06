@@ -8,6 +8,10 @@ class Tilemap:
 		self._dim = dim
 		self._storage = [init((x, y)) for x in range(dim[0]) for y in range(dim[1])]
 
+	@property
+	def dim(self):
+		return self._dim
+
 	def __getitem__(self, pos):
 		x, y = pos
 		return self._storage[y * self._dim[0] + x]

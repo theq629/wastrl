@@ -40,7 +40,7 @@ class Move:
 	def trigger(self):
 		position[self._actor] = tuple(position[self._actor][i] + self._delta[i] for i in range(2))
 
-class EndTurn:
+class SkipTurn:
 	__slots__ = (
 		'_ap',
 	)
@@ -52,8 +52,11 @@ class EndTurn:
 	def ap(self):
 		return self._ap
 
+	def trigger(self):
+		pass
+
 @turn.on.handle(0)
-def handle_thing_turns():
+def handle_thing_turns(min_ap=1):
 	def try_start_new_turn():
 		if len(_to_act_this_turn) == 0:
 			print("start turn", file=sys.stderr)
@@ -75,7 +78,7 @@ def handle_thing_turns():
 			action.trigger()
 		print("thing %i acting: %s actions, %i ap remaining" % (thing.index, str(len(actions)) if actions is not None else 'no', cur_ap), file=sys.stderr)
 		has_actions_this_turn[thing] = cur_ap
-		if cur_ap <= 0:
+		if cur_ap <= min_ap:
 			_to_act_this_turn.remove(thing)
 		break
 	
@@ -84,7 +87,7 @@ def handle_thing_turns():
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
-		self.height, self.terrain, starting_point, ending_point = mapgen.gen(self.rng)
+		self.terrain, starting_point, ending_point = mapgen.gen(self.rng)
 		self.player = data.Thing()
 		has_actions[self.player] = 5
 		position[self.player] = starting_point

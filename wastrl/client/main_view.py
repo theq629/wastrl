@@ -1,6 +1,7 @@
 import numpy
 from .. import ui
 from .. import game
+from . import commands
 from ..game import things
 
 class TopBarWin(ui.Window):
@@ -15,39 +16,40 @@ class TopBarWin(ui.Window):
 
 	def redraw(self, console):
 		ap = game.has_actions_this_turn[self._game.player]
-		ap_str = str(int(ap)) if int(ap) == ap else str(ap)
+		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
+		console.clear()
 		console.draw_str(0, 0, f'AP: {ap_str}')
 
 class MapWin(ui.Window):
 	__slots__ = (
 		'_game',
-		'_max_height',
-		'_draw_cell',
-		'_player_actions'
+		'_player_actions',
+		'_view_centre',
+		'_free_view'
 	)
 
 	def __init__(self, game, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._game = game
-		self._max_height = max(numpy.nditer(self._game.height))
 		self.on_redraw.add(self.redraw)
-		self.on_key.add(self.key)
-		self._draw_cell = self.draw_terrain_cell
 		self._player_actions = []
-
-	def view_centre(self):
-		return game.position[self._game.player]
+		self._free_view = False
+		self.setup_keys()
+		self.view_centre()
 
 	def redraw(self, console):
 		view_centre = self.view_centre()
-		world_dim = tuple(reversed(self._game.height.shape))
+		world_dim = self._game.terrain.dim
 		world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
 		screen_bounds = tuple((max(0, -world_offset[i]), min(self.dim[i], world_dim[i] - world_offset[i])) for i in range(2))
+
 		console.clear()
+
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_offset[0] + screen_x, world_offset[1] + screen_y
-				self._draw_cell(console, screen_x, screen_y, world_x, world_y)
+				terrain = self._game.terrain[world_x, world_y]
+				console.draw_char(screen_x, screen_y, char=things.characters[terrain], fg=things.colours[terrain])
 
 		# TODO: cache
 		# TODO: add easy joins on properties
@@ -60,45 +62,51 @@ class MapWin(ui.Window):
 			except KeyError:
 				pass
 
-	def draw_terrain_cell(self, console, screen_x, screen_y, world_x, world_y):
-		terrain = self._game.terrain[world_x, world_y]
-		console.draw_char(screen_x, screen_y, char=things.characters[terrain], fg=things.colours[terrain])
+	def view_centre(self):
+		if self._free_view:
+			return self._view_centre
+		else:
+			pos = game.position[self._game.player]
+			self._view_centre = pos
+			return pos
 
-	def draw_height_cell(self,console,  screen_x, screen_y, world_x, world_y):
-		c = int(255 * (self._game.height[world_y, world_x] / self._max_height))
-		console.draw_char(screen_x, screen_y, char='.', fg=(c, c, c))
+	def setup_keys(self):
+		self.on_key[commands.move_n].add(self.player_mover((0, -1)))
+		self.on_key[commands.move_s].add(self.player_mover((0, 1)))
+		self.on_key[commands.move_e].add(self.player_mover((1, 0)))
+		self.on_key[commands.move_w].add(self.player_mover((-1, 0)))
+		self.on_key[commands.move_ne].add(self.player_mover((1, -1)))
+		self.on_key[commands.move_nw].add(self.player_mover((-1, -1)))
+		self.on_key[commands.move_se].add(self.player_mover((1, 1)))
+		self.on_key[commands.move_sw].add(self.player_mover((-1, 1)))
+		self.on_key[commands.pass_turn].add(self.player_skip)
+		self.on_key[commands.centre_view].add(self.stop_free_view)
+		self.on_key[commands.move_view_n].add(self.view_mover((0, -1)))
+		self.on_key[commands.move_view_s].add(self.view_mover((0, 1)))
+		self.on_key[commands.move_view_e].add(self.view_mover((1, 0)))
+		self.on_key[commands.move_view_w].add(self.view_mover((-1, 0)))
+		self.on_key[commands.move_view_ne].add(self.view_mover((1, -1)))
+		self.on_key[commands.move_view_nw].add(self.view_mover((-1, -1)))
+		self.on_key[commands.move_view_se].add(self.view_mover((1, 1)))
+		self.on_key[commands.move_view_sw].add(self.view_mover((-1, 1)))
 
-	def key(self, key):
-		if key == 'UP' or key == 'k':
-			self._player_actions.append(game.Move(self._game.player, (0, -1)))
-			return True
-		elif key == 'DOWN' or key == 'j':
-			self._player_actions.append(game.Move(self._game.player, (0, 1)))
-			return True
-		elif key == 'LEFT' or key == 'h':
-			self._player_actions.append(game.Move(self._game.player, (-1, 0)))
-			return True
-		elif key == 'RIGHT' or key == 'l':
-			self._player_actions.append(game.Move(self._game.player, (1, 0)))
-			return True
-		elif key == 'shift+UP' or key == 'shift+k':
-			self._view_centre[1] -= 10
-			return True
-		elif key == 'shift+DOWN' or key == 'shift+j':
-			self._view_centre[1] += 10
-			return True
-		elif key == 'shift+LEFT' or key == 'shift+h':
-			self._view_centre[0] -= 10
-			return True
-		elif key == 'shift+RIGHT' or key == 'shift+l':
-			self._view_centre[0] += 10
-			return True
-		elif key == '1':
-			self._draw_cell = self.draw_terrain_cell
-			return True
-		elif key == '2':
-			self._draw_cell = self.draw_height_cell
-			return True
+	def stop_free_view(self):
+		self._free_view = False
+
+	def player_skip(self):
+		self._player_actions.append(game.SkipTurn(self._game.player))
+
+	def player_mover(self, delta):
+		def handler():
+			self._free_view = False
+			self._player_actions.append(game.Move(self._game.player, delta))
+		return handler
+
+	def view_mover(self, delta, multiplier=10):
+		def handler():
+			self._free_view = True
+			self._view_centre = tuple(self._view_centre[i] + delta[i] * multiplier for i in range(2))
+		return handler
 
 class MainView(ui.View):
 	__slots__ = (
@@ -113,13 +121,13 @@ class MainView(ui.View):
 		self._display = display
 		self._game = the_game
 		self._top_bar_win = TopBarWin(self._game)
-		self._map_win = MapWin(self._game)
+		self._map_win = MapWin(self._game, keybindings=self.keybindings)
 		self.windows.add(self._top_bar_win)
 		self.windows.add(self._map_win)
 		self.on_resize.add(self.resize)
-		self.on_key.add(self.key)
 		self.on_before_redraw.add(self.update_game)
 		game.act.on.add(self.take_player_action)
+		self.on_key[commands.quit].add(self._display.quit)
 
 	def take_player_action(self, thing, available_ap):
 		if thing == self._game.player:
@@ -135,8 +143,3 @@ class MainView(ui.View):
 	def resize(self, dim):
 		self._top_bar_win.place((0, 0), (dim[0], 1))
 		self._map_win.place((0, 1), (dim[0], dim[1] - 1))
-
-	def key(self, key):
-		if key == 'q':
-			self._display.quit()
-			return True

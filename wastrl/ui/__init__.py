@@ -24,19 +24,55 @@ class EventHandler(_ControlledCollection):
 				return True
 		return False
 
+class PartedEventHandler:
+	__slots__ = (
+		'_parts',
+	)
+
+	def __init__(self):
+		self._parts = {}
+
+	def __getitem__(self, part):
+		if part not in self._parts:
+			self._parts[part] = EventHandler()
+		return self._parts[part]
+
+	def _trigger(self, *args, **kwargs):
+		part, args, kwargs = self._map_input(*args, **kwargs)
+		if part in self._parts:
+			self._parts[part]._trigger(*args, **kwargs)
+			return True
+
+	def _map_input(self, *args, **kwargs):
+		raise NotImplementedError()
+
+class KeyEventHandler(PartedEventHandler):
+	__slots__ = (
+		'_keybindings',
+	)
+
+	def __init__(self, keybindings):
+		super().__init__()
+		self._keybindings = keybindings
+
+	def _map_input(self, key):
+		return self._keybindings.get(key), (), {}
+
 class Window:
 	__slots__ = (
 		'_pos',
 		'_dim',
 		'_console',
+		'_keybindings',
 		'_on_redraw',
 		'_on_key'
 	)
 
-	def __init__(self, pos=(0, 0), dim=(0, 0)):
+	def __init__(self, pos=(0, 0), dim=(0, 0), keybindings={}):
 		self.place(pos, dim)
+		self._keybindings = keybindings
 		self._on_redraw = EventHandler()
-		self._on_key = EventHandler()
+		self._on_key = KeyEventHandler(keybindings)
 
 	@property
 	def pos(self):
@@ -45,6 +81,10 @@ class Window:
 	@property
 	def dim(self):
 		return self._dim
+
+	@property
+	def keybindings(self):
+		return self._keybindings
 
 	@property
 	def on_redraw(self):
@@ -68,17 +108,19 @@ class View:
 	__slots__ = (
 		'_windows',
 		'_console',
+		'_keybindings',
 		'_on_resize',
 		'_on_key',
 		'_on_before_redraw',
 		'_on_after_redraw'
 	)
 
-	def __init__(self):
+	def __init__(self, keybindings={}):
 		self._windows = _ControlledCollection()
 		self._console = None
+		self._keybindings = keybindings
 		self._on_resize = EventHandler()
-		self._on_key = EventHandler()
+		self._on_key = KeyEventHandler(keybindings)
 		self._on_before_redraw = EventHandler()
 		self._on_after_redraw = EventHandler()
 		self._on_resize.add(self._resize)
@@ -87,6 +129,10 @@ class View:
 	@property
 	def windows(self):
 		return self._windows
+
+	@property
+	def keybindings(self):
+		return self._keybindings
 
 	@property
 	def on_resize(self):

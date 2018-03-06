@@ -1,10 +1,37 @@
+import os
+import sys
+import appdirs
 from .. import ui
+from ..ui import keys
 from .. import game
 from . import main_view
+from . import commands
+
+prog_name = "wastrl"
+prog_author = "theq629"
 
 def int_pair(s):
 	x, y = s.split(',')
 	return (int(x), int(y))
+
+def load_keys():
+	sections = { "main" }
+	path = os.path.join(appdirs.user_data_dir(prog_name, prog_author), "keys")
+	if not os.path.exists(path):
+		print(f"warning: keys config file does not exist: {path}", file=sys.stderr)
+	keybindings = keys.load(path)
+	try:
+		keys.verify(keybindings, sections=sections, commands=dir(commands))
+	except keys.UnknownSection as e:
+		print(f"warning: unknown section in keys file: {e}", file=sys.stderr)
+	except keys.UnknownKey as e:
+		print(f"warning: unknown key in keys file: {e}", file=sys.stderr)
+	except keys.UnknownCommand as e:
+		print(f"warning: unknown command in keys file: {e}", file=sys.stderr)
+	for section in sections:
+		if section not in keybindings:
+			keybindings[section] = {}
+	return keybindings
 
 if __name__ == '__main__':
 	import argparse
@@ -24,7 +51,9 @@ if __name__ == '__main__':
 	)
 	args = parser.parse_args()
 
+	keybindings = load_keys()
+
 	the_game = game.Game(args.rng_seed)
 
 	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl") as disp:
-		disp.views.add(main_view.MainView(disp, the_game))
+		disp.views.add(main_view.MainView(disp, the_game, keybindings=keybindings['main']))
