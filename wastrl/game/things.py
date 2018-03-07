@@ -39,5 +39,13 @@ def player():
 	return data.Thing({
 		props.graphics: props.Graphics(char='@', colour=0xffffff),
 		props.is_player: True,
-		props.action_points: 5
+		props.action_points: 5,
+		props.population: 100
+	})
+
+def ratling():
+	return data.Thing({
+		props.graphics: props.Graphics(char='r', colour=0xffffff),
+		props.action_points: 3,
+		props.population: 10
 	})

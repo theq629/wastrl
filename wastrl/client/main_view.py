@@ -20,7 +20,7 @@ class TopBarWin(ui.Window):
 		ap = props.action_points_this_turn[self._game.player]
 		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
 		console.clear()
-		console.draw_str(0, 0, f'AP: {ap_str}')
+		console.draw_str(0, 0, f'AP: {ap_str} Pop: {props.population[self._game.player]}')
 
 class MapWin(ui.Window):
 	__slots__ = (

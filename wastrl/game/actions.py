@@ -31,6 +31,31 @@ class Move:
 	def trigger(self):
 		props.position[self._actor] = tuple(props.position[self._actor][i] + self._delta[i] for i in range(2))
 
+class Attack:
+	__slots__ = (
+		'_actor',
+		'_target',
+		'_ap'
+	)
+
+	def __init__(self, actor, target):
+		self._actor = actor
+		self._target = target
+		self._ap = self._calc_ap()
+
+	def _calc_ap(self):
+		dx, dy = delta
+		return math.sqrt(dx**2 + dy**2)
+
+	@property
+	def ap(self):
+		return self._ap
+
+	def trigger(self):
+		props.population[self._target] = max(0, pops.population[self._target] - 5)
+		if props.population[self._target] <= 0:
+			event.die.trigger(self._target)
+
 class SkipTurn:
 	__slots__ = (
 		'_ap',

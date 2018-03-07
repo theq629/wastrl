@@ -2,6 +2,7 @@ import collections
 import tcod.random
 from .. import data
 from . import mapgen
+from . import thingsgen
 from . import properties as props
 from . import events
 import sys # TODO: improve logging
@@ -20,20 +21,26 @@ def handle_thing_turns(min_ap=1):
 	
 	try_start_new_turn()
 
+	done = set()
 	for thing in _to_act_this_turn:
 		cur_ap = props.action_points_this_turn[thing]
 		actions = events.act.trigger(thing, cur_ap)
-		for action in actions:
-			if action.ap is not None:
-				if cur_ap < action.ap:
-					break
-				cur_ap -= action.ap
-				action.trigger()
-		print("thing %i acting: %s actions, %i ap remaining" % (thing.index, str(len(actions)) if actions is not None else 'no', cur_ap), file=sys.stderr)
-		props.action_points_this_turn[thing] = cur_ap
-		if cur_ap <= min_ap:
-			_to_act_this_turn.remove(thing)
-		break
+		if actions is None:
+			done.add(thing)
+		else:
+			for action in actions:
+				if action.ap is not None:
+					if cur_ap < action.ap:
+						break
+					cur_ap -= action.ap
+					action.trigger()
+			print("thing %i acting: %s actions, %i ap remaining" % (thing.index, str(len(actions)) if actions is not None else 'no', cur_ap), file=sys.stderr)
+			props.action_points_this_turn[thing] = cur_ap
+			if cur_ap <= min_ap:
+				done.add(thing)
+				break
+	for thing in done:
+		_to_act_this_turn.remove(thing)
 	
 	try_start_new_turn()
 
@@ -50,6 +57,8 @@ class Game:
 		self.terrain, starting_point, ending_point, city_points = mapgen.gen(self.rng)
 
 		props.terrain_at.map = self.terrain
+
+		thingsgen.gen(self.terrain, self.rng)
 
 		for point in city_points:
 			city = things.city()
