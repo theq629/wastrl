@@ -53,7 +53,8 @@ class KeyBindingsWindow(Window):
 		space_left_on_line = dim_x
 		for key_events in self._key_event_sets:
 			for command in key_events:
-				keys = self._bindings.inverse[command]
+				keys = tuple(self.name_key(k) for k in self._bindings.inverse[command])
+				command = self.name_command(command)
 				total_len = len(command) + sum(len(k) for k in keys) + 1 + len(keys)
 				if space_left_on_line < total_len:
 					lines.append([])
@@ -62,6 +63,12 @@ class KeyBindingsWindow(Window):
 					space_left_on_line -= total_len
 				lines[-1].append((command, keys))
 		return lines
+
+	def name_command(self, command):
+		return command.replace('_', ' ')
+
+	def name_key(self, key):
+		return key
 
 class PaginatedWindow(Window, abc.ABC):
 	__slots__ = (
