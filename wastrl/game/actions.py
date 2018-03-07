@@ -1,5 +1,6 @@
 import math
 from . import properties as props
+from . import events
 
 class Move:
 	__slots__ = (
@@ -29,7 +30,10 @@ class Move:
 		return self._ap
 
 	def trigger(self):
-		props.position[self._actor] = tuple(props.position[self._actor][i] + self._delta[i] for i in range(2))
+		old_pos = props.position[self._actor]
+		new_pos = tuple(old_pos[i] + self._delta[i] for i in range(2))
+		props.position[self._actor] = new_pos
+		events.move.trigger(self._actor, old_pos, new_pos)
 
 class Attack:
 	__slots__ = (
