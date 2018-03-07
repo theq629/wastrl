@@ -48,6 +48,7 @@ shift+KP1 = move_view_sw
 shift+KP3 = move_view_se
 
 [dialogs]
+ESCAPE = close
 ENTER = close
 UP = line_up
 DOWN = line_down
