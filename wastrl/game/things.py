@@ -2,25 +2,25 @@ from . import properties as props
 from .. import data
 
 mountains = data.Thing({
-	props.graphics: props.Graphics(char='^', colour=0xe7e9e8)
+	props.graphics: props.Graphics(char='^', colour=0xcfc19a)
 })
 grassland = data.Thing({
-	props.graphics: props.Graphics(char='.', colour=0xcda026),
+	props.graphics: props.Graphics(char='.', colour=0x5f7b42),
 	props.walk_over_ap: 1
 })
 desert = data.Thing({
-	props.graphics: props.Graphics(char='.', colour=0xcd7c26),
+	props.graphics: props.Graphics(char='.', colour=0xffcf6d),
 	props.walk_over_ap: 1
 })
 forest = data.Thing({
-	props.graphics: props.Graphics(char='^', colour=0x844400),
+	props.graphics: props.Graphics(char='&', colour=0x345132),
 	props.walk_over_ap: 2
 })
 water = data.Thing({
-	props.graphics: props.Graphics(char='^', colour=0x22b6f2)
+	props.graphics: props.Graphics(char='~', colour=0x22b6f2)
 })
 road = data.Thing({
-	props.graphics: props.Graphics(char='^', colour=0x222222),
+	props.graphics: props.Graphics(char='.', colour=0x222222),
 	props.walk_over_ap: 0.5
 })
 
