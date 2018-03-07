@@ -26,17 +26,17 @@ class KeyBindingsWindow(Window):
 
 	def redraw(self, console):
 		lines = self._lines_for_width(self.dim[0])
-		console.clear()
+		console.clear(bg=self._colours.keys_background)
 		for y, line in enumerate(lines):
 			x = 1
 			for command, keys in line:
-				console.draw_str(x, y, string=command, fg=self._colours.action_command)
+				console.draw_str(x, y, string=command, fg=self._colours.action_command, bg=self._colours.keys_background)
 				x += len(command) + 1
 				for i, key in enumerate(keys):
-					console.draw_str(x, y, string=key, fg=self._colours.action_key)
+					console.draw_str(x, y, string=key, fg=self._colours.action_key, bg=self._colours.keys_background)
 					x += len(key)
 					if i < len(keys) - 1:
-						console.draw_char(x, y, char='/', fg=self._colours.action_sep)
+						console.draw_char(x, y, char='/', fg=self._colours.action_sep, bg=self._colours.keys_background)
 					x += 1
 
 	def _lines_for_width(self, dim_x):
