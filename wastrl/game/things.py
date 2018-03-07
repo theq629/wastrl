@@ -40,12 +40,39 @@ def player():
 		props.graphics: props.Graphics(char='@', colour=0xffffff),
 		props.is_player: True,
 		props.action_points: 5,
-		props.population: 100
+		props.population: 100,
+		props.inventory: set()
 	})
 
 def ratling():
 	return data.Thing({
 		props.graphics: props.Graphics(char='r', colour=0xffffff),
 		props.action_points: 3,
-		props.population: 10
+		props.population: 10,
+		props.inventory: set()
+	})
+
+def missile_of_kaboom():
+	return data.Thing({
+		props.graphics: props.Graphics(char=')', colour=0xffffff)
+	})
+
+def missile_of_fire_ball():
+	return data.Thing({
+		props.graphics: props.Graphics(char=')', colour=0xffffff)
+	})
+
+def missile_of_nuclear_warhead():
+	return data.Thing({
+		props.graphics: props.Graphics(char=')', colour=0xffffff)
+	})
+
+def device_of_mapping():
+	return data.Thing({
+		props.graphics: props.Graphics(char='/', colour=0xffffff)
+	})
+
+def device_of_restoration():
+	return data.Thing({
+		props.graphics: props.Graphics(char='/', colour=0xffffff)
 	})

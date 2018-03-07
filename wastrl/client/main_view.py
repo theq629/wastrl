@@ -30,10 +30,21 @@ class PlayerController:
 		self._on_key[commands.move_nw].add(self.command_mover((-1, -1)))
 		self._on_key[commands.move_se].add(self.command_mover((1, 1)))
 		self._on_key[commands.move_sw].add(self.command_mover((-1, 1)))
+		self._on_key[commands.get].add(self.command_get)
+		self._on_key[commands.drop].add(self.command_drop)
 
 	def command_skip(self):
 		if self._is_our_turn:
 			events.act.trigger(self._player, actions.SkipTurn(self._player))
+
+	def command_get(self):
+		if self._is_our_turn:
+			things = set(t for t in props.things_at[props.position[self._player]] if t != self._player)
+			events.act.trigger(self._player, actions.Get(self._player, things))
+
+	def command_drop(self):
+		if self._is_our_turn:
+			events.act.trigger(self._player, actions.Drop(self._player, set(props.inventory[self._player])))
 
 	def command_mover(self, delta):
 		def handle():

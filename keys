@@ -2,6 +2,8 @@
 q = quit
 c = centre_view
 . = pass_turn
+g = get
+d = drop
 k = move_n
 j = move_s
 h = move_w

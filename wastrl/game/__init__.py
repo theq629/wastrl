@@ -7,6 +7,7 @@ from . import properties as props
 from . import events
 from . import utils
 from . import ai
+from . import tilemap
 import sys # TODO: improve logging
 
 class TurnManager:
@@ -69,12 +70,20 @@ def check_win():
 			if goal_pos == player_pos:
 				events.win.trigger(player)
 
+@events.move.on.handle(-1)
+def update_things_at(thing, move_from, move_to):
+	if move_from is not None:
+		props.things_at[move_from].remove(thing)
+	if move_to is not None:
+		props.things_at[move_to].add(thing)
+
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points = mapgen.gen(self.rng)
 
 		props.terrain_at.map = self.terrain
+		props.things_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: set())
 		ai.Ai(self.terrain)
 
 		thingsgen.gen(self.terrain, self.rng)

@@ -3,6 +3,8 @@ from ..ui.basic import commands as basic_ui_commands
 quit = 'quit'
 centre_view = 'centre_view'
 pass_turn = 'pass_turn'
+get = 'get'
+drop = 'drop'
 move_n = 'move_n'
 move_s = 'move_s'
 move_e = 'move_e'
