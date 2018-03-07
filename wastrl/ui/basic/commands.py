@@ -1,1 +1,5 @@
 close = 'close'
+line_up = 'line_up'
+line_down = 'line_down'
+page_up = 'page_up'
+page_down = 'page_down'

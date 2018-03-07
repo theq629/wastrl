@@ -35,10 +35,16 @@ class PartedEventHandler:
 	def __init__(self):
 		self._parts = {}
 
+	def __contains__(self, part):
+		return part in self._parts
+
 	def __getitem__(self, part):
 		if part not in self._parts:
 			self._parts[part] = EventHandler()
 		return self._parts[part]
+
+	def __iter__(self):
+		return self._parts.__iter__()
 
 	def _trigger(self, *args, **kwargs):
 		part, args, kwargs = self._map_input(*args, **kwargs)

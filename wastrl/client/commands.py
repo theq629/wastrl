@@ -21,3 +21,7 @@ move_view_sw = 'move_view_sw'
 move_view_se = 'move_view_se'
 
 close = basic_ui_commands.close
+line_up = basic_ui_commands.line_up
+line_down = basic_ui_commands.line_down
+page_up = basic_ui_commands.page_up
+page_down = basic_ui_commands.page_down

@@ -46,4 +46,9 @@ shift+KP3 = move_view_se
 
 [dialogs]
 ENTER = close
-SPACE = close
+UP = line_up
+DOWN = line_down
+BACKSPACE = page_up
+SPACE = page_down
+PAGEUP = page_up
+PAGEDOWN = page_down
