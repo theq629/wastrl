@@ -1,4 +1,6 @@
 import textwrap
+import abc
+import math
 from .. import Window, View
 from . import commands
 from . import colours
@@ -61,84 +63,115 @@ class KeyBindingsWindow(Window):
 				lines[-1].append((command, keys))
 		return lines
 
-class TextWindow(Window):
+class PaginatedWindow(Window, abc.ABC):
 	__slots__ = (
 		'_colours',
 		'_title',
-		'_text',
 		'_title_lines',
-		'_text_lines',
-		'_last_draw_size',
-		'_start_pos',
-		'_page_size'
+		'_value',
+		'_prepared_value',
+		'_total_lines',
+		'_last_prepare_size',
+		'_page_size',
+		'_start_pos'
 	)
 
-	def __init__(self, title, text, commands=commands, colours=colours, *args, **kwargs):
+	def __init__(self, title, value, commands=commands, colours=colours, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._colours = colours
 		self._title = title
-		self._text = text
+		self._value = value
 		self._title_lines = None
-		self._text_lines = None
-		self._last_draw_size = None
+		self._prepared_value = None
+		self._last_prepare_size = None
+		self._total_lines = 0
 		self._start_pos = 0
 		self._page_size = 1
-		self.on_redraw.add(self.redraw)
 		self.setup_keys()
+		self.on_redraw.add(self._redraw_base)
+
+	@property
+	def num_title_lines(self):
+		return len(self._title_lines)
+
+	@property
+	def start_pos(self):
+		return self._start_pos
+
+	@property
+	def page_size(self):
+		return self._page_size
+
+	@property
+	def prepared(self):
+		if self._last_prepare_size is None or self._last_prepare_size != self.dim:
+			self._title_lines = textwrap.wrap(self._title, self.dim[0] - 1)
+			self._page_size = self.dim[1] - len(self._title_lines) - 3
+			self._prepared_value, self._total_lines = self.prepare(self._value)
+			self._last_prepare_size = self.dim
+		return self._prepared_value
+
+	@abc.abstractmethod
+	def prepare(self, value):
+		raise NotImplementedError()
 
 	def setup_keys(self):
-		self.on_key[commands.line_up].add(lambda: self.move_page(-1))
-		self.on_key[commands.line_down].add(lambda: self.move_page(1))
-		self.on_key[commands.page_up].add(lambda: self.move_page(-self._page_size))
-		self.on_key[commands.page_down].add(lambda: self.move_page(self._page_size))
+		self.on_key[commands.line_up].add(lambda: self._move_page(-1))
+		self.on_key[commands.line_down].add(lambda: self._move_page(1))
+		self.on_key[commands.page_up].add(lambda: self._move_page(-self._page_size))
+		self.on_key[commands.page_down].add(lambda: self._move_page(self._page_size))
 
-	def move_page(self, diff):
-		self._start_pos = max(0, min(len(self._text_lines) - self._page_size, self._start_pos + diff))
+	def _move_page(self, diff):
+		self._start_pos = max(0, min(self._total_lines - self._page_size, self._start_pos + diff))
 
-	def redraw(self, console):
-		if self._last_draw_size is None or self._last_draw_size != self.dim:
-			self._title_lines = textwrap.wrap(self._title, self.dim[0] - 1)
-			self._text_lines = textwrap.wrap(self._text, self.dim[0] - 1)
-			self._page_size = self.dim[1] - len(self._title_lines) - 3
-			self._start_pos = max(0, min(len(self._text_lines) - self._page_size, self._start_pos))
-
+	def _redraw_base(self, console):
+		self.prepared
 		console.clear()
 		y = 1
-
 		for line in self._title_lines:
 			console.draw_str(1, y, string=line, fg=self._colours.title)
 			y += 1
 
-		y += 1
+class TextWindow(PaginatedWindow):
+	def __init__(self, title, text, commands=commands, colours=colours, *args, **kwargs):
+		super().__init__(title, text, *args, **kwargs)
+		self.on_redraw.add(self.redraw)
 
-		for line in self._text_lines[self._start_pos : self._start_pos + self._page_size]:
+	def prepare(self, text):
+		text_lines = textwrap.wrap(text, self.dim[0] - 1)
+		return text_lines, len(text_lines)
+
+	def redraw(self, console):
+		text_lines = self.prepared
+		y = self.num_title_lines + 2
+		for line in text_lines[self.start_pos : self.start_pos + self.page_size]:
 			console.draw_str(1, y, string=line, fg=self._colours.text)
 			y += 1
 
-class TextView(View):
+class ViewWithKeys(View):
 	__slots__ = (
-		'_max_text_width',
-		'_text_win',
+		'_max_width',
+		'_main_win',
 		'_keys_win'
 	)
 
-	def __init__(self, title, text, commands=commands, max_text_width=None, *args, **kwargs):
+	def __init__(self, title, value, win_maker, commands=commands, max_width=None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self._max_text_width = max_text_width
-		self._text_win = TextWindow(title, text, keybindings=self.keybindings)
-		self._keys_win = KeyBindingsWindow((self.on_key, self._text_win.on_key), self.keybindings)
-		self.windows.add(self._text_win)
+		self._max_width = max_width
+		self._main_win = win_maker(title, value, keybindings=self.keybindings)
+		self._keys_win = KeyBindingsWindow((self.on_key, self._main_win.on_key), self.keybindings)
+		self.windows.add(self._main_win)
 		self.windows.add(self._keys_win)
 		self.on_resize.add(self.resize)
 		self.on_key[commands.close].add(lambda: self.close())
 
 	def resize(self, dim):
-		text_win_dim_x = dim[0]
-		if self._max_text_width is not None:
-			text_win_dim_x = min(text_win_dim_x, self._max_text_width)
-		text_width_margin_x = int((dim[0] - text_win_dim_x) / 2)
+		main_win_dim_x = dim[0]
+		if self._max_width is not None:
+			main_win_dim_x = min(main_win_dim_x, self._max_width)
+		text_width_margin_x = int((dim[0] - main_win_dim_x) / 2)
 
 		keys_win_dim_y = self._keys_win.needed_dim_y(dim[0])
 
-		self._text_win.place((text_width_margin_x, 0), (text_win_dim_x, dim[1] - keys_win_dim_y))
+		self._main_win.place((text_width_margin_x, 0), (main_win_dim_x, dim[1] - keys_win_dim_y))
 		self._keys_win.place((0, dim[1] - keys_win_dim_y), (dim[0], keys_win_dim_y))

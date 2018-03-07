@@ -20,9 +20,9 @@ class EndView(ui.View):
 		events.lose.on.add(self.lose, priority=100)
 
 	def win(self, player):
-		self._display.views.add(basic_ui.TextView("You win", texts.win, keybindings=self.keybindings, max_text_width=self._max_text_width))
+		self._display.views.add(basic_ui.ViewWithKeys("You win", texts.win, basic_ui.TextWindow, keybindings=self.keybindings, max_text_width=self._max_text_width))
 		self.close()
 
 	def lose(self, player):
-		self._display.views.add(basic_ui.TextView("You lose", texts.lose, keybindings=self.keybindings, max_text_width=self._max_text_width))
+		self._display.views.add(basic_ui.ViewWithKeys("You lose", texts.lose, basic_ui.TextWindow, keybindings=self.keybindings, max_text_width=self._max_text_width))
 		self.close()

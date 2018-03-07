@@ -69,4 +69,4 @@ if __name__ == '__main__':
 		disp.views.add(end_view.EndView(disp, the_game, keybindings=keybindings['dialogs']))
 		disp.views.add(main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main']))
 		if args.do_intro:
-			disp.views.add(basic_ui.TextView("Wastrl", texts.intro, keybindings=keybindings['dialogs'], max_text_width=80))
+			disp.views.add(basic_ui.ViewWithKeys("Wastrl", texts.intro, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80))
