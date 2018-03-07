@@ -1,3 +1,5 @@
+import collections
+
 class _HandlerCollection:
 	__slots__ = (
 		'_prepared',
@@ -125,6 +127,36 @@ class SetProperty:
 
 	def join(self, *others):
 		for key in self._storage:
+			try:
+				yield (key,) + tuple(other[key] for other in others)
+			except KeyError:
+				pass
+
+class OrderedSetProperty:
+	__slots__ = (
+		'_storage',
+	)
+
+	def __init__(self):
+		self._storage = collections.OrderedDict()
+
+	def __len__(self):
+		return len(self._storage)
+
+	def __contains__(self, key):
+		return key in self._storage
+
+	def add(self, key):
+		self._storage[key] = None
+
+	def remove(self, key):
+		del self._storage[key]
+
+	def __iter__(self):
+		return iter(self._storage.keys())
+
+	def join(self, *others):
+		for key in self._storage.keys():
 			try:
 				yield (key,) + tuple(other[key] for other in others)
 			except KeyError:

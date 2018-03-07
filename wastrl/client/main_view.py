@@ -6,6 +6,45 @@ from ..game import events
 from ..game import actions
 from . import commands
 
+class PlayerController:
+	__slots__ = (
+		'_player',
+		'_on_key',
+		'_is_our_turn'
+	)
+
+	def __init__(self, player, on_key):
+		self._player = player
+		self._on_key = on_key
+		self._is_our_turn = False
+		events.take_turn.on.add(self.watch_turn)
+		self.setup_keys()
+
+	def setup_keys(self):
+		self._on_key[commands.pass_turn].add(self.command_skip)
+		self._on_key[commands.move_n].add(self.command_mover((0, -1)))
+		self._on_key[commands.move_s].add(self.command_mover((0, 1)))
+		self._on_key[commands.move_e].add(self.command_mover((1, 0)))
+		self._on_key[commands.move_w].add(self.command_mover((-1, 0)))
+		self._on_key[commands.move_ne].add(self.command_mover((1, -1)))
+		self._on_key[commands.move_nw].add(self.command_mover((-1, -1)))
+		self._on_key[commands.move_se].add(self.command_mover((1, 1)))
+		self._on_key[commands.move_sw].add(self.command_mover((-1, 1)))
+
+	def command_skip(self):
+		if self._is_our_turn:
+			events.act.trigger(self._player, actions.SkipTurn(self._player))
+
+	def command_mover(self, delta):
+		def handle():
+			if self._is_our_turn:
+				events.act.trigger(self._player, actions.Move(self._player, delta))
+		return handle
+
+	def watch_turn(self, actor):
+		print("got turn", actor.index)
+		self._is_our_turn = actor == self._player
+
 class TopBarWin(ui.Window):
 	__slots__ = (
 		'_game',
@@ -38,6 +77,7 @@ class MapWin(ui.Window):
 		self._free_view = False
 		self.setup_keys()
 		self.view_centre()
+		PlayerController(self._game.player, self.on_key)
 
 	def redraw(self, console):
 		view_centre = self.view_centre()
@@ -69,15 +109,6 @@ class MapWin(ui.Window):
 			return pos
 
 	def setup_keys(self):
-		self.on_key[commands.move_n].add(self.player_mover((0, -1)))
-		self.on_key[commands.move_s].add(self.player_mover((0, 1)))
-		self.on_key[commands.move_e].add(self.player_mover((1, 0)))
-		self.on_key[commands.move_w].add(self.player_mover((-1, 0)))
-		self.on_key[commands.move_ne].add(self.player_mover((1, -1)))
-		self.on_key[commands.move_nw].add(self.player_mover((-1, -1)))
-		self.on_key[commands.move_se].add(self.player_mover((1, 1)))
-		self.on_key[commands.move_sw].add(self.player_mover((-1, 1)))
-		self.on_key[commands.pass_turn].add(self.player_skip)
 		self.on_key[commands.centre_view].add(self.stop_free_view)
 		self.on_key[commands.move_view_n].add(self.view_mover((0, -1)))
 		self.on_key[commands.move_view_s].add(self.view_mover((0, 1)))
@@ -90,15 +121,6 @@ class MapWin(ui.Window):
 
 	def stop_free_view(self):
 		self._free_view = False
-
-	def player_skip(self):
-		self._player_actions.append(actions.SkipTurn(self._game.player))
-
-	def player_mover(self, delta):
-		def handler():
-			self._free_view = False
-			self._player_actions.append(actions.Move(self._game.player, delta))
-		return handler
 
 	def view_mover(self, delta, multiplier=10):
 		def handler():
@@ -125,7 +147,7 @@ class MainView(ui.View):
 		self.windows.add(self._top_bar_win)
 		self.windows.add(self._map_win)
 		self.on_resize.add(self.resize)
-		self.on_before_redraw.add(self.update_game)
+		self.on_frame.add(self.update_game)
 		events.act.on.add(self.take_player_action)
 		events.win.on.add(self.win_or_lose, priority=99)
 		events.lose.on.add(self.win_or_lose, priority=99)

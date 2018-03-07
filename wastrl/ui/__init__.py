@@ -73,6 +73,7 @@ class Window:
 		'_dim',
 		'_console',
 		'_keybindings',
+		'_on_frame',
 		'_on_redraw',
 		'_on_key'
 	)
@@ -80,6 +81,7 @@ class Window:
 	def __init__(self, pos=(0, 0), dim=(0, 0), keybindings={}):
 		self.place(pos, dim)
 		self._keybindings = keybindings
+		self._on_frame = EventHandler()
 		self._on_redraw = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
 
@@ -94,6 +96,10 @@ class Window:
 	@property
 	def keybindings(self):
 		return self._keybindings
+
+	@property
+	def on_frame(self):
+		return self._on_frame
 
 	@property
 	def on_redraw(self):
@@ -120,6 +126,7 @@ class View:
 		'_console',
 		'_keybindings',
 		'_open',
+		'_on_frame',
 		'_on_resize',
 		'_on_key',
 		'_on_before_redraw',
@@ -132,6 +139,7 @@ class View:
 		self._console = None
 		self._keybindings = keybindings
 		self._open = True
+		self._on_frame = EventHandler()
 		self._on_resize = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
 		self._on_before_redraw = EventHandler()
@@ -146,6 +154,10 @@ class View:
 	@property
 	def keybindings(self):
 		return self._keybindings
+
+	@property
+	def on_frame(self):
+		return self._on_frame
 
 	@property
 	def on_resize(self):
@@ -171,6 +183,12 @@ class View:
 
 	def add(self, window):
 		self._windows.append(window)
+
+	def _handle_frame(self):
+		result = self.on_frame._trigger()
+		for win in self._windows:
+			result |= win._on_frame._trigger()
+		return result
 
 	def _tdl_event(self, event):
 		if event.type == 'KEYDOWN' and event.key != 'TEXT':
@@ -248,7 +266,7 @@ class Display:
 		self._setup()
 		self._draw()
 		while self._running:
-			if self._handle_events():
+			if self._handle_frame() or self._handle_events():
 				self._draw()
 
 	def close(self):
@@ -274,6 +292,12 @@ class Display:
 		self._root_console = tdl.init(*self._dim, **self._tdl_opts)
 		for view in self._views:
 			view._on_resize._trigger(self._dim)
+
+	def _handle_frame(self):
+		result = False
+		for view in reversed(self._views._items):
+			result |= view._handle_frame()
+		return result
 
 	def _handle_events(self):
 		if tdl.event.is_window_closed():
