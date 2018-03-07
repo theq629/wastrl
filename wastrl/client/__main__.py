@@ -1,6 +1,7 @@
 import os
 import sys
 import appdirs
+import configparser
 from .. import ui
 from ..ui import basic as basic_ui
 from ..ui import keys
@@ -42,6 +43,10 @@ if __name__ == '__main__':
 		dest = "resolution", type = int_pair, default = (80, 50),
 		help = "Resolution of display in characters."
 	)
+	parser.add_argument('-F', '--font', metavar="PATH",
+		dest = "font_path", type = str, default = None,
+		help = "Path to font image file."
+	)
 	parser.add_argument('-f', '--fullscreen',
 		dest = "fullscreen", default = False, action = 'store_true',
 		help = "Use fullscreen display."
@@ -60,7 +65,7 @@ if __name__ == '__main__':
 
 	the_game = game.Game(args.rng_seed)
 
-	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl") as disp:
+	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl", font_path=args.font_path) as disp:
 		disp.views.add(end_view.EndView(disp, the_game, keybindings=keybindings['dialogs']))
 		disp.views.add(main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main']))
 		if args.do_intro:
