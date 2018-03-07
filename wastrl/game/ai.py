@@ -24,7 +24,7 @@ class Ai:
 
 	def __init__(self, terrain):
 		self._walk_map = make_walk_map(terrain)
-		self._pather = tcod.path.Dijkstra(self._walk_map)
+		self._pather = tcod.path.Dijkstra(self._walk_map, diagonal=1)
 		self._taking_turn = None
 		events.take_turn.on.add(self.watch_turn)
 		events.move.on.add(self.track_player)

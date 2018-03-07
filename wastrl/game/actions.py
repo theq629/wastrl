@@ -1,4 +1,3 @@
-import math
 from . import properties as props
 from . import events
 
@@ -16,12 +15,11 @@ class Move:
 
 	def _calc_ap(self, delta):
 		dx, dy = delta
-		m = math.sqrt(dx**2 + dy**2)
 		x, y = props.position[self._actor]
 		x, y = x + dx, y + dy
 		t = props.terrain_at[x, y]
 		try:
-			return props.walk_over_ap[t] * m
+			return props.walk_over_ap[t]
 		except KeyError:
 			return None
 	
@@ -48,8 +46,7 @@ class Attack:
 		self._ap = self._calc_ap()
 
 	def _calc_ap(self):
-		dx, dy = delta
-		return math.sqrt(dx**2 + dy**2)
+		return 1
 
 	@property
 	def ap(self):
