@@ -5,7 +5,7 @@ mountains = data.Thing({
 	props.graphics: props.Graphics(char='^', colour=0xcfc19a)
 })
 grassland = data.Thing({
-	props.graphics: props.Graphics(char='.', colour=0x5f7b42),
+	props.graphics: props.Graphics(char='.', colour=0x10ad80),
 	props.walk_over_ap: 1
 })
 desert = data.Thing({
