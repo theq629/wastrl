@@ -120,14 +120,15 @@ def make_walk_map(terrain, height, dim, water_cost=100):
 				walkability[y, x] = water_cost
 	return walkability
 
-def make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, pather, rng):
+def make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, pather, rng, unwalkable_terrains={ things.mountains, things.water }):
 	for i in range(num_guaranteed_paths):
 		points = iter(choose_guaranteed_path_points(height, dim, starting_point, ending_point, num_mountain_ranges, rng))
 		last_point = next(points)
 		for point in points:
 			path = pather.get_path(last_point[0], last_point[1], point[0], point[1])
 			for x, y in path:
-				terrain[x, y] = things.desert
+				if terrain[x, y] in unwalkable_terrains:
+					terrain[x, y] = things.desert
 			last_point = point
 
 def make_deserts(terrain, height, dim, num_deserts, pather, rng, min_length=5, max_length=40, max_r=40, min_radius=8):
