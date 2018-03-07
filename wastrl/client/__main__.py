@@ -22,18 +22,16 @@ def load_keys():
 	path = os.path.join(appdirs.user_data_dir(prog_name, prog_author), "keys")
 	if not os.path.exists(path):
 		print(f"warning: keys config file does not exist: {path}", file=sys.stderr)
-	keybindings = keys.load(path)
+	keybindings = keys.CompoundKeybindings(sections)
+	keybindings.load(path)
 	try:
-		keys.verify(keybindings, sections=sections, commands=dir(commands))
+		keybindings.verify(sections=sections, commands=dir(commands))
 	except keys.UnknownSection as e:
 		print(f"warning: unknown section in keys file: {e}", file=sys.stderr)
 	except keys.UnknownKey as e:
 		print(f"warning: unknown key in keys file: {e}", file=sys.stderr)
 	except keys.UnknownCommand as e:
 		print(f"warning: unknown command in keys file: {e}", file=sys.stderr)
-	for section in sections:
-		if section not in keybindings:
-			keybindings[section] = {}
 	return keybindings
 
 if __name__ == '__main__':
