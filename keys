@@ -2,6 +2,7 @@
 q = quit
 c = centre_view
 . = pass_turn
+i = inventory
 g = get
 d = drop
 k = move_n

@@ -138,7 +138,7 @@ class TextWindow(PaginatedWindow):
 		self.on_redraw.add(self.redraw)
 
 	def prepare(self, text):
-		text_lines = textwrap.wrap(text, self.dim[0] - 1)
+		text_lines = textwrap.wrap(text, self.dim[0] - 2)
 		return text_lines, len(text_lines)
 
 	def redraw(self, console):
@@ -146,6 +146,46 @@ class TextWindow(PaginatedWindow):
 		y = self.num_title_lines + 2
 		for line in text_lines[self.start_pos : self.start_pos + self.page_size]:
 			console.draw_str(1, y, string=line, fg=self._colours.text)
+			y += 1
+
+class MenuWindow(PaginatedWindow):
+	def __init__(self, title, items, commands=commands, colours=colours, *args, **kwargs):
+		super().__init__(title, items, *args, **kwargs)
+		self.on_redraw.add(self.redraw)
+
+	def prepare(self, items):
+		max_key_width = max(len(k) for k, t in items) if len(items) > 0 else 0
+		prepared = tuple((k, textwrap.wrap(t, self.dim[0] - max_key_width - 3)) for k, t in items)
+		return prepared, sum(len(ls) for k, ls in prepared)
+
+	def redraw(self, console):
+		prepared = self.prepared
+		max_key_len = max(len(k) for k, ls in prepared) if len(prepared) > 0 else 0
+
+		def find_start_pos():
+			pos = item_i = line_i = 0
+			while item_i < len(prepared):
+				while line_i < len(prepared):
+					key, lines = prepared[item_i]
+					pos += 1
+					if pos >= self.start_pos:
+						return item_i, line_i
+					line_i += 1
+				item_i += i
+				line_i = 0
+			return item_i, line_i
+		item_i, line_i = find_start_pos()
+
+		y = self.num_title_lines + 2
+		while item_i < len(prepared):
+			key, lines = prepared[item_i]
+			while line_i < len(lines):
+				if line_i == 0:
+					console.draw_str(1, y, string=key, fg=self._colours.menu_key)
+				console.draw_str(max_key_len + 2, y, string=lines[line_i], fg=self._colours.text)
+				line_i += 1
+			item_i += 1
+			line_i = 0
 			y += 1
 
 class ViewWithKeys(View):

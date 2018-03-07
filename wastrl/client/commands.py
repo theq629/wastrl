@@ -5,6 +5,7 @@ centre_view = 'centre_view'
 pass_turn = 'pass_turn'
 get = 'get'
 drop = 'drop'
+inventory = "inventory"
 move_n = 'move_n'
 move_s = 'move_s'
 move_e = 'move_e'

@@ -11,7 +11,7 @@ class MapProperty:
 
 Graphics = collections.namedtuple('Graphics', ('char', 'colour'))
 
-named = data.ValuedProperty()
+name = data.ValuedProperty()
 graphics = data.ValuedProperty()
 position = data.ValuedProperty()
 is_goal = data.SetProperty()

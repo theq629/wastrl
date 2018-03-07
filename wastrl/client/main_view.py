@@ -1,21 +1,70 @@
 import numpy
 from .. import ui
+from ..ui import basic as basic_ui
 from .. import game
 from ..game import properties as props
 from ..game import events
 from ..game import actions
 from . import commands
 
+keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+class PlayerInterfaceManager:
+	__slots__ = (
+		'_display',
+		'_dialog_keybindings',
+		'_inventory_keys'
+	)
+
+	def __init__(self, display, dialog_keybindings):
+		self._display = display
+		self._dialog_keybindings = dialog_keybindings
+		self._inventory_keys = {}
+
+	def inventory_window(self, inventory):
+		self._display.views.add(basic_ui.ViewWithKeys(
+			title = "Inventory",
+			value = self.keyify_inventory(inventory),
+			win_maker = basic_ui.MenuWindow,
+			keybindings = self._dialog_keybindings,
+			max_width = 80
+		))
+
+	def name_for_thing(self, thing):
+		if thing in props.name:
+			return props.name[thing]
+		else:
+			return "<unknown>"
+
+	def keyify_inventory(self, inventory):
+		for thing in self._inventory_keys:
+			if thing not in inventory:
+				del self._inventory_keys[thing]
+
+		for thing in inventory:
+			if thing not in self._inventory_keys:
+				i = None
+				for j, key in enumerate(keys_for_inventory_menu):
+					if key not in self._inventory_keys.values():
+						i = j
+						break
+				if i is not None:
+					self._inventory_keys[thing] = keys_for_inventory_menu[i]
+
+		return sorted((self._inventory_keys[t], self.name_for_thing(t)) for t in inventory)
+
 class PlayerController:
 	__slots__ = (
 		'_player',
 		'_on_key',
+		'_interface_manager',
 		'_is_our_turn'
 	)
 
-	def __init__(self, player, on_key):
+	def __init__(self, player, on_key, interface_manager):
 		self._player = player
 		self._on_key = on_key
+		self._interface_manager = interface_manager
 		self._is_our_turn = False
 		events.take_turn.on.add(self.watch_turn)
 		self.setup_keys()
@@ -30,8 +79,12 @@ class PlayerController:
 		self._on_key[commands.move_nw].add(self.command_mover((-1, -1)))
 		self._on_key[commands.move_se].add(self.command_mover((1, 1)))
 		self._on_key[commands.move_sw].add(self.command_mover((-1, 1)))
+		self._on_key[commands.inventory].add(self.command_show_inventory)
 		self._on_key[commands.get].add(self.command_get)
 		self._on_key[commands.drop].add(self.command_drop)
+
+	def command_show_inventory(self):
+		self._interface_manager.inventory_window(set(props.inventory[self._player]))
 
 	def command_skip(self):
 		if self._is_our_turn:
@@ -131,7 +184,6 @@ class MapWin(ui.Window):
 		self.on_redraw.add(self.redraw)
 		self._player_actions = []
 		self._view_controller = ViewController(self._player, self.on_key)
-		PlayerController(self._player, self.on_key)
 		events.move.on.add(self.watch_move)
 
 	def watch_move(self, actor, move_from, move_to):
@@ -185,6 +237,7 @@ class MainView(ui.View):
 		events.win.on.add(self.win_or_lose, priority=99)
 		events.lose.on.add(self.win_or_lose, priority=99)
 		self.on_key[commands.quit].add(self._display.quit)
+		PlayerController(self._player, self.on_key, PlayerInterfaceManager(display, full_keybindings['dialogs']))
 
 	def take_player_action(self, thing, available_ap):
 		if thing == self._player:
