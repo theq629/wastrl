@@ -108,7 +108,7 @@ def dijkstra(starts, touch, graph=None, cost=uniform_cost, max_dist=None):
 	_dijkstra(graph, starts, touch, cost, max_dist=max_dist)
 
 # TODO: use A*
-def pathfind(starts, goal, graph=None, cost=uniform_cost):
+def pathfind(starts, goal, graph=None, cost=uniform_cost, max_dist=None):
 	get_neighbours = neighbours if graph is None else graph.neighbours
 
 	inf = float('inf')
@@ -132,7 +132,7 @@ def pathfind(starts, goal, graph=None, cost=uniform_cost):
 			return False
 		else:
 			return True
-	fringe = _dijkstra(graph, starts, touch, cost)
+	fringe = _dijkstra(graph, starts, touch, cost, max_dist=max_dist)
 
 	if len(found) > 0:
 		return reversed(tuple(trace_path(fringe, goal)))
