@@ -79,6 +79,7 @@ class KeyEventHandler(PartedEventHandler):
 
 class Window:
 	__slots__ = (
+		'_view',
 		'_pos',
 		'_dim',
 		'_console',
@@ -91,6 +92,7 @@ class Window:
 	)
 
 	def __init__(self, pos=(0, 0), dim=(0, 0), keybindings={}):
+		self._view = None
 		self.place(pos, dim)
 		self._keybindings = keybindings
 		self._on_frame = EventHandler()
@@ -141,6 +143,27 @@ class Window:
 			self._on_redraw._trigger(self._console)
 			dest_con.blit(self._console, self._pos[0], self._pos[1], self._dim[0], self._dim[1], 0, 0)
 
+	def redraw(self):
+		if self._view is not None:
+			self._view.redraw()
+
+class _WindowCollection(_ControlledCollection):
+	__slots__ = (
+		'_view',
+	)
+
+	def __init__(self, view):
+		super().__init__()
+		self._view = view
+
+	def add(self, win):
+		super().add(win)
+		win._view = self._view
+
+	def _remove(self, win):
+		super()._remove(win)
+		win._view = None
+
 class View:
 	__slots__ = (
 		'_displays',
@@ -159,7 +182,7 @@ class View:
 
 	def __init__(self, keybindings={}):
 		self._displays = []
-		self._windows = _ControlledCollection()
+		self._windows = _WindowCollection(self)
 		self._console = None
 		self._keybindings = keybindings
 		self._open = True
@@ -218,9 +241,6 @@ class View:
 			display._views._remove(self)
 		self._displays = []
 
-	def add(self, window):
-		self._windows.append(window)
-
 	def _handle_frame(self):
 		result = self.on_frame._trigger()
 		for win in self._windows:
@@ -259,6 +279,10 @@ class View:
 					win._draw(self._console)
 				dest_con.blit(self._console, 0, 0, self._console.width, self._console.height, 0, 0)
 			self._on_after_redraw._trigger()
+
+	def redraw(self):
+		for display in self._displays:
+			display.redraw()
 
 class _ViewCollection(_ControlledCollection):
 	__slots__ = (
@@ -367,3 +391,6 @@ class Display:
 		for view in self._views:
 			view._draw(self._root_console)
 		tdl.flush()
+
+	def redraw(self):
+		self._draw()

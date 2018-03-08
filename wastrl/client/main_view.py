@@ -201,6 +201,7 @@ class PlayerController:
 			delta = tuple(pos1[i] - pos0[i] for i in range(2))
 			events.act.trigger(self._player, actions.Move(self._player, delta))
 			pos0 = pos1
+			self._map_win.redraw()
 
 	def watch_turn(self, actor):
 		self._is_our_turn = actor == self._player
@@ -257,9 +258,9 @@ class TopBarWin(ui.Window):
 	def __init__(self, player, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._player = player
-		self.on_redraw.add(self.redraw)
+		self.on_redraw.add(self.handle_redraw)
 
-	def redraw(self, console):
+	def handle_redraw(self, console):
 		ap = props.action_points_this_turn[self._player]
 		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
 		console.clear()
@@ -280,7 +281,7 @@ class MapWin(ui.Window):
 		super().__init__(*args, **kwargs)
 		self._game = game
 		self._player = player
-		self.on_redraw.add(self.redraw)
+		self.on_redraw.add(self.handle_redraw)
 		self._player_actions = []
 		self._view_controller = ViewController(self._player, self.on_key)
 		self._player_can_move_to = set()
@@ -294,7 +295,7 @@ class MapWin(ui.Window):
 		if actor == self._player:
 			self._view_controller.stop_free_view()
 
-	def redraw(self, console):
+	def handle_redraw(self, console):
 		view_centre = self._view_controller.view_centre
 		world_dim = self._game.terrain.dim
 		self.world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
