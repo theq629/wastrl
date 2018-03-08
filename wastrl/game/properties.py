@@ -15,9 +15,12 @@ Graphics = collections.namedtuple('Graphics', (
 ))
 
 Attack = collections.namedtuple('Attack', (
-	'move_range',
-	'fire_range',
 	'damage'
+))
+
+ActivationTargetRange = collections.namedtuple('ActivationTargetRange', (
+	'move_range',
+	'fire_range'
 ))
 
 name = data.ValuedProperty()
@@ -29,6 +32,7 @@ action_points = data.ValuedProperty()
 action_points_this_turn = data.ValuedProperty()
 walk_over_ap = data.ValuedProperty()
 attack = data.ValuedProperty()
+activation_target_range = data.ValuedProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

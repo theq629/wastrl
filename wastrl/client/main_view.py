@@ -6,18 +6,10 @@ from ..game import properties as props
 from ..game import events
 from ..game import actions
 from ..game import tilemap
+from ..game import utils as game_utils
 from . import commands
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-def walk_cost(terrain, blocked_cost=float('inf')):
-	def cost(from_pos, pos):
-		t = terrain[pos]
-		if t not in props.walk_over_ap:
-			return blocked_cost
-		else:
-			return props.walk_over_ap[t]
-	return cost
 
 class PlayerInterfaceManager:
 	__slots__ = (
@@ -119,7 +111,9 @@ class PlayerController:
 		'_event_target',
 		'_interface_manager',
 		'_map_win',
-		'_is_our_turn'
+		'_is_our_turn',
+		'_targeting',
+		'_finish_targeting_callback'
 	)
 
 	def __init__(self, player, game, event_target, interface_manager, map_win):
@@ -129,6 +123,8 @@ class PlayerController:
 		self._interface_manager = interface_manager
 		self._map_win = map_win
 		self._is_our_turn = False
+		self._targeting = False
+		self._finish_targeting_callback = None
 		events.take_turn.on.add(self.watch_turn)
 		self.setup_keys()
 
@@ -147,6 +143,8 @@ class PlayerController:
 		self._event_target.on_key[commands.get].add(self.command_get)
 		self._event_target.on_key[commands.drop].add(self.command_drop)
 		self._event_target.on_key[commands.activate].add(self.command_activate)
+		self._event_target.on_key[commands.select_target].add(self.command_select_target)
+		self._event_target.on_key[commands.auto_target].add(self.command_auto_target)
 
 	def command_show_inventory(self):
 		self._interface_manager.inventory_window(set(props.inventory[self._player]))
@@ -170,29 +168,83 @@ class PlayerController:
 
 	def command_activate(self):
 		if self._is_our_turn:
-			def handle(thing_to_activate):
-				print("user wants to activate", thing_to_activate.index)
-			self._interface_manager.activate_window(set(props.inventory[self._player]), handle)
+			def handle_finish(thing_to_activate, target=None):
+				events.act.trigger(self._player, actions.Activate(self._player, thing_to_activate, target))
+			def handle_start(thing_to_activate):
+				if thing_to_activate in props.activation_target_range:
+					move_points, fire_points = self.get_target_range(thing_to_activate)
+					self.start_targeting(lambda t: handle_finish(thing_to_activate, t), move_points, fire_points)
+				else:
+					handle_finish(thing_to_activate)
+			self._interface_manager.activate_window(set(props.inventory[self._player]), handle_start)
+
+	def command_mover(self, delta):
+		def handle():
+			if self._targeting:
+				self._map_win.targeting = tuple(self._map_win.targeting[i] + delta[i] for i in range(2))
+			elif self._is_our_turn:
+				events.act.trigger(self._player, actions.Move(self._player, delta))
+		return handle
 
 	def command_move_to_click(self, screen_pos):
 		win_pos = tuple(screen_pos[i] - self._map_win.pos[i] for i in range(2))
 		if all(win_pos[i] >= 0 and win_pos[i] < self._map_win.dim[i] for i in range(2)):
 			world_pos = tuple(win_pos[i] + self._map_win.world_offset[i] for i in range(2))
-			path = tilemap.pathfind(
-				graph = self._game.terrain,
-				starts = (props.position[self._player],),
-				goal = world_pos,
-				cost = walk_cost(self._game.terrain),
-				max_dist = props.action_points_this_turn[self._player]
-			)
-			if path is not None:
-				self.move_on_path(path)
+			if self._targeting:
+				self._map_win.targeting = world_pos
+				self.stop_targeting()
+			else:
+				path = tilemap.pathfind(
+					graph = self._game.terrain,
+					starts = (props.position[self._player],),
+					goal = world_pos,
+					cost = game_utils.walk_cost(self._game.terrain),
+					max_dist = props.action_points_this_turn[self._player]
+				)
+				if path is not None:
+					self.move_on_path(path)
 
-	def command_mover(self, delta):
-		def handle():
-			if self._is_our_turn:
-				events.act.trigger(self._player, actions.Move(self._player, delta))
-		return handle
+	def command_select_target(self):
+		self.stop_targeting()
+
+	def command_auto_target(self):
+		self._map_win.auto_target()
+
+	def get_target_range(self, thing):
+		act_range = props.activation_target_range[thing]
+
+		move_points = set()
+		def touch(pos, dist):
+			move_points.add(pos)
+			return True
+		tilemap.dijkstra(
+			graph = self._game.terrain,
+			starts = (props.position[self._player],),
+			touch = touch,
+			cost = game_utils.walk_cost(self._game.terrain),
+			max_dist = act_range.move_range
+		)
+
+		fire_points = set()
+		for x in range(max(0, min(x for x, _ in move_points) - act_range.fire_range), min(self._game.terrain.dim[0] - 1, max(x for x, _ in move_points) + act_range.fire_range)):
+			for y in range(max(0, min(y for _, y in move_points) - act_range.fire_range), min(self._game.terrain.dim[1] - 1, max(y for _, y in move_points) + act_range.fire_range)):
+				pos = x, y
+				fire_points.add(pos)
+		fire_range_2 = act_range.fire_range**2
+
+		return move_points, fire_points
+
+	def start_targeting(self, callback, move_points, fire_points):
+		self._map_win.start_targeting(move_points, fire_points)
+		self._targeting = True
+		self._finish_targeting_callback = callback
+
+	def stop_targeting(self):
+		if self._finish_targeting_callback:
+			self._finish_targeting_callback(self._map_win.targeting)
+			self._finish_targeting_callback = None
+		self._map_win.stop_targeting()
+		self._targeting = False
 
 	def move_on_path(self, path):
 		path = iter(path)
@@ -274,7 +326,12 @@ class MapWin(ui.Window):
 		'_view_controller',
 		'_free_view',
 		'_player_can_move_to',
-		'world_offset'
+		'world_offset',
+		'targeting',
+		'_known_targets',
+		'_cur_target_index',
+		'_target_move_points',
+		'_target_fire_points'
 	)
 
 	def __init__(self, game, player, *args, **kwargs):
@@ -286,6 +343,11 @@ class MapWin(ui.Window):
 		self._view_controller = ViewController(self._player, self.on_key)
 		self._player_can_move_to = set()
 		self.world_offset = (0, 0)
+		self.targeting = None
+		self._known_targets = None
+		self._cur_target_index = None
+		self._target_move_points = None
+		self._target_fire_points = None
 		self.update_can_move_to()
 		events.move.on.add(self.watch_move)
 		events.acted.on.add(self.watch_actions)
@@ -301,23 +363,71 @@ class MapWin(ui.Window):
 		self.world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
 		screen_bounds = tuple((max(0, -self.world_offset[i]), min(self.dim[i], world_dim[i] - self.world_offset[i])) for i in range(2))
 
+		# TODO: cache
+		# TODO: make sure creatures are on top
+		things_to_draw = {}
+		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
+			screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
+			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
+				things_to_draw[screen_x, screen_y] = graphic
+
 		console.clear()
 
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
-				world_x, world_y = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
+				world_x, world_y = world_pos = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
 				terrain = self._game.terrain[world_x, world_y]
 				graphic = props.graphics[terrain]
 				bg = 0x000000
-				if (world_x, world_y) in self._player_can_move_to:
+				if self.targeting is not None and world_pos == self.targeting:
+					bg = 0xbb0000
+				elif self.targeting is not None and world_pos in self._target_move_points:
+					bg = 0x220000
+				elif self.targeting is not None and world_pos in self._target_fire_points:
+					bg = 0x110000
+				elif world_pos in self._player_can_move_to:
 					bg = 0x111111
+				thing_graphic = things_to_draw.get((screen_x, screen_y))
+				if thing_graphic is not None:
+					graphic = thing_graphic
 				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour, bg=bg)
 
-		# TODO: cache
-		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
-			screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
-			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
-				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
+	def is_on_screen(self, world_pos):
+		world_x, world_y = world_pos
+		screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
+		return screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]
+
+	def start_targeting(self, move_points, fire_points):
+		starting_target = None
+		if self._cur_target_index is not None:
+			last_targeted = self._known_targets[self._cur_target_index]
+			pos = props.position[last_targeted]
+			if pos in move_points and self.is_on_screen(pos):
+				starting_target = last_targeted
+
+		self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in move_points and self.is_on_screen(p))
+		self._target_move_points = move_points
+		self._target_fire_points = fire_points
+
+		if starting_target is not None:
+			self._cur_target_index = self._known_targets.index(starting_target)
+			self.targeting = props.position[self._known_targets[self._cur_target_index]]
+		else:
+			self.targeting = props.position[self._player]
+
+	def stop_targeting(self):
+		self.targeting = None
+		self._target_move_points = None
+		self._target_fire_points = None
+
+	def auto_target(self):
+		if self.targeting is not None and len(self._known_targets) > 0:
+			if self._cur_target_index is None:
+				closest = min(self._known_targets, key=lambda t: sum((props.position[t][i] - props.position[self._player][i])**2 for i in range(2)))
+				self._cur_target_index = self._known_targets.index(closest)
+			elif self._known_targets is not None:
+				self._cur_target_index = (self._cur_target_index + 1) % len(self._known_targets)
+			self.targeting = props.position[self._known_targets[self._cur_target_index]]
 
 	def watch_actions(self, actor):
 		if actor == self._player:
@@ -331,16 +441,14 @@ class MapWin(ui.Window):
 		self._player_can_move_to = set()
 		cur_ap = props.action_points_this_turn[self._player]
 		def touch(pos, dist):
-			if dist <= cur_ap:
-				self._player_can_move_to.add(pos)
-				return True
-			else:
-				return False
+			self._player_can_move_to.add(pos)
+			return True
 		tilemap.dijkstra(
 			graph = self._game.terrain,
 			starts = (props.position[self._player],),
 			touch = touch,
-			cost = walk_cost(self._game.terrain)
+			cost = game_utils.walk_cost(self._game.terrain),
+			max_dist = cur_ap
 		)
 
 class MainView(ui.View):

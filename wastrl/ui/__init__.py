@@ -102,6 +102,10 @@ class Window:
 		self._on_click = KeyEventHandler(keybindings)
 
 	@property
+	def view(self):
+		return self._view
+
+	@property
 	def pos(self):
 		return self._pos
 

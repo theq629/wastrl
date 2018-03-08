@@ -181,6 +181,7 @@ class MenuWindow(PaginatedWindow):
 	def handle_other_key_select_select(self, key):
 		if key in self._item_keys:
 			self._select_handler(key)
+			self.view.close()
 			return True
 
 	def handle_other_key_select_multi(self, key):

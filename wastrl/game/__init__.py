@@ -78,6 +78,11 @@ def update_things_at(thing, move_from, move_to):
 	if move_to is not None:
 		props.things_at[move_to].add(thing)
 
+@events.activate.on.handle()
+def dummy_activate(thing, actor, target_pos):
+	# TODO: handle actual activation for items
+	print("activate", thing.index, "at", target_pos)
+
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)

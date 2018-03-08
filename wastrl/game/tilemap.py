@@ -1,5 +1,16 @@
 import heapq
 
+def neighbours(pos):
+	x, y = pos
+	yield (x - 1, y - 1)
+	yield (x - 1, y)
+	yield (x - 1, y + 1)
+	yield (x, y - 1)
+	yield (x, y + 1)
+	yield (x + 1, y - 1)
+	yield (x + 1, y)
+	yield (x + 1, y + 1)
+
 class Tilemap:
 	__slots__ = (
 		'_dim',
@@ -42,7 +53,6 @@ class Tilemap:
 			if y < bound_y:
 				yield (x + 1, y + 1)
 
-
 class SearchFringe:
 	__slots__ = (
 		'_array',
@@ -68,27 +78,39 @@ class SearchFringe:
 
 uniform_cost = lambda n0, n1: 1
 
-def _dijkstra(graph, starts, touch, cost):
+def _dijkstra(graph, starts, touch, cost, max_dist=None):
+	get_neighbours = neighbours if graph is None else graph.neighbours
+
+	do_touch = touch
+	if max_dist is not None:
+		def do_touch(node, node_dist):
+			if node_dist > max_dist:
+				return False
+			else:
+				return touch(node, node_dist)
+
 	fringe = SearchFringe()
 	for start in starts:
 		fringe.put(start, 0)
 	while not fringe.is_empty():
 		node = fringe.pop()
 		node_dist = fringe.get(node)
-		if not touch(node, node_dist):
+		if not do_touch(node, node_dist):
 			break
-		for neighbour in graph.neighbours(node):
+		for neighbour in get_neighbours(node):
 			new_dist = node_dist + cost(node, neighbour)
 			old_dist = fringe.get(neighbour)
 			if old_dist is None or new_dist < old_dist:
 				fringe.put(neighbour, new_dist)
 	return fringe
 
-def dijkstra(graph, starts, touch, cost=uniform_cost):
-	_dijkstra(graph, starts, touch, cost)
+def dijkstra(starts, touch, graph=None, cost=uniform_cost, max_dist=None):
+	_dijkstra(graph, starts, touch, cost, max_dist=max_dist)
 
 # TODO: use A*
-def pathfind(graph, starts, goal, max_dist=float('inf'), cost=uniform_cost):
+def pathfind(starts, goal, graph=None, cost=uniform_cost):
+	get_neighbours = neighbours if graph is None else graph.neighbours
+
 	inf = float('inf')
 	def dist(node):
 		d = fringe.get(node)
@@ -100,14 +122,12 @@ def pathfind(graph, starts, goal, max_dist=float('inf'), cost=uniform_cost):
 		node = goal
 		while node not in starts:
 			yield node
-			node = min(graph.neighbours(node), key=dist)
+			node = min(get_neighbours(node), key=dist)
 		yield node
 
 	found = []
 	def touch(node, node_dist):
-		if node_dist > max_dist:
-			return False
-		elif node == goal:
+		if node == goal:
 			found.append(node)
 			return False
 		else:

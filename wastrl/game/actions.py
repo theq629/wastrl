@@ -1,5 +1,7 @@
 from . import properties as props
 from . import events
+from . import tilemap
+from . import utils
 
 class Base:
 	__slots__ = (
@@ -107,18 +109,46 @@ class Drop(Base):
 			events.drop.trigger(self._actor, thing)
 			events.move.trigger(thing, None, pos)
 
-class Attack(Base):
+class Activate(Base):
 	__slots__ = (
 		'_actor',
-		'_target'
+		'_thing',
+		'_target_pos'
 	)
 
-	def __init__(self, actor, target):
+	def __init__(self, actor, thing, target_pos):
 		self._actor = actor
-		self._target = target
-		super.__init__()
+		self._thing = thing
+		self._target_pos = target_pos
+		super().__init__()
+
+	def _is_valid(self):
+		actor_pos = props.position[self._actor]
+		act_range = props.activation_target_range[self._thing]
+
+		move_points = set()
+		def touch(pos, dist):
+			move_points.add(pos)
+			return True
+		tilemap.dijkstra(
+			starts = (actor_pos,),
+			touch = touch,
+			cost = utils.walk_cost_prop,
+			max_dist = act_range.move_range
+		)
+
+		fire_range_2 = act_range.fire_range**2
+		for point in move_points:
+			r = sum((point[i] - self._target_pos[i])**2 for i in range(2))
+			if r <= fire_range_2:
+				return True
+		return False
+
+	def _calc_ap(self):
+		if self._is_valid():
+			return 1
+		else:
+			return None
 
 	def trigger(self):
-		props.population[self._target] = max(0, pops.population[self._target] - 5)
-		if props.population[self._target] <= 0:
-			event.die.trigger(self._target)
+		events.activate.trigger(self._thing, self._actor, self._target_pos)

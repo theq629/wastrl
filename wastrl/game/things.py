@@ -65,31 +65,14 @@ def goal():
 		props.is_goal: True
 	})
 
-def player():
-	return Thing(_creature, {
-		props.name: "player",
-		props.graphics: props.Graphics(char='@', colour=0xffffff),
-		props.is_player: True,
-		props.action_points: 5,
-		props.population: 100,
-		props.inventory: set()
-	})
-
-def ratling():
-	return Thing(_creature, {
-		props.name: "ratling",
-		props.graphics: props.Graphics(char='r', colour=0xffffff),
-		props.action_points: 3,
-		props.population: 10,
-		props.inventory: set()
-	})
-
 def armoured_car():
 	return Thing(_weapon, {
 		props.name: "armoured car",
-		props.attack: props.Attack(
+		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 10,
 			fire_range = 0,
+		),
+		props.attack: props.Attack(
 			damage = (1, 5)
 		)
 	})
@@ -97,9 +80,11 @@ def armoured_car():
 def tank():
 	return Thing(_weapon, {
 		props.name: "tank",
-		props.attack: props.Attack(
+		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 5,
 			fire_range = 0,
+		),
+		props.attack: props.Attack(
 			damage = (3, 10)
 		)
 	})
@@ -107,9 +92,11 @@ def tank():
 def cannon():
 	return Thing(_weapon, {
 		props.name: "cannon",
-		props.attack: props.Attack(
+		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 5,
 			fire_range = 5,
+		),
+		props.attack: props.Attack(
 			damage = (1, 5)
 		)
 	})
@@ -117,9 +104,11 @@ def cannon():
 def artillery():
 	return Thing(_weapon, {
 		props.name: "cannon",
-		props.attack: props.Attack(
+		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 10,
+		),
+		props.attack: props.Attack(
 			damage = (1, 10)
 		)
 	})
@@ -147,4 +136,23 @@ def device_of_mapping():
 def device_of_restoration():
 	return Thing(_device, {
 		props.name: "device of restoration"
+	})
+
+def ratling():
+	return Thing(_creature, {
+		props.name: "ratling",
+		props.graphics: props.Graphics(char='r', colour=0xffffff),
+		props.action_points: 3,
+		props.population: 10,
+		props.inventory: set()
+	})
+
+def player():
+	return Thing(_creature, {
+		props.name: "player",
+		props.graphics: props.Graphics(char='@', colour=0xffffff),
+		props.is_player: True,
+		props.action_points: 5,
+		props.population: 100,
+		props.inventory: set()
 	})
