@@ -14,6 +14,7 @@ y = move_nw
 u = move_ne
 b = move_sw
 n = move_se
+mouse+LEFT = move_to_click
 UP = move_n
 DOWN = move_s
 LEFT = move_w

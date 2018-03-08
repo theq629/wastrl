@@ -70,12 +70,12 @@ class KeyEventHandler(PartedEventHandler):
 	def on_other(self):
 		return self._on_other
 
-	def _map_input(self, key):
-		return self._keybindings.get(key), (), {}
+	def _map_input(self, key, *args, **kwargs):
+		return self._keybindings.get(key), args, kwargs
 
-	def _trigger(self, key):
-		if not super()._trigger(key):
-			self._on_other._trigger(key)
+	def _trigger(self, key, *args, **kwargs):
+		if not super()._trigger(key, *args, **kwargs):
+			self._on_other._trigger(key, *args, **kwargs)
 
 class Window:
 	__slots__ = (
@@ -86,7 +86,8 @@ class Window:
 		'_on_frame',
 		'_on_redraw',
 		'_on_close',
-		'_on_key'
+		'_on_key',
+		'_on_click'
 	)
 
 	def __init__(self, pos=(0, 0), dim=(0, 0), keybindings={}):
@@ -96,6 +97,7 @@ class Window:
 		self._on_redraw = EventHandler()
 		self._on_close = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
+		self._on_click = KeyEventHandler(keybindings)
 
 	@property
 	def pos(self):
@@ -125,6 +127,10 @@ class Window:
 	def on_key(self):
 		return self._on_key
 
+	@property
+	def on_click(self):
+		return self._on_click
+
 	def place(self, pos, dim):
 		self._pos = pos
 		self._dim = dim
@@ -146,6 +152,7 @@ class View:
 		'_on_resize',
 		'_on_close',
 		'_on_key',
+		'_on_click',
 		'_on_before_redraw',
 		'_on_after_redraw'
 	)
@@ -159,6 +166,7 @@ class View:
 		self._on_frame = EventHandler()
 		self._on_resize = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
+		self._on_click = KeyEventHandler(keybindings)
 		self._on_close = EventHandler()
 		self._on_before_redraw = EventHandler()
 		self._on_after_redraw = EventHandler()
@@ -188,6 +196,10 @@ class View:
 	@property
 	def on_key(self):
 		return self._on_key
+
+	@property
+	def on_click(self):
+		return self._on_click
 
 	@property
 	def on_before_redraw(self):
@@ -224,6 +236,15 @@ class View:
 				for win in self._windows:
 					if win._on_key._trigger(key_name):
 						break
+			return True
+		elif event.type == 'MOUSEUP':
+			key_name = "mouse+" + event.button
+			if not self._on_click._trigger(key_name, event.cell):
+				for win in self._windows:
+					pos = tuple(event.cell[i] - win.pos[i] for i in range(2))
+					if all(pos[i] >= 0 and pos[i] < win.dim[i] for i in range(2)):
+						if win._on_click._trigger(key_name, pos):
+							break
 			return True
 		return False
 

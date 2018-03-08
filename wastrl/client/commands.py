@@ -23,6 +23,7 @@ move_view_nw = 'move_view_nw'
 move_view_ne = 'move_view_ne'
 move_view_sw = 'move_view_sw'
 move_view_se = 'move_view_se'
+move_to_click = 'move_to_click'
 
 close = basic_ui_commands.close
 line_up = basic_ui_commands.line_up

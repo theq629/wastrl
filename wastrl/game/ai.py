@@ -38,6 +38,7 @@ class Ai:
 			self._pather.set_goal(*new_pos)
 
 	def take_action(self, actor):
+		# TODO: avoid calculating whole path
 		while self._taking_turn == actor:
 			actor_pos = props.position[actor]
 			path = self._pather.get_path(*actor_pos)

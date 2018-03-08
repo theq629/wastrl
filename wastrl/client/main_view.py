@@ -10,6 +10,15 @@ from . import commands
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
+def walk_cost(terrain, blocked_cost=float('inf')):
+	def cost(from_pos, pos):
+		t = terrain[pos]
+		if t not in props.walk_over_ap:
+			return blocked_cost
+		else:
+			return props.walk_over_ap[t]
+	return cost
+
 class PlayerInterfaceManager:
 	__slots__ = (
 		'_display',
@@ -106,33 +115,38 @@ class PlayerInterfaceManager:
 class PlayerController:
 	__slots__ = (
 		'_player',
-		'_on_key',
+		'_game',
+		'_event_target',
 		'_interface_manager',
+		'_map_win',
 		'_is_our_turn'
 	)
 
-	def __init__(self, player, on_key, interface_manager):
+	def __init__(self, player, game, event_target, interface_manager, map_win):
 		self._player = player
-		self._on_key = on_key
+		self._game = game
+		self._event_target = event_target
 		self._interface_manager = interface_manager
+		self._map_win = map_win
 		self._is_our_turn = False
 		events.take_turn.on.add(self.watch_turn)
 		self.setup_keys()
 
 	def setup_keys(self):
-		self._on_key[commands.pass_turn].add(self.command_skip)
-		self._on_key[commands.move_n].add(self.command_mover((0, -1)))
-		self._on_key[commands.move_s].add(self.command_mover((0, 1)))
-		self._on_key[commands.move_e].add(self.command_mover((1, 0)))
-		self._on_key[commands.move_w].add(self.command_mover((-1, 0)))
-		self._on_key[commands.move_ne].add(self.command_mover((1, -1)))
-		self._on_key[commands.move_nw].add(self.command_mover((-1, -1)))
-		self._on_key[commands.move_se].add(self.command_mover((1, 1)))
-		self._on_key[commands.move_sw].add(self.command_mover((-1, 1)))
-		self._on_key[commands.inventory].add(self.command_show_inventory)
-		self._on_key[commands.get].add(self.command_get)
-		self._on_key[commands.drop].add(self.command_drop)
-		self._on_key[commands.activate].add(self.command_activate)
+		self._event_target.on_click[commands.move_to_click].add(self.command_move_to_click)
+		self._event_target.on_key[commands.pass_turn].add(self.command_skip)
+		self._event_target.on_key[commands.move_n].add(self.command_mover((0, -1)))
+		self._event_target.on_key[commands.move_s].add(self.command_mover((0, 1)))
+		self._event_target.on_key[commands.move_e].add(self.command_mover((1, 0)))
+		self._event_target.on_key[commands.move_w].add(self.command_mover((-1, 0)))
+		self._event_target.on_key[commands.move_ne].add(self.command_mover((1, -1)))
+		self._event_target.on_key[commands.move_nw].add(self.command_mover((-1, -1)))
+		self._event_target.on_key[commands.move_se].add(self.command_mover((1, 1)))
+		self._event_target.on_key[commands.move_sw].add(self.command_mover((-1, 1)))
+		self._event_target.on_key[commands.inventory].add(self.command_show_inventory)
+		self._event_target.on_key[commands.get].add(self.command_get)
+		self._event_target.on_key[commands.drop].add(self.command_drop)
+		self._event_target.on_key[commands.activate].add(self.command_activate)
 
 	def command_show_inventory(self):
 		self._interface_manager.inventory_window(set(props.inventory[self._player]))
@@ -160,11 +174,33 @@ class PlayerController:
 				print("user wants to activate", thing_to_activate.index)
 			self._interface_manager.activate_window(set(props.inventory[self._player]), handle)
 
+	def command_move_to_click(self, screen_pos):
+		win_pos = tuple(screen_pos[i] - self._map_win.pos[i] for i in range(2))
+		if all(win_pos[i] >= 0 and win_pos[i] < self._map_win.dim[i] for i in range(2)):
+			world_pos = tuple(win_pos[i] + self._map_win.world_offset[i] for i in range(2))
+			path = tilemap.pathfind(
+				graph = self._game.terrain,
+				starts = (props.position[self._player],),
+				goal = world_pos,
+				cost = walk_cost(self._game.terrain),
+				max_dist = props.action_points_this_turn[self._player]
+			)
+			if path is not None:
+				self.move_on_path(path)
+
 	def command_mover(self, delta):
 		def handle():
 			if self._is_our_turn:
 				events.act.trigger(self._player, actions.Move(self._player, delta))
 		return handle
+
+	def move_on_path(self, path):
+		path = iter(path)
+		pos0 = next(path)
+		for pos1 in path:
+			delta = tuple(pos1[i] - pos0[i] for i in range(2))
+			events.act.trigger(self._player, actions.Move(self._player, delta))
+			pos0 = pos1
 
 	def watch_turn(self, actor):
 		self._is_our_turn = actor == self._player
@@ -236,7 +272,8 @@ class MapWin(ui.Window):
 		'_player_actions',
 		'_view_controller',
 		'_free_view',
-		'_player_can_move_to'
+		'_player_can_move_to',
+		'world_offset'
 	)
 
 	def __init__(self, game, player, *args, **kwargs):
@@ -247,9 +284,11 @@ class MapWin(ui.Window):
 		self._player_actions = []
 		self._view_controller = ViewController(self._player, self.on_key)
 		self._player_can_move_to = set()
+		self.world_offset = (0, 0)
 		self.update_can_move_to()
 		events.move.on.add(self.watch_move)
 		events.acted.on.add(self.watch_actions)
+		events.take_turn.on.add(self.watch_turns)
 
 	def watch_move(self, actor, move_from, move_to):
 		if actor == self._player:
@@ -258,14 +297,14 @@ class MapWin(ui.Window):
 	def redraw(self, console):
 		view_centre = self._view_controller.view_centre
 		world_dim = self._game.terrain.dim
-		world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
-		screen_bounds = tuple((max(0, -world_offset[i]), min(self.dim[i], world_dim[i] - world_offset[i])) for i in range(2))
+		self.world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
+		screen_bounds = tuple((max(0, -self.world_offset[i]), min(self.dim[i], world_dim[i] - self.world_offset[i])) for i in range(2))
 
 		console.clear()
 
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
-				world_x, world_y = world_offset[0] + screen_x, world_offset[1] + screen_y
+				world_x, world_y = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
 				terrain = self._game.terrain[world_x, world_y]
 				graphic = props.graphics[terrain]
 				bg = 0x000000
@@ -275,11 +314,15 @@ class MapWin(ui.Window):
 
 		# TODO: cache
 		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
-			screen_x, screen_y = world_x - world_offset[0], world_y - world_offset[1]
+			screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
 			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
 				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
 
 	def watch_actions(self, actor):
+		if actor == self._player:
+			self.update_can_move_to()
+
+	def watch_turns(self, actor):
 		if actor == self._player:
 			self.update_can_move_to()
 
@@ -296,7 +339,7 @@ class MapWin(ui.Window):
 			graph = self._game.terrain,
 			starts = (props.position[self._player],),
 			touch = touch,
-			cost = lambda _, p: props.walk_over_ap[self._game.terrain[p]]
+			cost = walk_cost(self._game.terrain)
 		)
 
 class MainView(ui.View):
@@ -325,7 +368,7 @@ class MainView(ui.View):
 		events.win.on.add(self.win_or_lose, priority=99)
 		events.lose.on.add(self.win_or_lose, priority=99)
 		self.on_key[commands.quit].add(self._display.quit)
-		PlayerController(self._player, self.on_key, PlayerInterfaceManager(display, full_keybindings['dialogs']))
+		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._map_win)
 
 	def take_player_action(self, thing, available_ap):
 		if thing == self._player:

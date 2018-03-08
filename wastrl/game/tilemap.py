@@ -66,7 +66,9 @@ class SearchFringe:
 	def pop(self):
 		return heapq.heappop(self._array)[1]
 
-def dijkstra(graph, starts, touch, cost=lambda n0, n1: 1):
+uniform_cost = lambda n0, n1: 1
+
+def _dijkstra(graph, starts, touch, cost):
 	fringe = SearchFringe()
 	for start in starts:
 		fringe.put(start, 0)
@@ -80,3 +82,39 @@ def dijkstra(graph, starts, touch, cost=lambda n0, n1: 1):
 			old_dist = fringe.get(neighbour)
 			if old_dist is None or new_dist < old_dist:
 				fringe.put(neighbour, new_dist)
+	return fringe
+
+def dijkstra(graph, starts, touch, cost=uniform_cost):
+	_dijkstra(graph, starts, touch, cost)
+
+# TODO: use A*
+def pathfind(graph, starts, goal, max_dist=float('inf'), cost=uniform_cost):
+	inf = float('inf')
+	def dist(node):
+		d = fringe.get(node)
+		if d is None:
+			return inf
+		else:
+			return d
+	def trace_path(node, end):
+		node = goal
+		while node not in starts:
+			yield node
+			node = min(graph.neighbours(node), key=dist)
+		yield node
+
+	found = []
+	def touch(node, node_dist):
+		if node_dist > max_dist:
+			return False
+		elif node == goal:
+			found.append(node)
+			return False
+		else:
+			return True
+	fringe = _dijkstra(graph, starts, touch, cost)
+
+	if len(found) > 0:
+		return reversed(tuple(trace_path(fringe, goal)))
+	else:
+		return None
