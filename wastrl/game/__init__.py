@@ -35,8 +35,10 @@ class TurnManager:
 				self._to_act_this_turn.remove(self._taking_turn)
 		if len(self._to_act_this_turn) == 0:
 			self._start_turn()
-		self._taking_turn = next(iter(self._to_act_this_turn))
-		events.take_turn.trigger(self._taking_turn)
+		next_to_go = next(iter(self._to_act_this_turn))
+		if next_to_go != self._taking_turn:
+			self._taking_turn = next_to_go
+			events.take_turn.trigger(self._taking_turn)
 		if self._action_this_update:
 			return self._taking_turn
 		else:
@@ -115,7 +117,6 @@ class Game:
 		print("player:", player.index, file=sys.stderr)
 
 		self.turn_manager = TurnManager(self.rng)
-		self.turn_manager.update()
 
 	def update(self):
 		changed = False
