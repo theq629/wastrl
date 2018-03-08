@@ -58,14 +58,24 @@ class PartedEventHandler:
 class KeyEventHandler(PartedEventHandler):
 	__slots__ = (
 		'_keybindings',
+		'_on_other'
 	)
 
 	def __init__(self, keybindings):
 		super().__init__()
 		self._keybindings = keybindings
+		self._on_other = EventHandler()
+
+	@property
+	def on_other(self):
+		return self._on_other
 
 	def _map_input(self, key):
 		return self._keybindings.get(key), (), {}
+
+	def _trigger(self, key):
+		if not super()._trigger(key):
+			self._on_other._trigger(key)
 
 class Window:
 	__slots__ = (
@@ -75,6 +85,7 @@ class Window:
 		'_keybindings',
 		'_on_frame',
 		'_on_redraw',
+		'_on_close',
 		'_on_key'
 	)
 
@@ -83,6 +94,7 @@ class Window:
 		self._keybindings = keybindings
 		self._on_frame = EventHandler()
 		self._on_redraw = EventHandler()
+		self._on_close = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
 
 	@property
@@ -104,6 +116,10 @@ class Window:
 	@property
 	def on_redraw(self):
 		return self._on_redraw
+
+	@property
+	def on_close(self):
+		return self._on_close
 
 	@property
 	def on_key(self):
@@ -128,6 +144,7 @@ class View:
 		'_open',
 		'_on_frame',
 		'_on_resize',
+		'_on_close',
 		'_on_key',
 		'_on_before_redraw',
 		'_on_after_redraw'
@@ -142,6 +159,7 @@ class View:
 		self._on_frame = EventHandler()
 		self._on_resize = EventHandler()
 		self._on_key = KeyEventHandler(keybindings)
+		self._on_close = EventHandler()
 		self._on_before_redraw = EventHandler()
 		self._on_after_redraw = EventHandler()
 		self._on_resize.add(self._resize)
@@ -164,6 +182,10 @@ class View:
 		return self._on_resize
 
 	@property
+	def on_close(self):
+		return self._on_close
+
+	@property
 	def on_key(self):
 		return self._on_key
 
@@ -176,6 +198,9 @@ class View:
 		return self._on_after_redraw
 
 	def close(self):
+		for win in self._windows:
+			win._on_close._trigger()
+		self._on_close._trigger()
 		self._open = False
 		for display in self._displays:
 			display._views._remove(self)

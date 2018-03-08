@@ -156,9 +156,49 @@ class TextWindow(PaginatedWindow):
 			y += 1
 
 class MenuWindow(PaginatedWindow):
-	def __init__(self, title, items, commands=commands, colours=colours, *args, **kwargs):
+	__slots__ = (
+		'_item_keys',
+		'_select_handler',
+		'_select_multi',
+		'_selection'
+	)
+
+	def __init__(self, title, items, select_handler=None, select_multi=False, commands=commands, colours=colours, *args, **kwargs):
 		super().__init__(title, items, *args, **kwargs)
+		self._item_keys = set(k for k, v in items)
+		self._select_handler = select_handler
+		self._select_multi = select_multi
+		self._selection = set()
 		self.on_redraw.add(self.redraw)
+		self.on_key[commands.select_all].add(self.select_all)
+		if select_handler is not None:
+			if select_multi:
+				self.on_key.on_other.add(self.handle_other_key_select_multi)
+				self.on_close.add(self.handle_close_select_multi)
+			else:
+				self.on_key.on_other.add(self.handle_other_key_select_select)
+
+	def handle_other_key_select_select(self, key):
+		if key in self._item_keys:
+			self._select_handler(key)
+			return True
+
+	def handle_other_key_select_multi(self, key):
+		if key in self._item_keys:
+			if key in self._selection:
+				self._selection.remove(key)
+			else:
+				self._selection.add(key)
+			return True
+
+	def handle_close_select_multi(self):
+		self._select_handler(self._selection)
+
+	def select_all(self):
+		if len(self._selection) == len(self._item_keys):
+			self._selection.clear()
+		else:
+			self._selection = set(self._item_keys)
 
 	def prepare(self, items):
 		max_key_width = max(len(k) for k, t in items) if len(items) > 0 else 0
@@ -188,7 +228,8 @@ class MenuWindow(PaginatedWindow):
 			key, lines = prepared[item_i]
 			while line_i < len(lines):
 				if line_i == 0:
-					console.draw_str(1, y, string=key, fg=self._colours.menu_key)
+					fg = self._colours.menu_key if key not in self._selection else self._colours.menu_key_sel
+					console.draw_str(1, y, string=key, fg=fg)
 				console.draw_str(max_key_len + 2, y, string=lines[line_i], fg=self._colours.text)
 				line_i += 1
 			item_i += 1

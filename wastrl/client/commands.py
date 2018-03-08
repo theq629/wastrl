@@ -3,9 +3,10 @@ from ..ui.basic import commands as basic_ui_commands
 quit = 'quit'
 centre_view = 'centre_view'
 pass_turn = 'pass_turn'
+inventory = "inventory"
 get = 'get'
 drop = 'drop'
-inventory = "inventory"
+activate = 'activate'
 move_n = 'move_n'
 move_s = 'move_s'
 move_e = 'move_e'
@@ -28,3 +29,4 @@ line_up = basic_ui_commands.line_up
 line_down = basic_ui_commands.line_down
 page_up = basic_ui_commands.page_up
 page_down = basic_ui_commands.page_down
+select_all = basic_ui_commands.select_all

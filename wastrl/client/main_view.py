@@ -21,20 +21,69 @@ class PlayerInterfaceManager:
 		self._dialog_keybindings = dialog_keybindings
 		self._inventory_keys = {}
 
-	def inventory_window(self, inventory):
+	def menu(self, items=(), name_value=lambda x: x, select_handler=None, select_multi=False, **kwargs):
+		named_items = [(k, name_value(v)) for k, v in items]
+		if select_handler is None:
+			handle = None
+		elif select_multi:
+			def handle(selected_keys):
+				select_handler(tuple(v for k, v in items if k in selected_keys))
+		else:
+			def handle(selected_key):
+				for key, value in items:
+					if key == selected_key:
+						select_handler(value)
+						return
 		self._display.views.add(basic_ui.ViewWithKeys(
-			title = "Inventory",
-			value = self.keyify_inventory(inventory),
-			win_maker = basic_ui.MenuWindow,
+			win_maker = lambda *args, **kwargs: basic_ui.MenuWindow(*args, select_handler=handle, select_multi=select_multi, **kwargs),
 			keybindings = self._dialog_keybindings,
-			max_width = 80
+			max_width = 80,
+			value = named_items,
+			**kwargs
 		))
+
+	def inventory_window(self, inventory):
+		self.menu(
+			title = "Inventory",
+			items = self.keyify_inventory(inventory),
+			name_value = self.name_for_thing
+		)
+
+	def drop_window(self, inventory, handler):
+		self.menu(
+			title = "Drop",
+			items = self.keyify_inventory(inventory),
+			name_value = self.name_for_thing,
+			select_handler = handler,
+			select_multi = True
+		)
+
+	def get_window(self, things, handler):
+		self.menu(
+			title = "Get",
+			items = self.keyify_things(things),
+			name_value = self.name_for_thing,
+			select_handler = handler,
+			select_multi = True
+		)
+
+	def activate_window(self, inventory, handler):
+		self.menu(
+			title = "Activate",
+			items = self.keyify_inventory(inventory),
+			name_value = self.name_for_thing,
+			select_handler = handler,
+			select_multi = False
+		)
 
 	def name_for_thing(self, thing):
 		if thing in props.name:
 			return props.name[thing]
 		else:
 			return "<unknown>"
+
+	def keyify_things(self, things):
+		return tuple((k, t) for k, t in zip(keys_for_inventory_menu, things))
 
 	def keyify_inventory(self, inventory):
 		for thing in self._inventory_keys:
@@ -51,7 +100,7 @@ class PlayerInterfaceManager:
 				if i is not None:
 					self._inventory_keys[thing] = keys_for_inventory_menu[i]
 
-		return sorted((self._inventory_keys[t], self.name_for_thing(t)) for t in inventory)
+		return sorted((self._inventory_keys[t], t) for t in inventory)
 
 class PlayerController:
 	__slots__ = (
@@ -82,6 +131,7 @@ class PlayerController:
 		self._on_key[commands.inventory].add(self.command_show_inventory)
 		self._on_key[commands.get].add(self.command_get)
 		self._on_key[commands.drop].add(self.command_drop)
+		self._on_key[commands.activate].add(self.command_activate)
 
 	def command_show_inventory(self):
 		self._interface_manager.inventory_window(set(props.inventory[self._player]))
@@ -92,12 +142,22 @@ class PlayerController:
 
 	def command_get(self):
 		if self._is_our_turn:
-			things = set(t for t in props.things_at[props.position[self._player]] if t != self._player)
-			events.act.trigger(self._player, actions.Get(self._player, things))
+			things_here = set(t for t in props.things_at[props.position[self._player]] if t != self._player)
+			def handle(things_to_get):
+				events.act.trigger(self._player, actions.Get(self._player, things_to_get))
+			self._interface_manager.get_window(things_here, handle)
 
 	def command_drop(self):
 		if self._is_our_turn:
-			events.act.trigger(self._player, actions.Drop(self._player, set(props.inventory[self._player])))
+			def handle(things_to_drop):
+				events.act.trigger(self._player, actions.Drop(self._player, things_to_drop))
+			self._interface_manager.drop_window(set(props.inventory[self._player]), handle)
+
+	def command_activate(self):
+		if self._is_our_turn:
+			def handle(thing_to_activate):
+				print("user wants to activate", thing_to_activate.index)
+			self._interface_manager.activate_window(set(props.inventory[self._player]), handle)
 
 	def command_mover(self, delta):
 		def handle():
