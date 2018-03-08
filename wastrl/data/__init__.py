@@ -53,12 +53,35 @@ class Event:
 			value = self._fold_f(value, f(*args, **kwargs))
 		return value
 
-class ValuedProperty:
+class _AllProperties:
+	__slots__ = (
+		'_all',
+	)
+
+	def __init__(self):
+		self._all = []
+
+	def __iter__(self):
+		return self._all.__iter__()
+
+	def remove(self, thing):
+		for property in self._all:
+			if thing in property:
+				property.remove(thing)
+
+class BaseProperty:
+	all = _AllProperties()
+
+	def __init__(self):
+		BaseProperty.all._all.append(self)
+
+class ValuedProperty(BaseProperty):
 	__slots__ = (
 		'_storage',
 	)
 
 	def __init__(self):
+		super().__init__()
 		self._storage = {}
 
 	def __getitem__(self, key):
@@ -102,12 +125,13 @@ class ValuedProperty:
 			except KeyError:
 				pass
 
-class SetProperty:
+class SetProperty(BaseProperty):
 	__slots__ = (
 		'_storage',
 	)
 
 	def __init__(self):
+		super().__init__()
 		self._storage = set()
 
 	def __len__(self):
@@ -132,12 +156,13 @@ class SetProperty:
 			except KeyError:
 				pass
 
-class OrderedSetProperty:
+class OrderedSetProperty(BaseProperty):
 	__slots__ = (
 		'_storage',
 	)
 
 	def __init__(self):
+		super().__init__()
 		self._storage = collections.OrderedDict()
 
 	def __len__(self):

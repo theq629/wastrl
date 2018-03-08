@@ -15,7 +15,7 @@ class Base:
 	def ap(self):
 		return self._ap
 
-	def trigger(self):
+	def trigger(self, rng):
 		pass
 
 class SkipTurn(Base):
@@ -53,7 +53,7 @@ class Move(Base):
 		except KeyError:
 			return None
 
-	def trigger(self):
+	def trigger(self, rng):
 		old_pos = props.position[self._actor]
 		new_pos = tuple(old_pos[i] + self._delta[i] for i in range(2))
 		props.position[self._actor] = new_pos
@@ -76,12 +76,10 @@ class Get(Base):
 		else:
 			return None
 
-	def trigger(self):
-		pos = props.position[self._actor]
+	def trigger(self, rng):
 		for thing in self._things:
 			props.position.remove(thing)
 			props.inventory[self._actor].add(thing)
-			events.move.trigger(thing, pos, None)
 			events.get.trigger(self._actor, thing)
 
 class Drop(Base):
@@ -101,7 +99,7 @@ class Drop(Base):
 		else:
 			return None
 
-	def trigger(self):
+	def trigger(self, rng):
 		pos = props.position[self._actor]
 		for thing in self._things:
 			props.inventory[self._actor].remove(thing)
@@ -150,5 +148,5 @@ class Activate(Base):
 		else:
 			return None
 
-	def trigger(self):
-		events.activate.trigger(self._thing, self._actor, self._target_pos)
+	def trigger(self, rng):
+		events.activate.trigger(self._thing, self._actor, self._target_pos, rng)

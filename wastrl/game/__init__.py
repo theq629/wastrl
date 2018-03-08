@@ -12,13 +12,15 @@ import sys # TODO: improve logging
 
 class TurnManager:
 	__slots__ = (
+		'_rng',
 		'_min_ap',
 		'_to_act_this_turn',
 		'_taking_turn',
 		'_action_this_update'
 	)
 
-	def __init__(self, min_ap=1):
+	def __init__(self, rng, min_ap=1):
+		self._rng = rng
 		self._min_ap = min_ap
 		self._to_act_this_turn = data.OrderedSetProperty()
 		self._taking_turn = None
@@ -59,10 +61,25 @@ class TurnManager:
 				if actor not in props.is_player:
 					_to_act_this_turn.remove(self._taking_turn)
 			else:
-				action.trigger()
+				action.trigger(self._rng)
 				props.action_points_this_turn[actor] -= action.ap
 				events.acted.trigger(actor)
 				self._action_this_update = True
+
+@events.attack.on.handle(1000)
+def handle_damage(attackee, target, damage):
+	if target in props.is_alive:
+		print("damage", target.index, damage, props.population[target])
+		props.population[target] -= damage
+		events.take_damage.trigger(target)
+
+@events.take_damage.on.handle(1000)
+def handle_death(thing):
+	if props.population[thing] <= 0:
+		print("dies", thing.index)
+		props.population[thing] = 0
+		events.die.trigger(thing)
+		data.BaseProperty.all.remove(thing)
 
 @events.turn.on.handle(1000)
 def check_win():
@@ -77,11 +94,6 @@ def update_things_at(thing, move_from, move_to):
 		props.things_at[move_from].remove(thing)
 	if move_to is not None:
 		props.things_at[move_to].add(thing)
-
-@events.activate.on.handle()
-def dummy_activate(thing, actor, target_pos):
-	# TODO: handle actual activation for items
-	print("activate", thing.index, "at", target_pos)
 
 class Game:
 	def __init__(self, seed):
@@ -102,7 +114,7 @@ class Game:
 
 		print("player:", player.index, file=sys.stderr)
 
-		self.turn_manager = TurnManager()
+		self.turn_manager = TurnManager(self.rng)
 		self.turn_manager.update()
 
 	def update(self):

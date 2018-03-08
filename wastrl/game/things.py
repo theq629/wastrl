@@ -1,5 +1,6 @@
-from . import properties as props
 from .. import data
+from . import properties as props
+from .effects import damage as effect_damage
 
 def Thing(init, *other_inits):
 	init.update(*other_inits)
@@ -72,8 +73,9 @@ def armoured_car():
 			move_range = 10,
 			fire_range = 0,
 		),
-		props.attack: props.Attack(
-			damage = (1, 5)
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (1, 5),
+			radius = 1
 		)
 	})
 
@@ -84,8 +86,9 @@ def tank():
 			move_range = 5,
 			fire_range = 0,
 		),
-		props.attack: props.Attack(
-			damage = (3, 10)
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (3, 10),
+			radius = 1
 		)
 	})
 
@@ -96,8 +99,9 @@ def cannon():
 			move_range = 5,
 			fire_range = 5,
 		),
-		props.attack: props.Attack(
-			damage = (1, 5)
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (1, 5),
+			radius = 1
 		)
 	})
 
@@ -108,24 +112,49 @@ def artillery():
 			move_range = 0,
 			fire_range = 10,
 		),
-		props.attack: props.Attack(
-			damage = (1, 10)
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (1, 10),
+			radius = 1
 		)
 	})
 
 def missile_of_kaboom():
 	return Thing(_missile, {
-		props.name: "missile of kaboom"
+		props.name: "missile of kaboom",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (5, 20),
+			radius = 1
+		)
 	})
 
 def missile_of_fire_ball():
 	return Thing(_missile, {
-		props.name: "missile of fire ball"
+		props.name: "missile of fire ball",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (10, 25),
+			radius = 2
+		)
 	})
 
 def missile_of_nuclear_warhead():
 	return Thing(_missile, {
-		props.name: "missile of nuclear warhead"
+		props.name: "missile of nuclear warhead",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 30,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (50, 100),
+			radius = 5
+		)
 	})
 
 def device_of_mapping():
