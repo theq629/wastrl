@@ -14,9 +14,15 @@ def gen_things(thing_maker, terrain, rng, num):
 			num_done += 1
 
 def gen(terrain, rng):
-	gen_things(things.ratling, terrain, rng, 100)
+	gen_things(things.armoured_car, terrain, rng, 100)
+	gen_things(things.tank, terrain, rng, 50)
+	gen_things(things.cannon, terrain, rng, 50)
+	gen_things(things.artillery, terrain, rng, 50)
+
 	gen_things(things.missile_of_kaboom, terrain, rng, 100)
 	gen_things(things.missile_of_fire_ball, terrain, rng, 50)
 	gen_things(things.missile_of_nuclear_warhead, terrain, rng, 10)
 	gen_things(things.device_of_mapping, terrain, rng, 50)
 	gen_things(things.device_of_restoration, terrain, rng, 50)
+
+	gen_things(things.ratling, terrain, rng, 100)

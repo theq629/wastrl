@@ -84,6 +84,46 @@ def ratling():
 		props.inventory: set()
 	})
 
+def armoured_car():
+	return Thing(_weapon, {
+		props.name: "armoured car",
+		props.attack: props.Attack(
+			move_range = 10,
+			fire_range = 0,
+			damage = (1, 5)
+		)
+	})
+
+def tank():
+	return Thing(_weapon, {
+		props.name: "tank",
+		props.attack: props.Attack(
+			move_range = 5,
+			fire_range = 0,
+			damage = (3, 10)
+		)
+	})
+
+def cannon():
+	return Thing(_weapon, {
+		props.name: "cannon",
+		props.attack: props.Attack(
+			move_range = 5,
+			fire_range = 5,
+			damage = (1, 5)
+		)
+	})
+
+def artillery():
+	return Thing(_weapon, {
+		props.name: "cannon",
+		props.attack: props.Attack(
+			move_range = 0,
+			fire_range = 10,
+			damage = (1, 10)
+		)
+	})
+
 def missile_of_kaboom():
 	return Thing(_missile, {
 		props.name: "missile of kaboom"
