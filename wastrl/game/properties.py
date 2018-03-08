@@ -45,6 +45,7 @@ walk_over_ap = data.ValuedProperty()
 attack = data.ValuedProperty()
 activation_target_range = data.ValuedProperty()
 is_alive = data.SetProperty()
+is_dead = data.SetProperty()
 is_visual = data.SetProperty()
 
 is_goal = data.SetProperty()

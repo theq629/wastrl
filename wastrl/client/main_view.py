@@ -367,9 +367,10 @@ class MapWin(ui.Window):
 		# TODO: make sure creatures are on top
 		things_to_draw = {}
 		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
-			screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
-			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
-				things_to_draw[screen_x, screen_y] = graphic
+			if not thing in props.is_dead:
+				screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
+				if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
+					things_to_draw[screen_x, screen_y] = graphic
 
 		console.clear()
 
@@ -439,18 +440,19 @@ class MapWin(ui.Window):
 			self.update_can_move_to()
 
 	def update_can_move_to(self):
-		self._player_can_move_to = set()
-		cur_ap = props.action_points_this_turn[self._player]
-		def touch(pos, dist):
-			self._player_can_move_to.add(pos)
-			return True
-		tilemap.dijkstra(
-			graph = self._game.terrain,
-			starts = (props.position[self._player],),
-			touch = touch,
-			cost = game_utils.walk_cost(self._game.terrain),
-			max_dist = cur_ap
-		)
+		if self._player in props.action_points_this_turn:
+			self._player_can_move_to = set()
+			cur_ap = props.action_points_this_turn[self._player]
+			def touch(pos, dist):
+				self._player_can_move_to.add(pos)
+				return True
+			tilemap.dijkstra(
+				graph = self._game.terrain,
+				starts = (props.position[self._player],),
+				touch = touch,
+				cost = game_utils.walk_cost(self._game.terrain),
+				max_dist = cur_ap
+			)
 
 class MainView(ui.View):
 	__slots__ = (

@@ -27,22 +27,28 @@ class TurnManager:
 		self._action_this_update = False
 		self._start_turn()
 		events.act.on.add(self._handle_action)
+		events.die.on.add(self._handle_death)
 
 	def update(self, rng):
+		event_change = False
+
 		self._action_this_update = False
 		if self._taking_turn is None or props.action_points_this_turn[self._taking_turn] < self._min_ap:
 			if self._taking_turn is not None:
 				self._to_act_this_turn.remove(self._taking_turn)
+				self._taking_turn = None
 		if len(self._to_act_this_turn) == 0:
 			self._start_turn()
 
-		next_to_go = next(iter(self._to_act_this_turn))
-		event_change = events.update.trigger(rng)
-		if next_to_go != self._taking_turn:
-			self._taking_turn = next_to_go
-			events.take_turn.trigger(self._taking_turn)
+		event_change |= events.update.trigger(rng)
 
-		event_change = event_change or False
+		if len(self._to_act_this_turn) > 0:
+			next_to_go = next(iter(self._to_act_this_turn))
+			if next_to_go != self._taking_turn:
+				self._taking_turn = next_to_go
+				events.take_turn.trigger(self._taking_turn)
+
+		event_change = event_change
 		if self._action_this_update:
 			return self._taking_turn, event_change
 		else:
@@ -68,9 +74,14 @@ class TurnManager:
 					_to_act_this_turn.remove(self._taking_turn)
 			else:
 				action.trigger(self._rng)
-				props.action_points_this_turn[actor] -= action.ap
+				if actor in props.action_points_this_turn:
+					props.action_points_this_turn[actor] -= action.ap
 				events.acted.trigger(actor)
 				self._action_this_update = True
+
+	def _handle_death(self, actor):
+		if actor in self._to_act_this_turn:
+			self._to_act_this_turn.remove(actor)
 
 @events.attack.on.handle(1000)
 def handle_damage(attackee, target, damage):
@@ -84,15 +95,23 @@ def handle_death(thing):
 	if props.population[thing] <= 0:
 		print("dies", thing.index)
 		props.population[thing] = 0
+		props.is_alive.remove(thing)
+		props.is_dead.add(thing)
+		props.action_points.remove(thing)
+		props.action_points_this_turn.remove(thing)
 		events.die.trigger(thing)
-		data.BaseProperty.all.remove(thing)
 
-@events.turn.on.handle(1000)
-def check_win():
-	for player, player_pos in props.is_player.join(props.position):
+@events.move.on.handle(1000)
+def check_win(actor, move_from, move_to):
+	if actor in props.is_player:
 		for goal, goal_pos in props.is_goal.join(props.position):
-			if goal_pos == player_pos:
-				events.win.trigger(player)
+			if goal_pos == move_to:
+				events.win.trigger(actor)
+
+@events.die.on.handle(1000)
+def check_lose(actor):
+	if actor in props.is_player:
+		events.lose.trigger(actor)
 
 @events.move.on.handle(-1)
 def update_things_at(thing, move_from, move_to):
@@ -127,7 +146,7 @@ class Game:
 		while True:
 			acted, changed_now = self.turn_manager.update(self.rng)
 			changed |= changed_now
-			if acted is None:
+			if acted is None or changed_now:
 				break
 			changed = True
 		return changed
