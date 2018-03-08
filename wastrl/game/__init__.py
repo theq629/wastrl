@@ -86,14 +86,12 @@ class TurnManager:
 @events.attack.on.handle(1000)
 def handle_damage(attackee, target, damage):
 	if target in props.is_alive:
-		print("damage", target.index, damage, props.population[target])
 		props.population[target] -= damage
-		events.take_damage.trigger(target)
+		events.take_damage.trigger(target, damage)
 
 @events.take_damage.on.handle(1000)
-def handle_death(thing):
+def handle_death(thing, damage):
 	if props.population[thing] <= 0:
-		print("dies", thing.index)
 		props.population[thing] = 0
 		props.is_alive.remove(thing)
 		props.is_dead.add(thing)

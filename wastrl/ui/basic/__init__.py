@@ -1,9 +1,33 @@
+import collections
 import textwrap
 import abc
 import math
 from .. import Window, View
 from . import commands
-from . import colours
+
+Colours = collections.namedtuple('Colours', (
+	'background',
+	'title',
+	'text',
+	'menu_key',
+	'menu_key_sel',
+	'action_command',
+	'action_key',
+	'action_sep',
+	'keys_background'
+))
+
+default_colours = Colours(
+	background = 0x000000,
+	title = 0xffcf6d,
+	text = 0xcfc19a,
+	menu_key = 0x10ad80,
+	menu_key_sel = 0xffcf6d,
+	action_command = 0x10ad80,
+	action_key = 0xffcf6d,
+	action_sep = 0x10ad80,
+	keys_background = 0x222222
+)
 
 class KeyBindingsWindow(Window):
 	__slots__ = (
@@ -13,7 +37,7 @@ class KeyBindingsWindow(Window):
 		'_cache'
 	)
 
-	def __init__(self, key_event_sets, bindings, colours=colours, *args, **kwargs):
+	def __init__(self, key_event_sets, bindings, colours=default_colours, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._colours = colours
 		self._key_event_sets = key_event_sets
@@ -83,7 +107,7 @@ class PaginatedWindow(Window, abc.ABC):
 		'_start_pos'
 	)
 
-	def __init__(self, title, value, commands=commands, colours=colours, *args, **kwargs):
+	def __init__(self, title=None, value="", commands=commands, colours=default_colours, do_keys=True, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._colours = colours
 		self._title = title
@@ -94,12 +118,13 @@ class PaginatedWindow(Window, abc.ABC):
 		self._total_lines = 0
 		self._start_pos = 0
 		self._page_size = 1
-		self.setup_keys()
+		if do_keys:
+			self.setup_keys()
 		self.on_redraw.add(self._redraw_base)
 
 	@property
 	def num_title_lines(self):
-		return len(self._title_lines)
+		return len(self._title_lines) if self._title_lines is not None else 0
 
 	@property
 	def start_pos(self):
@@ -110,10 +135,20 @@ class PaginatedWindow(Window, abc.ABC):
 		return self._page_size
 
 	@property
+	def value(self):
+		return self._value
+
+	@value.setter
+	def value(self, value):
+		self._value = value
+		self._last_prepare_size = None
+		self.prepared
+
+	@property
 	def prepared(self):
 		if self._last_prepare_size is None or self._last_prepare_size != self.dim:
-			self._title_lines = textwrap.wrap(self._title, self.dim[0] - 1)
-			self._page_size = self.dim[1] - len(self._title_lines) - 3
+			self._title_lines = textwrap.wrap(self._title, self.dim[0] - 1) if self._title is not None else None
+			self._page_size = self.dim[1] - self.num_title_lines - 3
 			self._prepared_value, self._total_lines = self.prepare(self._value)
 			self._last_prepare_size = self.dim
 		return self._prepared_value
@@ -121,6 +156,12 @@ class PaginatedWindow(Window, abc.ABC):
 	@abc.abstractmethod
 	def prepare(self, value):
 		raise NotImplementedError()
+
+	def scroll_to_start(self):
+		self._start_pos = 0
+
+	def scroll_to_end(self):
+		self._start_pos = self._total_lines - self._page_size
 
 	def setup_keys(self):
 		self.on_key[commands.line_up].add(lambda: self._move_page(-1))
@@ -133,15 +174,15 @@ class PaginatedWindow(Window, abc.ABC):
 
 	def _redraw_base(self, console):
 		self.prepared
-		console.clear()
-		y = 1
-		for line in self._title_lines:
-			console.draw_str(1, y, string=line, fg=self._colours.title)
-			y += 1
+		console.clear(bg=self._colours.background)
+		if self._title_lines is not None:
+			y = 1
+			for line in self._title_lines:
+				console.draw_str(1, y, string=line, fg=self._colours.title, bg=self._colours.background)
 
 class TextWindow(PaginatedWindow):
-	def __init__(self, title, text, commands=commands, colours=colours, *args, **kwargs):
-		super().__init__(title, text, *args, **kwargs)
+	def __init__(self, title=None, text="", commands=commands, colours=default_colours, *args, **kwargs):
+		super().__init__(title, text, colours=colours, *args, **kwargs)
 		self.on_redraw.add(self.redraw)
 
 	def prepare(self, text):
@@ -152,7 +193,7 @@ class TextWindow(PaginatedWindow):
 		text_lines = self.prepared
 		y = self.num_title_lines + 2
 		for line in text_lines[self.start_pos : self.start_pos + self.page_size]:
-			console.draw_str(1, y, string=line, fg=self._colours.text)
+			console.draw_str(1, y, string=line, fg=self._colours.text, bg=self._colours.background)
 			y += 1
 
 class MenuWindow(PaginatedWindow):
@@ -163,7 +204,7 @@ class MenuWindow(PaginatedWindow):
 		'_selection'
 	)
 
-	def __init__(self, title, items, select_handler=None, select_multi=False, commands=commands, colours=colours, *args, **kwargs):
+	def __init__(self, title, items, select_handler=None, select_multi=False, commands=commands, colours=default_colours, *args, **kwargs):
 		super().__init__(title, items, *args, **kwargs)
 		self._item_keys = set(k for k, v in items)
 		self._select_handler = select_handler
@@ -230,8 +271,8 @@ class MenuWindow(PaginatedWindow):
 			while line_i < len(lines):
 				if line_i == 0:
 					fg = self._colours.menu_key if key not in self._selection else self._colours.menu_key_sel
-					console.draw_str(1, y, string=key, fg=fg)
-				console.draw_str(max_key_len + 2, y, string=lines[line_i], fg=self._colours.text)
+					console.draw_str(1, y, string=key, fg=fg, bg=self._colours.background)
+				console.draw_str(max_key_len + 2, y, string=lines[line_i], fg=self._colours.text, bg=self._colours.background)
 				line_i += 1
 			item_i += 1
 			line_i = 0

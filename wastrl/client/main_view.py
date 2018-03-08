@@ -11,6 +11,61 @@ from . import commands
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
+class MessageHandler:
+	__slots__ = (
+		'player',
+		'text',
+		'changed'
+	)
+
+	def __init__(self, player):
+		self.player = player
+		self.text = ""
+		self.changed = False
+		events.take_damage.on.add(self.handle_take_damage, priority=100)
+		events.die.on.add(self.handle_die, priority=100)
+		events.activate.on.add(self.handle_activate, priority=100)
+		events.get.on.add(self.handle_get, priority=100)
+		events.drop.on.add(self.handle_drop, priority=100)
+
+	def message(self, message, *args, **kwargs):
+		msg_line = message.format(*args, **kwargs) + "\n"
+		self.text += msg_line
+		self.changed = True
+
+	def name_thing(self, thing):
+		if thing in props.name:
+			return "the " + props.name[thing]
+		else:
+			return "something"
+
+	def format_list(self, items):
+		items = list(items)
+		if len(items) == 1:
+			return items[1]
+		elif len(items) == 2:
+			return "{} and {}".format(*items)
+		else:
+			return ", and ".join((", ".join(items[:-1]), items[-1]))
+
+	def handle_take_damage(self, target, damage):
+		self.message("{target} takes {damage} damage", target=self.name_thing(target).title(), damage=damage)
+
+	def handle_die(self, actor):
+		self.message("{actor}", actor=self.name_thing(actor).title())
+
+	def handle_activate(self, thing, actor, target_pos, _rng):
+		if actor == self.player:
+			self.message("You activate {thing}", thing=self.name_thing(thing))
+
+	def handle_get(self, actor, thing):
+		if actor == self.player:
+			self.message("You get {thing}", thing=self.name_thing(thing))
+
+	def handle_drop(self, actor, thing):
+		if actor == self.player:
+			self.message("You drop {thing}", thing=self.name_thing(thing))
+
 class PlayerInterfaceManager:
 	__slots__ = (
 		'_display',
@@ -302,7 +357,7 @@ class ViewController:
 			self._view_centre = tuple(self._view_centre[i] + delta[i] * multiplier for i in range(2))
 		return handler
 
-class TopBarWin(ui.Window):
+class StatusWin(ui.Window):
 	__slots__ = (
 		'_player',
 	)
@@ -313,10 +368,12 @@ class TopBarWin(ui.Window):
 		self.on_redraw.add(self.handle_redraw)
 
 	def handle_redraw(self, console):
+		bg = 0x222222
 		ap = props.action_points_this_turn[self._player]
 		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
-		console.clear()
-		console.draw_str(0, 0, f'AP: {ap_str} Pop: {props.population[self._player]}')
+		console.clear(bg=bg)
+		console.draw_str(1, 1, f"AP: {ap_str}", bg=bg)
+		console.draw_str(1, 2, f"Pop: {props.population[self._player]}", bg=bg)
 
 class MapWin(ui.Window):
 	__slots__ = (
@@ -460,20 +517,30 @@ class MainView(ui.View):
 		'_full_keybindings',
 		'_game',
 		'_player',
-		'_top_bar_win',
-		'_map_win'
+		'_bar_width',
+		'_status_win',
+		'_msg_win',
+		'_map_win',
+		'_msg_handler'
 	)
 
-	def __init__(self, display, full_keybindings, the_game, *args, **kwargs):
+	def __init__(self, display, full_keybindings, the_game, bar_width=20, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._display = display
 		self._full_keybindings = full_keybindings
 		self._game = the_game
 		self._player = next(iter(props.is_player))
-		self._top_bar_win = TopBarWin(self._player)
+		self._bar_width = bar_width
+		self._status_win = StatusWin(self._player)
 		self._map_win = MapWin(self._game, self._player, keybindings=self.keybindings)
-		self.windows.add(self._top_bar_win)
+		log_colours = basic_ui.default_colours._replace(
+			background = 0x222222,
+			text = 0x888888
+		)
+		self._msg_win = basic_ui.TextWindow(text="", title=None, do_keys=None, colours=log_colours)
+		self.windows.add(self._status_win)
 		self.windows.add(self._map_win)
+		self.windows.add(self._msg_win)
 		self.on_resize.add(self.resize)
 		self.on_frame.add(self.update_game)
 		events.act.on.add(self.take_player_action)
@@ -481,6 +548,7 @@ class MainView(ui.View):
 		events.lose.on.add(self.win_or_lose, priority=99)
 		self.on_key[commands.quit].add(self._display.quit)
 		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._map_win)
+		self._msg_handler = MessageHandler(self._player)
 
 	def take_player_action(self, thing, available_ap):
 		if thing == self._player:
@@ -494,8 +562,17 @@ class MainView(ui.View):
 		self.close()
 
 	def update_game(self):
-		return self._game.update()
+		changed = self._game.update()
+		if self._msg_handler.changed:
+			self._msg_win.value = self._msg_handler.text
+			self._msg_win.scroll_to_end()
+			self._msg_handler.changed = False
+			return True
+		return changed
 
 	def resize(self, dim):
-		self._top_bar_win.place((0, 0), (dim[0], 1))
-		self._map_win.place((0, 1), (dim[0], dim[1] - 1))
+		status_win_width = min(self._bar_width, dim[0])
+		status_win_height = 3
+		self._status_win.place((0, 0), (status_win_width, status_win_height))
+		self._msg_win.place((0, status_win_height), (status_win_width, dim[1] - status_win_height))
+		self._map_win.place((status_win_width, 0), (dim[0] - status_win_width + 1, dim[1]))
