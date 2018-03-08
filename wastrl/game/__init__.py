@@ -28,7 +28,7 @@ class TurnManager:
 		self._start_turn()
 		events.act.on.add(self._handle_action)
 
-	def update(self):
+	def update(self, rng):
 		self._action_this_update = False
 		if self._taking_turn is None or props.action_points_this_turn[self._taking_turn] < self._min_ap:
 			if self._taking_turn is not None:
@@ -37,7 +37,7 @@ class TurnManager:
 			self._start_turn()
 
 		next_to_go = next(iter(self._to_act_this_turn))
-		event_change = events.update.trigger()
+		event_change = events.update.trigger(rng)
 		if next_to_go != self._taking_turn:
 			self._taking_turn = next_to_go
 			events.take_turn.trigger(self._taking_turn)
@@ -125,7 +125,7 @@ class Game:
 	def update(self):
 		changed = False
 		while True:
-			acted, changed_now = self.turn_manager.update()
+			acted, changed_now = self.turn_manager.update(self.rng)
 			changed |= changed_now
 			if acted is None:
 				break

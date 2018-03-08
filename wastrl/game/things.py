@@ -24,6 +24,17 @@ _device = {
 	props.graphics: props.Graphics(char='?', colour=0xffffff)
 }
 
+explosion = {
+	props.name: "explosion",
+	props.graphics: props.Graphics(char='+', colour=0xaa0000),
+	props.is_visual: True
+}
+explosion_smoke = {
+	props.name: "explosion smoke",
+	props.graphics: props.Graphics(char='+', colour=0xffffff),
+	props.is_visual: True
+}
+
 mountains = Thing({
 	props.name: "mountains",
 	props.graphics: props.Graphics(char='^', colour=0xcfc19a)
@@ -52,13 +63,6 @@ road = Thing({
 	props.graphics: props.Graphics(char='.', colour=0x222222),
 	props.walk_over_ap: 0.5
 })
-
-def explosion():
-	return Thing({
-		props.name: "explosion",
-		props.graphics: props.Graphics(char='+', colour=0xaa0000),
-		props.is_visual: True
-	})
 
 def city():
 	return Thing({

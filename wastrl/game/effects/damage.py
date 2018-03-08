@@ -18,7 +18,7 @@ def handle_activation(thing, actor, target_pos, rng):
 		params = activates_as[thing]
 		damage = rng.randint(*params.damage)
 		poses = tuple(utils.iter_radius(target_pos, params.radius))
-		explosion.explode(poses)
+		explosion.explode(poses, rng)
 		for pos in poses:
 			for target_thing in props.things_at[pos]:
 				events.attack.trigger(actor, target_thing, damage)
