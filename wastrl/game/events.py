@@ -1,5 +1,6 @@
 from .. import data
 
+update = data.Event(False, lambda a, b: a or b)
 take_turn = data.Event()
 act = data.Event(None, lambda a, b: b if a is not None else b)
 

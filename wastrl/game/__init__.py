@@ -35,14 +35,18 @@ class TurnManager:
 				self._to_act_this_turn.remove(self._taking_turn)
 		if len(self._to_act_this_turn) == 0:
 			self._start_turn()
+
 		next_to_go = next(iter(self._to_act_this_turn))
+		event_change = events.update.trigger()
 		if next_to_go != self._taking_turn:
 			self._taking_turn = next_to_go
 			events.take_turn.trigger(self._taking_turn)
+
+		event_change = event_change or False
 		if self._action_this_update:
-			return self._taking_turn
+			return self._taking_turn, event_change
 		else:
-			return None
+			return None, event_change
 
 	def _start_turn(self):
 		for thing, ap in props.action_points.items():
@@ -121,7 +125,8 @@ class Game:
 	def update(self):
 		changed = False
 		while True:
-			acted = self.turn_manager.update()
+			acted, changed_now = self.turn_manager.update()
+			changed |= changed_now
 			if acted is None:
 				break
 			changed = True

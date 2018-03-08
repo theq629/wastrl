@@ -53,6 +53,13 @@ road = Thing({
 	props.walk_over_ap: 0.5
 })
 
+def explosion():
+	return Thing({
+		props.name: "explosion",
+		props.graphics: props.Graphics(char='+', colour=0xaa0000),
+		props.is_visual: True
+	})
+
 def city():
 	return Thing({
 		props.name: "city",
