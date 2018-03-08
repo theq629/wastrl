@@ -61,6 +61,7 @@ class TurnManager:
 			else:
 				action.trigger()
 				props.action_points_this_turn[actor] -= action.ap
+				events.acted.trigger(actor)
 				self._action_this_update = True
 
 @events.turn.on.handle(1000)

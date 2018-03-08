@@ -5,6 +5,7 @@ from .. import game
 from ..game import properties as props
 from ..game import events
 from ..game import actions
+from ..game import tilemap
 from . import commands
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -234,7 +235,8 @@ class MapWin(ui.Window):
 		'_player',
 		'_player_actions',
 		'_view_controller',
-		'_free_view'
+		'_free_view',
+		'_player_can_move_to'
 	)
 
 	def __init__(self, game, player, *args, **kwargs):
@@ -244,7 +246,10 @@ class MapWin(ui.Window):
 		self.on_redraw.add(self.redraw)
 		self._player_actions = []
 		self._view_controller = ViewController(self._player, self.on_key)
+		self._player_can_move_to = set()
+		self.update_can_move_to()
 		events.move.on.add(self.watch_move)
+		events.acted.on.add(self.watch_actions)
 
 	def watch_move(self, actor, move_from, move_to):
 		if actor == self._player:
@@ -263,13 +268,36 @@ class MapWin(ui.Window):
 				world_x, world_y = world_offset[0] + screen_x, world_offset[1] + screen_y
 				terrain = self._game.terrain[world_x, world_y]
 				graphic = props.graphics[terrain]
-				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
+				bg = 0x000000
+				if (world_x, world_y) in self._player_can_move_to:
+					bg = 0x111111
+				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour, bg=bg)
 
 		# TODO: cache
 		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
 			screen_x, screen_y = world_x - world_offset[0], world_y - world_offset[1]
 			if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
 				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour)
+
+	def watch_actions(self, actor):
+		if actor == self._player:
+			self.update_can_move_to()
+
+	def update_can_move_to(self):
+		self._player_can_move_to = set()
+		cur_ap = props.action_points_this_turn[self._player]
+		def touch(pos, dist):
+			if dist <= cur_ap:
+				self._player_can_move_to.add(pos)
+				return True
+			else:
+				return False
+		tilemap.dijkstra(
+			graph = self._game.terrain,
+			starts = (props.position[self._player],),
+			touch = touch,
+			cost = lambda _, p: props.walk_over_ap[self._game.terrain[p]]
+		)
 
 class MainView(ui.View):
 	__slots__ = (
