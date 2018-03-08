@@ -399,11 +399,12 @@ class MapWin(ui.Window):
 
 	def start_targeting(self, move_points, fire_points):
 		starting_target = None
-		if self._cur_target_index is not None:
+		if self._cur_target_index is not None and self._cur_target_index < len(self._known_targets):
 			last_targeted = self._known_targets[self._cur_target_index]
-			pos = props.position[last_targeted]
-			if pos in move_points and self.is_on_screen(pos):
-				starting_target = last_targeted
+			if last_targeted in props.position:
+				pos = props.position[last_targeted]
+				if pos in move_points and self.is_on_screen(pos):
+					starting_target = last_targeted
 
 		self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in move_points and self.is_on_screen(p))
 		self._target_move_points = move_points
