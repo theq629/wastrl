@@ -1,5 +1,10 @@
 import heapq
 
+def distance(point0, point1):
+	x0, y0 = point0
+	x1, y1 = point1
+	return (x0 - x1)**2 + (y0 - y1)**2
+
 def neighbours(pos):
 	x, y = pos
 	yield (x - 1, y - 1)
@@ -111,13 +116,14 @@ def _dijkstra(graph, starts, touch, cost, max_dist=None):
 def dijkstra(starts, touch, graph=None, cost=uniform_cost, max_dist=None):
 	_dijkstra(graph, starts, touch, cost, max_dist=max_dist)
 
-# TODO: use A*
-def pathfind(starts, goal, graph=None, cost=uniform_cost, max_dist=None):
+def pathfind(starts, goal, graph=None, cost=uniform_cost, max_dist=None, heuristic=distance):
 	get_neighbours = neighbours if graph is None else graph.neighbours
 
 	inf = float('inf')
+
+	best_dist = {}
 	def dist(node):
-		d = fringe.get(node)
+		d = best_dist.get(node)
 		if d is None:
 			return inf
 		else:
@@ -136,7 +142,29 @@ def pathfind(starts, goal, graph=None, cost=uniform_cost, max_dist=None):
 			return False
 		else:
 			return True
-	fringe = _dijkstra(graph, starts, touch, cost, max_dist=max_dist)
+
+	do_touch = touch
+	if max_dist is not None:
+		def do_touch(node, node_dist):
+			if node_dist > max_dist:
+				return False
+			else:
+				return touch(node, node_dist)
+
+	fringe = SearchFringe()
+	for start in starts:
+		fringe.put(start, 0)
+		best_dist[start] = 0
+	while not fringe.is_empty():
+		node = fringe.pop()
+		node_dist = best_dist[node]
+		if do_touch(node, node_dist):
+			for neighbour in get_neighbours(node):
+				new_dist = node_dist + cost(node, neighbour)
+				old_dist = best_dist.get(neighbour)
+				if old_dist is None or new_dist < old_dist:
+					fringe.put(neighbour, new_dist + heuristic(neighbour, goal))
+					best_dist[neighbour] = new_dist
 
 	if len(found) > 0:
 		return reversed(tuple(trace_path(fringe, goal)))
