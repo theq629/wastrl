@@ -2,6 +2,9 @@ from ... import data
 from .. import properties as props
 from .. import things
 from .. import events
+from . import smoke as effect_smoke
+
+chance_of_smoke = 0.25
 
 _explosion_times = data.ValuedProperty()
 _smoke_times = data.ValuedProperty()
@@ -21,6 +24,8 @@ def make_explosion_smoke(rng):
 
 def explode(points, rng):
 	for pos in points:
+		if rng.uniform(0, 1) < chance_of_smoke:
+			effect_smoke.start((pos,), rng)
 		explosion = make_explosion(rng)
 		props.position[explosion] = pos
 		_explosion_times[explosion] = rng.randint(2, 3)

@@ -63,6 +63,7 @@ class TurnManager:
 			if thing not in props.is_player:
 				props.action_points_this_turn[thing] = ap
 				self._to_act_this_turn.add(thing)
+		events.start_turn.trigger(self._rng)
 
 	def _handle_action(self, actor, action):
 		if actor != self._taking_turn:

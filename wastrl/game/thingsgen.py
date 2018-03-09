@@ -36,6 +36,7 @@ def set_starting_kit(player):
 		things.missile_of_kaboom,
 		things.missile_of_fire_ball,
 		things.missile_of_nuclear_warhead,
+		things.missile_of_smoke,
 		things.device_of_mapping,
 		things.device_of_restoration
 	]

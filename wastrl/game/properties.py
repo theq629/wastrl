@@ -50,6 +50,7 @@ activation_target_range = data.ValuedProperty()
 is_alive = data.SetProperty()
 is_dead = data.SetProperty()
 is_visual = data.SetProperty()
+blocks_vision = data.SetProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

@@ -1,6 +1,7 @@
 from .. import data
 from . import properties as props
 from .effects import damage as effect_damage
+from .effects import smoke as effect_smoke
 
 def Thing(init, *other_inits):
 	init.update(*other_inits)
@@ -32,12 +33,20 @@ explosion = {
 explosion_smoke = {
 	props.name: "explosion smoke",
 	props.graphics: props.Graphics(char='+', colour=0xffffff),
-	props.is_visual: True
+	props.is_visual: True,
+}
+
+smoke = {
+	props.name: "smoke",
+	props.graphics: props.Graphics(char='&', colour=0xffffff),
+	props.is_visual: True,
+	props.blocks_vision: True
 }
 
 mountains = Thing({
 	props.name: "mountains",
-	props.graphics: props.Graphics(char='^', colour=0xcfc19a)
+	props.graphics: props.Graphics(char='^', colour=0xcfc19a),
+	props.blocks_vision: True
 })
 grassland = Thing({
 	props.name: "grassland",
@@ -165,6 +174,18 @@ def missile_of_nuclear_warhead():
 		effect_damage.activates_as: effect_damage.Params(
 			damage = (50, 100),
 			radius = 5
+		)
+	})
+
+def missile_of_smoke():
+	return Thing(_missile, {
+		props.name: "missile of smoke",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_smoke.activates_as: effect_smoke.Params(
+			radius = 3
 		)
 	})
 

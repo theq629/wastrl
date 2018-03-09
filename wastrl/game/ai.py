@@ -1,4 +1,5 @@
 import numpy
+import tcod
 from . import tilemap
 from . import properties as props
 from . import events
@@ -61,12 +62,14 @@ class DijkstraMap:
 class Ai:
 	__slots__ = (
 		'_dijkstra_map',
-		'_taking_turn'
+		'_taking_turn',
+		'_player_pos'
 	)
 
 	def __init__(self, terrain):
 		self._dijkstra_map = DijkstraMap(terrain)
 		self._taking_turn = None
+		self._player_pos = None
 		events.take_turn.on.add(self.watch_turn)
 		events.move.on.add(self.track_player)
 
@@ -77,12 +80,13 @@ class Ai:
 	def track_player(self, actor, old_pos, new_pos):
 		if actor in props.is_player:
 			self._dijkstra_map.update(new_pos)
+			self._player_pos = new_pos
 
 	def take_action(self, actor):
 		while self._taking_turn == actor:
 			actor_pos = props.position[actor]
 			delta = self._dijkstra_map.move_from(actor_pos)
-			if delta is None:
+			if delta is None or not (self._player_pos is not None and self.can_see(actor_pos, self._player_pos)):
 				break
 			action = actions.Move(actor, delta)
 			if action.ap is not None and action.ap < props.action_points_this_turn[actor]:
@@ -91,3 +95,9 @@ class Ai:
 				break
 		if self._taking_turn == actor:
 			events.act.trigger(actor, actions.SkipTurn(actor))
+
+	def can_see(self, actor_pos, target_pos):
+		for pos in tcod.line_iter(actor_pos[0], actor_pos[1], target_pos[0], target_pos[1]):
+			if any(t in props.blocks_vision for t in props.things_at[pos]):
+				return False
+		return True
