@@ -181,7 +181,7 @@ def missile_of_nuclear_warhead():
 		),
 		effect_damage.activates_as: effect_damage.Params(
 			damage = (50, 100),
-			radius = 5
+			radius = 8
 		)
 	})
 
