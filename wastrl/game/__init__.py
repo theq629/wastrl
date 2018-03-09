@@ -137,6 +137,8 @@ class Game:
 
 		print("player:", player.index, file=sys.stderr)
 
+		thingsgen.set_starting_kit(player) # TODO: debugging
+
 		self.turn_manager = TurnManager(self.rng)
 
 	def update(self):

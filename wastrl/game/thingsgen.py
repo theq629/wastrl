@@ -26,3 +26,19 @@ def gen(terrain, rng):
 	gen_things(things.device_of_restoration, terrain, rng, 50)
 
 	gen_things(things.ratling, terrain, rng, 100)
+
+def set_starting_kit(player):
+	makers = [
+		things.armoured_car,
+		things.tank,
+		things.cannon,
+		things.artillery,
+		things.missile_of_kaboom,
+		things.missile_of_fire_ball,
+		things.missile_of_nuclear_warhead,
+		things.device_of_mapping,
+		things.device_of_restoration
+	]
+	for make in makers:
+		thing = make()
+		props.inventory[player].add(thing)
