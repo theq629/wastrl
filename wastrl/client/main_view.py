@@ -591,8 +591,18 @@ class MainView(ui.View):
 		self.close()
 
 	def quit(self):
-		self._display.views.add(basic_ui.ViewWithKeys("You quit", texts.quit, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
-		self.close()
+		self._display.views.add(basic_ui.ViewWithKeys(
+			title = "Really quit",
+			win_maker = lambda *args, **kwargs: basic_ui.MenuWindow(*args, select_handler=self.handle_quit_result, **kwargs),
+			keybindings = self._full_keybindings['dialogs'],
+			max_width = 80,
+			value = (("y", "Yes"), ("n", "No"))
+		))
+
+	def handle_quit_result(self, key):
+		if key == "y":
+			self._display.views.add(basic_ui.ViewWithKeys("You quit", texts.quit, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
+			self.close()
 
 	def help(self):
 		key_items = tuple((c, " ".join(ks)) for c, ks in self.keybindings.inverse.items())
