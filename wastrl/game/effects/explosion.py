@@ -5,6 +5,7 @@ from .. import things
 from .. import events
 from .. import utils
 from . import smoke as effect_smoke
+from . import fire as effect_fire
 
 Params = collections.namedtuple('Params', (
 	'damage',
@@ -12,6 +13,7 @@ Params = collections.namedtuple('Params', (
 ))
 
 chance_of_smoke = 0.25
+chance_of_fire = 0.1
 
 activates_as = data.ValuedProperty()
 
@@ -33,6 +35,8 @@ def make_explosion_smoke(rng):
 
 def explode(points, rng):
 	for pos in points:
+		if rng.uniform(0, 1) < chance_of_fire:
+			effect_fire.start((pos,), rng)
 		if rng.uniform(0, 1) < chance_of_smoke:
 			effect_smoke.start((pos,), rng)
 		explosion = make_explosion(rng)

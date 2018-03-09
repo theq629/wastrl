@@ -61,6 +61,7 @@ is_dead = data.SetProperty()
 is_visual = data.SetProperty()
 is_blocking = data.SetProperty()
 blocks_vision = data.SetProperty()
+is_flamable = data.SetProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

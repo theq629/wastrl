@@ -3,6 +3,7 @@ from . import properties as props
 from .effects import damage as effect_damage
 from .effects import explosion as effect_explosion
 from .effects import smoke as effect_smoke
+from .effects import fire as effect_fire
 
 def Thing(init, *other_inits):
 	init.update(*other_inits)
@@ -42,6 +43,13 @@ explosion_smoke = {
 	props.is_visual: True,
 }
 
+fire = {
+	props.name: "fire",
+	props.name_article: "some",
+	props.graphics: props.Graphics(char='&', colour=0xcc0000),
+	props.is_visual: True
+}
+
 smoke = {
 	props.name: "smoke",
 	props.name_article: "some",
@@ -60,7 +68,8 @@ grassland = Thing({
 	props.name: "grassland",
 	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0x10ad80),
-	props.walk_over_ap: 1
+	props.walk_over_ap: 1,
+	props.is_flamable: True
 })
 desert = Thing({
 	props.name: "desert",
@@ -72,7 +81,8 @@ forest = Thing({
 	props.name: "forest",
 	props.name_article: "",
 	props.graphics: props.Graphics(char='&', colour=0x345132),
-	props.walk_over_ap: 2
+	props.walk_over_ap: 2,
+	props.is_flamable: True
 })
 water = Thing({
 	props.name: "water",
@@ -186,15 +196,18 @@ def missile_of_kaboom():
 		)
 	})
 
-def missile_of_fire_ball():
+def missile_of_fire_bomb():
 	return Thing(_missile, {
-		props.name: "missile of fire ball",
+		props.name: "missile of fire bomb",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (10, 25),
+			radius = 2
+		),
+		effect_fire.activates_as: effect_fire.Params(
 			radius = 2
 		)
 	})
