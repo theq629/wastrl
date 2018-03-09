@@ -28,6 +28,21 @@ def rand_grouped_blobs(dim, num, pather, rng, min_length, max_length, max_r, min
 					yield p, r
 	return tuple(iter_points())
 
+def rand_grouped_spots(dim, num, pather, rng, min_length, max_length, max_r, min_radius, num_per_spine_point):
+	def iter_points():
+		for i in range(num):
+			length = rng.randint(min_length, max_length)
+			start = rand_point(dim, rng)
+			end = clamp_point(dim, (start[0] + rng.randint(-length, length), start[1] + rng.randint(-length, length)))
+			for x, y in pather.get_path(start[0], start[1], end[0], end[1]):
+				for j in range(num_per_spine_point):
+					dx = rng.randint(-max_r, max_r)
+					dy = rng.randint(-max_r, max_r)
+					p = x + dx, y + dy
+					if is_valid_point(dim, p):
+						yield p
+	return tuple(iter_points())
+
 def choose_guaranteed_path_points(height, dim, starting_point, ending_point, num_mountain_ranges, rng, max_x_variation=10):
 	point_dist = int(dim[0] / (num_mountain_ranges + 1))
 	pos_x = int(point_dist / 2)
@@ -141,6 +156,10 @@ def make_deserts(terrain, height, dim, num_deserts, pather, rng, min_length=5, m
 			if h > 5 and terrain[x, y] == things.grassland:
 				terrain[x, y] = things.desert
 
+def make_forests(terrain, height, dim, num_deserts, pather, rng, min_length=5, max_length=15, max_r=4, min_radius=8):
+	for x, y in rand_grouped_spots(dim, num_deserts, pather, rng, min_length, max_length, max_r, min_radius, 50):
+		terrain[x, y] = things.forest
+
 def make_cities(terrain, dim, num_cities, rng, x_margin):
 	def make():
 		for i in range(num_cities):
@@ -174,7 +193,7 @@ default_terrain_info = (
 	(100, things.mountains)
 )
 
-def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_lakes=20, num_rivers=20, num_cities=20, num_deserts=60, terrain_info=default_terrain_info):
+def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_lakes=20, num_rivers=20, num_cities=20, num_forests=30, num_deserts=60, terrain_info=default_terrain_info):
 	margin = int(dim[1] / 4)
 	range_dist = int(dim[0] / (num_mountain_ranges + 1))
 	max_point_offset = int(range_dist / 10)
@@ -195,6 +214,7 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 
 	terrain = tilemap.Tilemap(dim, init=lambda _: things.desert)
 	assign_base_terrain(terrain, norm_height, dim, terrain_info)
+	make_forests(terrain, height, dim, num_forests, height_pather, rng)
 	run_rivers(terrain, height, lake_points, dim, num_rivers, rng, max_x_offset=range_dist)
 	walkability = make_walk_map(terrain, height, dim)
 	walk_pather = tcod.path.AStar(walkability)
