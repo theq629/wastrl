@@ -33,6 +33,10 @@ class Tilemap:
 		x, y = pos
 		self._storage[y * self._dim[0] + x] = value
 
+	def fill(self, value):
+		for i in range(len(self._storage)):
+			self._storage[i] = value
+
 	def neighbours(self, pos):
 		x, y = pos
 		bound_x, bound_y = self._dim[0] - 1, self.dim[1] - 1
