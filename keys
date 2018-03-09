@@ -1,5 +1,5 @@
 [main]
-q = quit
+shift+q = quit
 c = centre_view
 . = pass_turn
 i = inventory

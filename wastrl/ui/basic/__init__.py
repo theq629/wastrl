@@ -196,17 +196,39 @@ class TextWindow(PaginatedWindow):
 			console.draw_str(1, y, string=line, fg=self._colours.text, bg=self._colours.background)
 			y += 1
 
+def is_printable_char(char):
+	if len(char) == 1:
+		c = ord(char)
+		return 0x20 <= c <= 0x7E
+	return False
+
+class TextEnterWindow(TextWindow):
+	__slots__ = (
+		'_allow_key',
+	)
+
+	def __init__(self, title=None, text="", allow_keys=is_printable_char, commands=commands, colours=default_colours, *args, **kwargs):
+		super().__init__(title, text, colours=colours, *args, **kwargs)
+		self._allow_key = allow_keys
+		self.on_key.on_other.add(self.handle_other_key)
+
+	def handle_other_key(self, key):
+		if self._allow_key(key):
+			self.value += key
+
 class MenuWindow(PaginatedWindow):
 	__slots__ = (
 		'_item_keys',
+		'_auto_close_view'
 		'_select_handler',
 		'_select_multi',
 		'_selection'
 	)
 
-	def __init__(self, title, items, select_handler=None, select_multi=False, commands=commands, colours=default_colours, *args, **kwargs):
+	def __init__(self, title, items, select_handler=None, select_multi=False, commands=commands, colours=default_colours, auto_close_view=True, *args, **kwargs):
 		super().__init__(title, items, *args, **kwargs)
 		self._item_keys = set(k for k, v in items)
+		self._auto_close_view = auto_close_view
 		self._select_handler = select_handler
 		self._select_multi = select_multi
 		self._selection = set()
@@ -217,12 +239,13 @@ class MenuWindow(PaginatedWindow):
 				self.on_key.on_other.add(self.handle_other_key_select_multi)
 				self.on_close.add(self.handle_close_select_multi)
 			else:
-				self.on_key.on_other.add(self.handle_other_key_select_select)
+				self.on_key.on_other.add(self.handle_other_key_select_single)
 
-	def handle_other_key_select_select(self, key):
+	def handle_other_key_select_single(self, key):
 		if key in self._item_keys:
 			self._select_handler(key)
-			self.view.close()
+			if self._auto_close_view:
+				self.view.close()
 			return True
 
 	def handle_other_key_select_multi(self, key):
@@ -295,6 +318,10 @@ class ViewWithKeys(View):
 		self.on_resize.add(self.resize)
 		self.on_key[commands.close].add(lambda: self.close())
 
+	@property
+	def window(self):
+		return self._main_win
+
 	def resize(self, dim):
 		main_win_dim_x = dim[0]
 		if self._max_width is not None:
@@ -305,3 +332,23 @@ class ViewWithKeys(View):
 
 		self._main_win.place((text_width_margin_x, 0), (main_win_dim_x, dim[1] - keys_win_dim_y))
 		self._keys_win.place((0, dim[1] - keys_win_dim_y), (dim[0], keys_win_dim_y))
+
+class LoadingView(View):
+	__slots__ = (
+		'_text_win',
+		'_max_width'
+	)
+
+	def __init__(self, title, text, max_width=80, **kwargs):
+		super().__init__(**kwargs)
+		self._text_win = TextWindow(title=title, text=text)
+		self._max_width = max_width
+		self.windows.add(self._text_win)
+		self.on_resize.add(self.resize)
+
+	def resize(self, dim):
+		main_win_dim_x = dim[0]
+		if self._max_width is not None:
+			main_win_dim_x = min(main_win_dim_x, self._max_width)
+		text_width_margin_x = int((dim[0] - main_win_dim_x) / 2)
+		self._text_win.place((text_width_margin_x, 0), (main_win_dim_x, dim[1]))

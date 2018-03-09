@@ -7,5 +7,9 @@ You reach Wastrl!
 """.strip()
 
 lose = """
-You all died crossing the wastelands.
+Your people all died crossing the wastelands.
+""".strip()
+
+quit = """
+Your people lay down and gave up. The mutant vultures circle.
 """.strip()

@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import appdirs
 import configparser
 from .. import ui
@@ -7,7 +8,7 @@ from ..ui import basic as basic_ui
 from ..ui import keys
 from .. import game
 from . import main_view
-from . import end_view
+from . import menu
 from . import commands
 from . import texts
 
@@ -52,21 +53,31 @@ if __name__ == '__main__':
 		help = "Use fullscreen display."
 	)
 	parser.add_argument('-s', '--seed',
-		dest = "rng_seed", type = int, default = 0,
-		help = "Seed for randomness."
+		dest = "rng_seed", type = int, default = None,
+		help = "Seed for randomness when starting a new game."
 	)
-	parser.add_argument('-I', '--skip-intro',
-		dest = "do_intro", default = True, action = 'store_false',
-		help = "Skip the intro message."
+	parser.add_argument('-n', '--new-game',
+		dest = "start_new_game", action = 'store_true', default = False,
+		help = "Start a new game without going through the menu."
 	)
 	args = parser.parse_args()
 
 	keybindings = load_keys()
 
-	the_game = game.Game(args.rng_seed)
-
 	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl", font_path=args.font_path) as disp:
-		disp.views.add(end_view.EndView(disp, the_game, keybindings=keybindings['dialogs']))
-		disp.views.add(main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main']))
-		if args.do_intro:
-			disp.views.add(basic_ui.ViewWithKeys("Wastrl", texts.intro, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80))
+		def start_game(seed=None, do_intro=True):
+			loading_view = basic_ui.LoadingView("Creating game", "Please wait while the game is being created.")
+			disp.views.add(loading_view)
+			if seed is None:
+				seed = int(time.time() * 1000)
+			the_game = game.Game(seed)
+			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'])
+			loading_view.close()
+			disp.views.add(view)
+			if do_intro:
+				intro_view = basic_ui.ViewWithKeys("Wastrl", texts.intro, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80)
+				disp.views.add(intro_view)
+		if args.start_new_game:
+			start_game(seed=args.rng_seed, do_intro=False)
+		else:
+			disp.views.add(menu.Menu(disp, keybindings, start_game, keybindings=keybindings['dialogs']))

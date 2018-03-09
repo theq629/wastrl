@@ -8,6 +8,7 @@ from ..game import actions
 from ..game import tilemap
 from ..game import utils as game_utils
 from . import commands
+from . import texts
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -369,11 +370,14 @@ class StatusWin(ui.Window):
 
 	def handle_redraw(self, console):
 		bg = 0x222222
-		ap = props.action_points_this_turn[self._player]
-		ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
 		console.clear(bg=bg)
-		console.draw_str(1, 1, f"AP: {ap_str}", bg=bg)
-		console.draw_str(1, 2, f"Pop: {props.population[self._player]}", bg=bg)
+		if self._player in props.is_alive:
+			ap = props.action_points_this_turn[self._player]
+			ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
+			console.draw_str(1, 1, f"AP: {ap_str}", bg=bg)
+			console.draw_str(1, 2, f"Pop: {props.population[self._player]}", bg=bg)
+		else:
+			console.draw_str(1, 1, f"DEAD", bg=bg)
 
 class MapWin(ui.Window):
 	__slots__ = (
@@ -518,19 +522,21 @@ class MainView(ui.View):
 		'_game',
 		'_player',
 		'_bar_width',
+		'_dialog_max_width',
 		'_status_win',
 		'_msg_win',
 		'_map_win',
 		'_msg_handler'
 	)
 
-	def __init__(self, display, full_keybindings, the_game, bar_width=20, *args, **kwargs):
+	def __init__(self, display, full_keybindings, the_game, bar_width=20, dialog_max_width=80, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._display = display
 		self._full_keybindings = full_keybindings
 		self._game = the_game
 		self._player = next(iter(props.is_player))
 		self._bar_width = bar_width
+		self._dialog_max_width = dialog_max_width
 		self._status_win = StatusWin(self._player)
 		self._map_win = MapWin(self._game, self._player, keybindings=self.keybindings)
 		log_colours = basic_ui.default_colours._replace(
@@ -543,12 +549,13 @@ class MainView(ui.View):
 		self.windows.add(self._msg_win)
 		self.on_resize.add(self.resize)
 		self.on_frame.add(self.update_game)
-		events.act.on.add(self.take_player_action)
-		events.win.on.add(self.win_or_lose, priority=99)
-		events.lose.on.add(self.win_or_lose, priority=99)
-		self.on_key[commands.quit].add(self._display.quit)
+		self.on_key[commands.quit].add(self.quit)
 		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._map_win)
 		self._msg_handler = MessageHandler(self._player)
+
+		events.act.on.add(self.take_player_action)
+		events.win.on.add(self.win, priority=100)
+		events.lose.on.add(self.lose, priority=100)
 
 	def take_player_action(self, thing, available_ap):
 		if thing == self._player:
@@ -557,9 +564,6 @@ class MainView(ui.View):
 			return actions
 		else:
 			return None
-
-	def win_or_lose(self, player):
-		self.close()
 
 	def update_game(self):
 		changed = self._game.update()
@@ -576,3 +580,15 @@ class MainView(ui.View):
 		self._status_win.place((0, 0), (status_win_width, status_win_height))
 		self._msg_win.place((0, status_win_height), (status_win_width, dim[1] - status_win_height))
 		self._map_win.place((status_win_width, 0), (dim[0] - status_win_width + 1, dim[1]))
+
+	def win(self, player):
+		self._display.views.add(basic_ui.ViewWithKeys("You win", texts.win, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
+		self.close()
+
+	def lose(self, player):
+		self._display.views.add(basic_ui.ViewWithKeys("You lose", texts.lose, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
+		self.close()
+
+	def quit(self):
+		self._display.views.add(basic_ui.ViewWithKeys("You quit", texts.quit, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
+		self.close()
