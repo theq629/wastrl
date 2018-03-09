@@ -89,6 +89,7 @@ class Ai:
 		self._player_pos = None
 		events.take_turn.on.add(self.watch_turn)
 		events.move.on.add(self.track_player)
+		events.die.on.add(self.track_player_death)
 
 	def watch_turn(self, actor):
 		self._taking_turn = actor if actor not in props.is_player else None
@@ -96,8 +97,15 @@ class Ai:
 
 	def track_player(self, actor, old_pos, new_pos):
 		if actor in props.is_player:
-			self._dijkstra_map.update(new_pos)
-			self._player_pos = new_pos
+			if actor in props.is_alive:
+				self._dijkstra_map.update(new_pos)
+				self._player_pos = new_pos
+			else:
+				self._player_pos = None
+
+	def track_player_death(self, actor):
+		if actor in props.is_player:
+			self._player_pos = None
 
 	def update_goals(self, actor, can_see_player):
 		actor_pos = props.position[actor]
@@ -130,13 +138,13 @@ class Ai:
 			path = tuple(path)[1:]
 		return path
 
-	def take_action(self, actor):
+	def try_action(self, actor):
 		actor_pos = props.position[actor]
 		can_see_player = self.can_see(actor_pos, self._player_pos)
 
 		self.update_goals(actor, can_see_player)
 
-		while self._taking_turn == actor:
+		while self._taking_turn == actor and self._player_pos is not None:
 			actor_pos = props.position[actor]
 
 			if can_see_player and actor in props.intrinsics:
@@ -173,8 +181,13 @@ class Ai:
 			else:
 				break
 
-		if self._taking_turn == actor:
-			events.act.trigger(actor, actions.SkipTurn(actor))
+	def take_action(self, actor):
+		try:
+			if self._player_pos is not None:
+				self.try_action(actor)
+		finally:
+			if self._taking_turn == actor:
+				events.act.trigger(actor, actions.SkipTurn(actor))
 
 	def can_see(self, actor_pos, target_pos):
 		for pos in tcod.line_iter(actor_pos[0], actor_pos[1], target_pos[0], target_pos[1]):

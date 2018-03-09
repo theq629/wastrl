@@ -1,3 +1,5 @@
+import sys
+import traceback
 import collections
 import tcod.random
 from .. import data
@@ -33,9 +35,10 @@ class TurnManager:
 		event_change = False
 
 		self._action_this_update = False
-		if self._taking_turn is None or props.action_points_this_turn[self._taking_turn] < self._min_ap:
+		if self._taking_turn is None or self._taking_turn not in props.action_points_this_turn or props.action_points_this_turn[self._taking_turn] < self._min_ap:
 			if self._taking_turn is not None:
-				self._to_act_this_turn.remove(self._taking_turn)
+				if self._taking_turn in self._to_act_this_turn:
+					self._to_act_this_turn.remove(self._taking_turn)
 				self._taking_turn = None
 		if len(self._to_act_this_turn) == 0:
 			self._start_turn()
@@ -74,9 +77,15 @@ class TurnManager:
 				if actor not in props.is_player:
 					_to_act_this_turn.remove(self._taking_turn)
 			else:
-				action.trigger(self._rng)
-				if actor in props.action_points_this_turn:
-					props.action_points_this_turn[actor] -= action.ap
+				try:
+					action.trigger(self._rng)
+					if actor in props.action_points_this_turn:
+						props.action_points_this_turn[actor] -= action.ap
+				except Exception as e:
+					print("error in action:", file=sys.stderr)
+					traceback.print_exc(file=sys.stderr)
+					if actor in _to_act_this_turn:
+						_to_act_this_turn.remove(actor)
 				events.acted.trigger(actor)
 				self._action_this_update = True
 
@@ -164,6 +173,7 @@ class Game:
 		utils.spawn(things.goal(), ending_point)
 		player = things.player()
 		utils.spawn(player, starting_point)
+		self._player = player
 
 		print("player:", player.index, file=sys.stderr)
 
@@ -173,7 +183,7 @@ class Game:
 
 	def update(self):
 		changed = False
-		while True:
+		while self._player in props.is_alive:
 			acted, changed_now = self.turn_manager.update(self.rng)
 			changed |= changed_now
 			if acted is None or changed_now:

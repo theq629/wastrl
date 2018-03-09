@@ -379,10 +379,12 @@ class ViewController:
 	def view_centre(self):
 		if self._free_view:
 			return self._view_centre
-		else:
+		elif self._player in props.position:
 			pos = props.position[self._player]
 			self._view_centre = pos
 			return pos
+		else:
+			return self._view_centre
 
 	def stop_free_view(self):
 		self._free_view = False
@@ -606,12 +608,14 @@ class MainView(ui.View):
 			return None
 
 	def update_game(self):
-		changed = self._game.update()
-		if self._msg_handler.changed:
-			self._msg_win.value = self._msg_handler.text
-			self._msg_win.scroll_to_end()
-			self._msg_handler.changed = False
-			return True
+		changed = False
+		if self._player in props.is_alive:
+			changed = self._game.update()
+			if self._msg_handler.changed:
+				self._msg_win.value = self._msg_handler.text
+				self._msg_win.scroll_to_end()
+				self._msg_handler.changed = False
+				return True
 		return changed
 
 	def resize(self, dim):

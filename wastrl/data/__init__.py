@@ -1,3 +1,5 @@
+import sys
+import traceback
 import collections
 
 class _HandlerCollection:
@@ -50,7 +52,11 @@ class Event:
 	def trigger(self, *args, **kwargs):
 		value = self._init_value
 		for _, f in self._on:
-			value = self._fold_f(value, f(*args, **kwargs))
+			try:
+				value = self._fold_f(value, f(*args, **kwargs))
+			except Exception as e:
+				print("error in event:", file=sys.stderr)
+				traceback.print_exc(file=sys.stderr)
 		return value
 
 class _AllProperties:
