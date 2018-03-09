@@ -25,7 +25,7 @@ class MessageHandler:
 		self.changed = False
 		events.take_damage.on.add(self.handle_take_damage, priority=100)
 		events.die.on.add(self.handle_die, priority=100)
-		events.activate.on.add(self.handle_activate, priority=100)
+		events.activate.on.add(self.handle_activate, priority=-1)
 		events.get.on.add(self.handle_get, priority=100)
 		events.drop.on.add(self.handle_drop, priority=100)
 
