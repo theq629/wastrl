@@ -468,7 +468,7 @@ class MapWin(ui.Window):
 				if pos in move_points and self.is_on_screen(pos):
 					starting_target = last_targeted
 
-		self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in move_points and self.is_on_screen(p))
+		self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in fire_points and self.is_on_screen(p))
 		self._target_move_points = move_points
 		self._target_fire_points = fire_points
 
