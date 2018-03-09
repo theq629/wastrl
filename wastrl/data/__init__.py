@@ -69,6 +69,10 @@ class _AllProperties:
 			if thing in property:
 				property.remove(thing)
 
+	def clear(self):
+		for property in self._all:
+			property.clear()
+
 class BaseProperty:
 	all = _AllProperties()
 
@@ -111,6 +115,9 @@ class ValuedProperty(BaseProperty):
 	def __iter__(self):
 		return self._storage.__iter__()
 
+	def clear(self):
+		self._storage.clear()
+
 	def join_keys(self, *others):
 		for key, value in self._storage.items():
 			try:
@@ -149,6 +156,9 @@ class SetProperty(BaseProperty):
 	def __iter__(self):
 		return self._storage.__iter__()
 
+	def clear(self):
+		self._storage.clear()
+
 	def join(self, *others):
 		for key in self._storage:
 			try:
@@ -180,6 +190,9 @@ class OrderedSetProperty(BaseProperty):
 	def __iter__(self):
 		return iter(self._storage.keys())
 
+	def clear(self):
+		self._storage.clear()
+
 	def join(self, *others):
 		for key in self._storage.keys():
 			try:
@@ -206,3 +219,7 @@ class Thing:
 	@property
 	def index(self):
 		return self._index
+
+def reset():
+	BaseProperty.all.clear()
+	Thing._next_thing_index = 0

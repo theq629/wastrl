@@ -118,10 +118,17 @@ def update_things_at(thing, move_from, move_to):
 	if move_to is not None:
 		props.things_at[move_to].add(thing)
 
+def reset_data():
+	all_things = set(props.position) | set(t for i in props.inventory.values() for t in i)
+	for thing in all_things:
+		data.BaseProperty.all.remove(thing)
+
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points = mapgen.gen(self.rng)
+
+		reset_data()
 
 		props.terrain_at.map = self.terrain
 		props.things_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: set())

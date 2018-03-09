@@ -20,6 +20,9 @@ class MapProperty(data.BaseProperty):
 			raise KeyError()
 		return self.map[pos]
 
+	def clear(self):
+		pass
+
 Graphics = collections.namedtuple('Graphics', (
 	'char',
 	'colour'
