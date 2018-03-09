@@ -20,6 +20,13 @@ class MapProperty(data.BaseProperty):
 			raise KeyError()
 		return self.map[pos]
 
+	def __setitem__(self, pos, value):
+		try:
+			x, y = pos
+		except TypeError:
+			raise KeyError()
+		self.map[pos] = value
+
 	def clear(self):
 		pass
 
@@ -50,6 +57,7 @@ activation_target_range = data.ValuedProperty()
 is_alive = data.SetProperty()
 is_dead = data.SetProperty()
 is_visual = data.SetProperty()
+is_blocking = data.SetProperty()
 blocks_vision = data.SetProperty()
 
 is_goal = data.SetProperty()
@@ -57,3 +65,4 @@ is_player = data.SetProperty()
 
 terrain_at = MapProperty()
 things_at = MapProperty()
+blocked_at = MapProperty()

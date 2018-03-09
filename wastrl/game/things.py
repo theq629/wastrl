@@ -10,7 +10,8 @@ def Thing(init, *other_inits):
 _creature = {
 	props.action_points: 1,
 	props.population: 1,
-	props.inventory: set()
+	props.inventory: set(),
+	props.is_blocking: True
 }
 
 _weapon = {

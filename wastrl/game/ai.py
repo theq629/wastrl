@@ -14,18 +14,18 @@ _actor_path = data.ValuedProperty()
 
 class DijkstraMap:
 	__slots__ = (
-		'_terrain',
-		'_max_dist_to_player',
+		'terrain',
+		'max_dist_to_player',
 		'_walk_map',
 		'_map',
 		'_goal'
 	)
 
 	def __init__(self, terrain, max_dist_to_player=40):
-		self._terrain = terrain
-		self._max_dist_to_player = max_dist_to_player
+		self.terrain = terrain
+		self.max_dist_to_player = max_dist_to_player
 		self._walk_map = self.make_walk_map(terrain)
-		self._map = numpy.zeros(shape=tuple(reversed(self._terrain.dim)))
+		self._map = numpy.zeros(shape=tuple(reversed(self.terrain.dim)))
 		self._goal = None
 
 	def make_walk_map(self, terrain, block_cost=float('inf')):
@@ -54,7 +54,7 @@ class DijkstraMap:
 				x, y = neighbour
 				if x >= 0 and y >= 0 and x < self._walk_map.shape[1] and y < self._walk_map.shape[0]:
 					new_dist = node_dist + self._walk_map[y, x]
-					if new_dist <= self._max_dist_to_player:
+					if new_dist <= self.max_dist_to_player:
 						old_dist = fringe.get(neighbour)
 						if old_dist is None or new_dist < old_dist:
 							fringe.put(neighbour, new_dist)
@@ -63,7 +63,7 @@ class DijkstraMap:
 		node = pos
 		while node != self._goal:
 			yield node
-			node = min(self._terrain.neighbours(node), key=lambda p: self._map[p[1], p[0]])
+			node = min(self.terrain.neighbours(node), key=lambda p: self._map[p[1], p[0]])
 		yield node
 
 	def get_path(self, pos):
@@ -108,22 +108,56 @@ class Ai:
 			elif actor in _actor_path:
 				_actor_path.remove(actor)
 
+	def custom_path(self, actor_pos, goal_pos):
+		def cost(from_pos, pos):
+			t = self._dijkstra_map.terrain[pos]
+			if t not in props.walk_over_ap:
+				return utils.blocked_cost
+			elif props.blocked_at[pos] and pos != goal_pos:
+				return utils.blocked_cost
+			else:
+				return props.walk_over_ap[t]
+		path = tilemap.pathfind(
+			graph = self._dijkstra_map.terrain,
+			starts = (actor_pos,),
+			goal = goal_pos,
+			cost = cost,
+			max_dist = self._dijkstra_map.max_dist_to_player / 2
+		)
+		if path is not None:
+			path = tuple(path)[1:]
+		return path
+
 	def take_action(self, actor):
 		self.update_goals(actor)
 		while self._taking_turn == actor:
 			actor_pos = props.position[actor]
+
 			if actor not in _actor_path:
 				break
 			path = _actor_path[actor]
 			if len(path) == 0:
 				break
-			delta = tuple(path[0][i] - actor_pos[i] for i in range(2))
+			next_pos = path[0]
+			delta = tuple(next_pos[i] - actor_pos[i] for i in range(2))
+
+			if props.blocked_at[next_pos] and actor in _actor_goal:
+				path = self.custom_path(actor_pos, _actor_goal[actor])
+				if path is None:
+					_actor_path.remove(actor)
+					break
+				_actor_path[actor] = path
+				if len(path) == 0:
+					break
+				delta = tuple(path[0][i] - actor_pos[i] for i in range(2))
+
 			action = actions.Move(actor, delta)
 			if action.ap is not None and action.ap < props.action_points_this_turn[actor]:
 				_actor_path[actor] = path[1:]
 				events.act.trigger(actor, action)
 			else:
 				break
+
 		if self._taking_turn == actor:
 			events.act.trigger(actor, actions.SkipTurn(actor))
 

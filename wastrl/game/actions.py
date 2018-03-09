@@ -47,6 +47,8 @@ class Move(Base):
 			return None
 		x, y = props.position[self._actor]
 		x, y = x + dx, y + dy
+		if any(t in props.is_blocking for t in props.things_at[x, y]):
+			return None
 		t = props.terrain_at[x, y]
 		try:
 			return props.walk_over_ap[t]

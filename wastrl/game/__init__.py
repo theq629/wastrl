@@ -116,8 +116,10 @@ def check_lose(actor):
 def update_things_at(thing, move_from, move_to):
 	if move_from is not None:
 		props.things_at[move_from].remove(thing)
+		props.blocked_at[move_from] = any(t in props.is_blocking for t in props.things_at[move_from])
 	if move_to is not None:
 		props.things_at[move_to].add(thing)
+		props.blocked_at[move_to] |= thing in props.is_blocking
 
 def reset_data():
 	all_things = set(props.position) | set(t for i in props.inventory.values() for t in i)
@@ -133,6 +135,7 @@ class Game:
 
 		props.terrain_at.map = self.terrain
 		props.things_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: set())
+		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
 		ai.Ai(self.terrain)
 
 		thingsgen.gen(self.terrain, self.rng)
