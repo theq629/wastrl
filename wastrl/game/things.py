@@ -4,6 +4,7 @@ from .effects import damage as effect_damage
 from .effects import explosion as effect_explosion
 from .effects import smoke as effect_smoke
 from .effects import fire as effect_fire
+from .effects import desertify as effect_desertify
 
 def Thing(init, *other_inits):
 	init.update(*other_inits)
@@ -222,6 +223,9 @@ def missile_of_nuclear_warhead():
 		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (50, 100),
 			radius = 8
+		),
+		effect_desertify.activates_as: effect_desertify.Params(
+			radius = 5
 		)
 	})
 

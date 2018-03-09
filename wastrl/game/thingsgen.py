@@ -20,7 +20,7 @@ def gen(terrain, rng):
 	gen_things(things.artillery, terrain, rng, 50)
 
 	gen_things(things.missile_of_kaboom, terrain, rng, 100)
-	gen_things(things.missile_of_fire_ball, terrain, rng, 50)
+	gen_things(things.missile_of_fire_bomb, terrain, rng, 50)
 	gen_things(things.missile_of_nuclear_warhead, terrain, rng, 10)
 	gen_things(things.device_of_mapping, terrain, rng, 50)
 	gen_things(things.device_of_restoration, terrain, rng, 50)
@@ -34,7 +34,7 @@ def set_starting_kit(player):
 		things.cannon,
 		things.artillery,
 		things.missile_of_kaboom,
-		things.missile_of_fire_ball,
+		things.missile_of_fire_bomb,
 		things.missile_of_nuclear_warhead,
 		things.missile_of_smoke,
 		things.device_of_mapping,
