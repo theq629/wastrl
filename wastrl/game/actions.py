@@ -3,6 +3,8 @@ from . import events
 from . import tilemap
 from . import utils
 
+min_terrain_cost = 0.5
+
 class Base:
 	__slots__ = (
 		'_ap',
@@ -125,6 +127,10 @@ class Activate(Base):
 	def _is_valid(self):
 		actor_pos = props.position[self._actor]
 		act_range = props.activation_target_range[self._thing]
+		fire_range_2 = act_range.fire_range**2
+
+		if sum((actor_pos[i] - self._target_pos[i])**2 for i in range(2)) > (act_range.move_range / min_terrain_cost + act_range.fire_range)**2:
+			return False
 
 		move_points = set()
 		def touch(pos, dist):
@@ -137,7 +143,6 @@ class Activate(Base):
 			max_dist = act_range.move_range
 		)
 
-		fire_range_2 = act_range.fire_range**2
 		for point in move_points:
 			r = sum((point[i] - self._target_pos[i])**2 for i in range(2))
 			if r <= fire_range_2:

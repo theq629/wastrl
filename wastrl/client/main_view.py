@@ -315,12 +315,13 @@ class PlayerController:
 			max_dist = act_range.move_range
 		)
 
-		fire_points = set()
-		for x in range(max(0, min(x for x, _ in move_points) - act_range.fire_range), min(self._game.terrain.dim[0] - 1, max(x for x, _ in move_points) + act_range.fire_range)):
-			for y in range(max(0, min(y for _, y in move_points) - act_range.fire_range), min(self._game.terrain.dim[1] - 1, max(y for _, y in move_points) + act_range.fire_range)):
-				pos = x, y
-				fire_points.add(pos)
 		fire_range_2 = act_range.fire_range**2
+		fire_points = set()
+		for x in range(max(0, min(x for x, _ in move_points) - act_range.fire_range), min(self._game.terrain.dim[0] - 1, max(x for x, _ in move_points) + act_range.fire_range + 1)):
+			for y in range(max(0, min(y for _, y in move_points) - act_range.fire_range), min(self._game.terrain.dim[1] - 1, max(y for _, y in move_points) + act_range.fire_range + 1)):
+				pos = x, y
+				if any(sum((p[i] - pos[i])**2 for i in range(2)) <= fire_range_2 for p in move_points):
+					fire_points.add(pos)
 
 		return move_points, fire_points
 
@@ -476,11 +477,11 @@ class MapWin(ui.Window):
 				graphic = props.graphics[terrain]
 				bg = 0x000000
 				if self.targeting is not None and world_pos == self.targeting:
-					bg = 0xbb0000
+					bg = 0xcc0000
 				elif self.targeting is not None and world_pos in self._target_move_points:
-					bg = 0x220000
+					bg = 0x440000
 				elif self.targeting is not None and world_pos in self._target_fire_points:
-					bg = 0x110000
+					bg = 0x330000
 				elif world_pos in self._player_can_move_to:
 					bg = 0x111111
 				thing_graphic = things_to_draw.get((screen_x, screen_y))
