@@ -63,5 +63,7 @@ class Menu(ui.View):
 			self._display.quit()
 		elif choice == 'n':
 			self._start_game()
+			self.close()
 		elif choice == 's':
 			self.get_seed(lambda s: self._start_game(s))
+			self.close()
