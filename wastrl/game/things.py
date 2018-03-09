@@ -118,7 +118,7 @@ def cannon():
 
 def artillery():
 	return Thing(_weapon, {
-		props.name: "cannon",
+		props.name: "artillery",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 10,
