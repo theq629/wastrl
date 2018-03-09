@@ -46,11 +46,14 @@ class MessageHandler:
 		else:
 			return ", and ".join((", ".join(items[:-1]), items[-1]))
 
+	def capitalize(self, string):
+		return string[0].upper() + string[1:]
+
 	def handle_take_damage(self, target, damage):
-		self.message("{target} takes {damage} damage.", target=self.name_thing(target).title(), damage=damage)
+		self.message("{target} takes {damage} damage.", target=self.capitalize(self.name_thing(target)), damage=damage)
 
 	def handle_die(self, actor):
-		self.message("{actor} dies.", actor=self.name_thing(actor).title())
+		self.message("{actor} dies.", actor=self.capitalize(self.name_thing(actor)))
 
 	def handle_activate(self, thing, actor, target_pos, _rng):
 		if actor == self.player:
