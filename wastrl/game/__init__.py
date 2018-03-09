@@ -155,7 +155,7 @@ class Game:
 		props.terrain_at.map = self.terrain
 		props.things_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: set())
 		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
-		ai.Ai(self.terrain)
+		ai.Ai(self.rng, self.terrain)
 
 		thingsgen.gen(self.terrain, self.rng)
 

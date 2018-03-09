@@ -76,12 +76,14 @@ class DijkstraMap:
 
 class Ai:
 	__slots__ = (
+		'_rng',
 		'_dijkstra_map',
 		'_taking_turn',
 		'_player_pos'
 	)
 
-	def __init__(self, terrain):
+	def __init__(self, rng, terrain):
+		self._rng = rng
 		self._dijkstra_map = DijkstraMap(terrain)
 		self._taking_turn = None
 		self._player_pos = None
@@ -97,9 +99,9 @@ class Ai:
 			self._dijkstra_map.update(new_pos)
 			self._player_pos = new_pos
 
-	def update_goals(self, actor):
+	def update_goals(self, actor, can_see_player):
 		actor_pos = props.position[actor]
-		if (actor not in _actor_goal or _actor_goal[actor] != self._player_pos) and self.can_see(actor_pos, self._player_pos):
+		if (actor not in _actor_goal or _actor_goal[actor] != self._player_pos) and can_see_player:
 			_actor_goal[actor] = self._player_pos
 			path = self._dijkstra_map.get_path(actor_pos)
 			if path is not None:
@@ -129,9 +131,22 @@ class Ai:
 		return path
 
 	def take_action(self, actor):
-		self.update_goals(actor)
+		actor_pos = props.position[actor]
+		can_see_player = self.can_see(actor_pos, self._player_pos)
+
+		self.update_goals(actor, can_see_player)
+
 		while self._taking_turn == actor:
 			actor_pos = props.position[actor]
+
+			if can_see_player and actor in props.intrinsics:
+				can_use = tuple(props.intrinsics[actor])
+				num_can_use = len(can_use)
+				if num_can_use > 0:
+					to_use = can_use[self._rng.randint(0, num_can_use - 1)]
+					action = actions.Activate(actor, to_use, self._player_pos)
+					if action.ap is not None and action.ap < props.action_points_this_turn[actor]:
+						events.act.trigger(actor, action)
 
 			if actor not in _actor_path:
 				break

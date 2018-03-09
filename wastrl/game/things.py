@@ -238,7 +238,7 @@ def ratling():
 	return Thing(_creature, {
 		props.name: "ratling",
 		props.graphics: props.Graphics(char='r', colour=0xffffff),
-		props.action_points: 3,
+		props.action_points: 10,
 		props.population: 10,
 		props.inventory: set(),
 		props.intrinsics: {
