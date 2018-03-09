@@ -3,15 +3,10 @@ Your ragged band wanders the wastelands, encountering only mutant monsters and t
 """.strip()
 
 def make_helpful_intro(keybindings, help_command):
-	return """
-	{base}
-
-	Press during play for help: {help_keys}
-	""".strip().format(
+	return "{base}\n\nPress during play for help: {help_keys}".format(
 		base = intro,
 		help_keys = " ".join(keybindings.inverse[help_command])
 	)
-	
 
 win = """
 You reach Wastrl!

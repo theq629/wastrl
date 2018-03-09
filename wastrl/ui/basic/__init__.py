@@ -186,7 +186,7 @@ class TextWindow(PaginatedWindow):
 		self.on_redraw.add(self.redraw)
 
 	def prepare(self, text):
-		text_lines = textwrap.wrap(text, self.dim[0] - 2)
+		text_lines = tuple(l for l0 in text.split("\n") for l in (textwrap.wrap(l0, self.dim[0] - 2, replace_whitespace=False) if len(l0) > 0 else (l0,)))
 		return text_lines, len(text_lines)
 
 	def redraw(self, console):
