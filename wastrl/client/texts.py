@@ -1,5 +1,5 @@
 intro = """
-Your ragged band wanders the wastelands, encountering only mutant monsters and the broken ruins of cities. It is said that in the West there is a city called Wastrl which still survives as a refuge against the horrors.
+Your ragged band wanders the wastelands, encountering only mutant monsters and the broken ruins of cities. It is said that in the west there is a city called Wastrl which still survives as a refuge against the horrors.
 """.strip()
 
 def make_helpful_intro(keybindings, help_command):
