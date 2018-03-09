@@ -47,30 +47,30 @@ class MessageHandler:
 			return ", and ".join((", ".join(items[:-1]), items[-1]))
 
 	def handle_take_damage(self, target, damage):
-		self.message("{target} takes {damage} damage", target=self.name_thing(target).title(), damage=damage)
+		self.message("{target} takes {damage} damage.", target=self.name_thing(target).title(), damage=damage)
 
 	def handle_die(self, actor):
-		self.message("{actor} dies", actor=self.name_thing(actor).title())
+		self.message("{actor} dies.", actor=self.name_thing(actor).title())
 
 	def handle_activate(self, thing, actor, target_pos, _rng):
 		if actor == self.player:
-			self.message("You activate {thing}", thing=self.name_thing(thing))
+			self.message("You activate {thing}.", thing=self.name_thing(thing))
 
 	def handle_get(self, actor, thing):
 		if actor == self.player:
-			self.message("You get {thing}", thing=self.name_thing(thing))
+			self.message("You get {thing}.", thing=self.name_thing(thing))
 
 	def handle_drop(self, actor, thing):
 		if actor == self.player:
-			self.message("You drop {thing}", thing=self.name_thing(thing))
+			self.message("You drop {thing}.", thing=self.name_thing(thing))
 
 	def do_look(self, pos):
 		things = (props.terrain_at[pos],) + tuple(props.things_at[pos])
 		if len(things) > 0:
 			ex_things = tuple(self.name_thing(t) for t in things)
-			self.message("You see {things}", things=self.format_list(ex_things))
+			self.message("You see {things}.", things=self.format_list(ex_things))
 		else:
-			self.message("You see nothing there")
+			self.message("You see nothing there.")
 
 class PlayerInterfaceManager:
 	__slots__ = (
