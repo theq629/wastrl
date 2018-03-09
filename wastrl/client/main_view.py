@@ -50,7 +50,7 @@ class MessageHandler:
 		self.message("{target} takes {damage} damage", target=self.name_thing(target).title(), damage=damage)
 
 	def handle_die(self, actor):
-		self.message("{actor}", actor=self.name_thing(actor).title())
+		self.message("{actor} dies", actor=self.name_thing(actor).title())
 
 	def handle_activate(self, thing, actor, target_pos, _rng):
 		if actor == self.player:
