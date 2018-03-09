@@ -35,15 +35,12 @@ class MessageHandler:
 		self.changed = True
 
 	def name_thing(self, thing):
-		if thing in props.name:
-			return "the " + props.name[thing]
-		else:
-			return "something"
+		return events.examine.trigger(thing)
 
 	def format_list(self, items):
 		items = list(items)
 		if len(items) == 1:
-			return items[1]
+			return items[0]
 		elif len(items) == 2:
 			return "{} and {}".format(*items)
 		else:
@@ -66,6 +63,14 @@ class MessageHandler:
 	def handle_drop(self, actor, thing):
 		if actor == self.player:
 			self.message("You drop {thing}", thing=self.name_thing(thing))
+
+	def do_look(self, pos):
+		things = (props.terrain_at[pos],) + tuple(props.things_at[pos])
+		if len(things) > 0:
+			ex_things = tuple(self.name_thing(t) for t in things)
+			self.message("You see {things}", things=self.format_list(ex_things))
+		else:
+			self.message("You see nothing there")
 
 class PlayerInterfaceManager:
 	__slots__ = (
@@ -166,17 +171,19 @@ class PlayerController:
 		'_game',
 		'_event_target',
 		'_interface_manager',
+		'_message_handler',
 		'_map_win',
 		'_is_our_turn',
 		'_targeting',
 		'_finish_targeting_callback'
 	)
 
-	def __init__(self, player, game, event_target, interface_manager, map_win):
+	def __init__(self, player, game, event_target, interface_manager, message_handler, map_win):
 		self._player = player
 		self._game = game
 		self._event_target = event_target
 		self._interface_manager = interface_manager
+		self._message_handler = message_handler
 		self._map_win = map_win
 		self._is_our_turn = False
 		self._targeting = False
@@ -186,6 +193,8 @@ class PlayerController:
 
 	def setup_keys(self):
 		self._event_target.on_click[commands.move_to_click].add(self.command_move_to_click)
+		self._event_target.on_click[commands.mouse_look].add(self.command_mouse_look)
+		self._event_target.on_key[commands.look].add(self.command_look)
 		self._event_target.on_key[commands.pass_turn].add(self.command_skip)
 		self._event_target.on_key[commands.move_n].add(self.command_mover((0, -1)))
 		self._event_target.on_key[commands.move_s].add(self.command_mover((0, 1)))
@@ -229,7 +238,7 @@ class PlayerController:
 			def handle_start(thing_to_activate):
 				if thing_to_activate in props.activation_target_range:
 					move_points, fire_points = self.get_target_range(thing_to_activate)
-					self.start_targeting(lambda t: handle_finish(thing_to_activate, t), move_points, fire_points)
+					self.start_targeting(lambda t: handle_finish(thing_to_activate, t), points=(move_points, fire_points))
 				else:
 					handle_finish(thing_to_activate)
 			self._interface_manager.activate_window(set(props.inventory[self._player]), handle_start)
@@ -259,6 +268,15 @@ class PlayerController:
 				)
 				if path is not None:
 					self.move_on_path(path)
+
+	def command_look(self):
+		self.start_targeting(self._message_handler.do_look)
+
+	def command_mouse_look(self, screen_pos):
+		win_pos = tuple(screen_pos[i] - self._map_win.pos[i] for i in range(2))
+		if all(win_pos[i] >= 0 and win_pos[i] < self._map_win.dim[i] for i in range(2)):
+			world_pos = tuple(win_pos[i] + self._map_win.world_offset[i] for i in range(2))
+			self._message_handler.do_look(world_pos)
 
 	def command_select_target(self):
 		self.stop_targeting()
@@ -290,8 +308,8 @@ class PlayerController:
 
 		return move_points, fire_points
 
-	def start_targeting(self, callback, move_points, fire_points):
-		self._map_win.start_targeting(move_points, fire_points)
+	def start_targeting(self, callback, points=None):
+		self._map_win.start_targeting(points)
 		self._targeting = True
 		self._finish_targeting_callback = callback
 
@@ -459,20 +477,24 @@ class MapWin(ui.Window):
 		screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
 		return screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]
 
-	def start_targeting(self, move_points, fire_points):
+	def start_targeting(self, points=None):
 		starting_target = None
 		if self._cur_target_index is not None and self._cur_target_index < len(self._known_targets):
 			last_targeted = self._known_targets[self._cur_target_index]
 			if last_targeted in props.position:
 				pos = props.position[last_targeted]
-				if pos in move_points and self.is_on_screen(pos):
+				if (points is None or pos in points[1]) and self.is_on_screen(pos):
 					starting_target = last_targeted
 
-		self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in fire_points and self.is_on_screen(p))
-		self._target_move_points = move_points
-		self._target_fire_points = fire_points
+		if points is not None:
+			move_points, fire_points = points
+			self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and p in fire_points and self.is_on_screen(p))
+			self._target_move_points, self._target_fire_points = points
+		else:
+			self._known_targets = tuple(t for t in props.action_points for p in (props.position[t],) if t != self._player and self.is_on_screen(p))
+			self._target_move_points, self._target_fire_points = set(), set()
 
-		if starting_target is not None:
+		if starting_target is not None and starting_target in self._known_targets:
 			self._cur_target_index = self._known_targets.index(starting_target)
 			self.targeting = props.position[self._known_targets[self._cur_target_index]]
 		else:
@@ -551,8 +573,8 @@ class MainView(ui.View):
 		self.on_frame.add(self.update_game)
 		self.on_key[commands.quit].add(self.quit)
 		self.on_key[commands.help].add(self.help)
-		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._map_win)
 		self._msg_handler = MessageHandler(self._player)
+		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._msg_handler, self._map_win)
 
 		events.act.on.add(self.take_player_action)
 		events.win.on.add(self.win, priority=100)

@@ -21,7 +21,7 @@ def int_pair(s):
 
 def load_keys():
 	sections = { "main", "dialogs" }
-	path = os.path.join(appdirs.user_data_dir(prog_name, prog_author), "keys")
+	path = os.path.join(appdirs.user_config_dir(prog_name, prog_author), "keys")
 	if not os.path.exists(path):
 		print(f"warning: keys config file does not exist: {path}", file=sys.stderr)
 	keybindings = keys.CompoundKeybindings(sections)

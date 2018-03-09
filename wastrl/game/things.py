@@ -39,6 +39,7 @@ explosion_smoke = {
 
 smoke = {
 	props.name: "smoke",
+	props.name_article: "some",
 	props.graphics: props.Graphics(char='&', colour=0xffffff),
 	props.is_visual: True,
 	props.blocks_vision: True
@@ -46,30 +47,36 @@ smoke = {
 
 mountains = Thing({
 	props.name: "mountains",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='^', colour=0xcfc19a),
 	props.blocks_vision: True
 })
 grassland = Thing({
 	props.name: "grassland",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0x10ad80),
 	props.walk_over_ap: 1
 })
 desert = Thing({
 	props.name: "desert",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0xffcf6d),
 	props.walk_over_ap: 1
 })
 forest = Thing({
 	props.name: "forest",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='&', colour=0x345132),
 	props.walk_over_ap: 2
 })
 water = Thing({
 	props.name: "water",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='~', colour=0x22b6f2)
 })
 road = Thing({
 	props.name: "road",
+	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0x222222),
 	props.walk_over_ap: 0.5
 })
@@ -211,7 +218,7 @@ def ratling():
 
 def player():
 	return Thing(_creature, {
-		props.name: "player",
+		props.name: "band of people",
 		props.graphics: props.Graphics(char='@', colour=0xffffff),
 		props.is_player: True,
 		props.action_points: 5,

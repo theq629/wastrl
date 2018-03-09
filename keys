@@ -1,6 +1,5 @@
 [main]
 shift+/ = help
-h = help
 shift+q = quit
 c = centre_view
 . = pass_turn
@@ -11,6 +10,8 @@ a = activate
 ENTER = select_target
 t = auto_target
 mouse+LEFT = move_to_click
+v = look
+mouse+RIGHT = mouse_look
 k = move_n
 j = move_s
 h = move_w

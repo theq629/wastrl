@@ -45,6 +45,7 @@ ActivationTargetRange = collections.namedtuple('ActivationTargetRange', (
 ))
 
 name = data.ValuedProperty()
+name_article = data.ValuedProperty()
 graphics = data.ValuedProperty()
 position = data.ValuedProperty()
 population = data.ValuedProperty()

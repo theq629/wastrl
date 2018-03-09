@@ -121,6 +121,22 @@ def update_things_at(thing, move_from, move_to):
 		props.things_at[move_to].add(thing)
 		props.blocked_at[move_to] |= thing in props.is_blocking
 
+@events.examine.on.handle(0)
+def base_examine(thing):
+	if thing not in props.name:
+		return ""
+	else:
+		name = props.name[thing]
+		article = None
+		if thing in props.name_article:
+			article = props.name_article[thing]
+		else:
+			if len(name) > 0:
+				article = "an" if name[0].lower() in "aeiou" else "a"
+		if article is not None:
+			name = " ".join((article, name))
+		return name
+
 def reset_data():
 	all_things = set(props.position) | set(t for i in props.inventory.values() for t in i)
 	for thing in all_things:
