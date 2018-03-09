@@ -75,7 +75,8 @@ if __name__ == '__main__':
 			loading_view.close()
 			disp.views.add(view)
 			if do_intro:
-				intro_view = basic_ui.ViewWithKeys("Wastrl", texts.intro, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80)
+				text = texts.make_helpful_intro(keybindings['main'], commands.help)
+				intro_view = basic_ui.ViewWithKeys("Wastrl", text, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80)
 				disp.views.add(intro_view)
 		if args.start_new_game:
 			start_game(seed=args.rng_seed, do_intro=False)

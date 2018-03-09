@@ -1,5 +1,6 @@
 from ..ui.basic import commands as basic_ui_commands
 
+help = 'help'
 quit = 'quit'
 centre_view = 'centre_view'
 pass_turn = 'pass_turn'

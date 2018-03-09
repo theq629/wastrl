@@ -20,6 +20,9 @@ class KeyBindingsInverse:
 	def __getitem__(self, command):
 		return self._storage[command]
 
+	def items(self):
+		return self._storage.items()
+
 	def get(self, command):
 		return self._storage.get(command)
 
@@ -38,6 +41,9 @@ class KeyBindings:
 
 	def get(self, key):
 		return self._storage.get(key)
+
+	def items(self):
+		return self._storage.items()
 
 	@property
 	def inverse(self):

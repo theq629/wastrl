@@ -550,6 +550,7 @@ class MainView(ui.View):
 		self.on_resize.add(self.resize)
 		self.on_frame.add(self.update_game)
 		self.on_key[commands.quit].add(self.quit)
+		self.on_key[commands.help].add(self.help)
 		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._map_win)
 		self._msg_handler = MessageHandler(self._player)
 
@@ -592,3 +593,13 @@ class MainView(ui.View):
 	def quit(self):
 		self._display.views.add(basic_ui.ViewWithKeys("You quit", texts.quit, basic_ui.TextWindow, keybindings=self._full_keybindings['dialogs'], max_width=self._dialog_max_width))
 		self.close()
+
+	def help(self):
+		key_items = tuple((c, " ".join(ks)) for c, ks in self.keybindings.inverse.items())
+		self._display.views.add(basic_ui.ViewWithKeys(
+			title = "Help",
+			win_maker = basic_ui.MenuWindow,
+			keybindings = self._full_keybindings['dialogs'],
+			max_width = 80,
+			value = key_items
+		))

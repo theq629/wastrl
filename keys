@@ -1,4 +1,6 @@
 [main]
+shift+/ = help
+h = help
 shift+q = quit
 c = centre_view
 . = pass_turn
