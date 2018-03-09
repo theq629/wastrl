@@ -1,5 +1,6 @@
 import numpy
 import tcod
+from .. import data
 from . import tilemap
 from . import properties as props
 from . import events
@@ -8,12 +9,16 @@ from . import utils
 
 out_of_range_value = float('inf')
 
+_actor_goal = data.ValuedProperty()
+_actor_path = data.ValuedProperty()
+
 class DijkstraMap:
 	__slots__ = (
 		'_terrain',
 		'_max_dist_to_player',
 		'_walk_map',
-		'_map'
+		'_map',
+		'_goal'
 	)
 
 	def __init__(self, terrain, max_dist_to_player=40):
@@ -21,6 +26,7 @@ class DijkstraMap:
 		self._max_dist_to_player = max_dist_to_player
 		self._walk_map = self.make_walk_map(terrain)
 		self._map = numpy.zeros(shape=tuple(reversed(self._terrain.dim)))
+		self._goal = None
 
 	def make_walk_map(self, terrain, block_cost=float('inf')):
 		walk = numpy.zeros(shape=tuple(reversed(terrain.dim)))
@@ -35,6 +41,7 @@ class DijkstraMap:
 		return walk
 
 	def update(self, player_pos):
+		self._goal = player_pos
 		self._map[:] = out_of_range_value
 		fringe = tilemap.SearchFringe()
 		fringe.put(player_pos, 0)
@@ -52,12 +59,20 @@ class DijkstraMap:
 						if old_dist is None or new_dist < old_dist:
 							fringe.put(neighbour, new_dist)
 
-	def move_from(self, pos):
+	def _trace_path(self, pos):
+		node = pos
+		while node != self._goal:
+			yield node
+			node = min(self._terrain.neighbours(node), key=lambda p: self._map[p[1], p[0]])
+		yield node
+
+	def get_path(self, pos):
+		if self._goal is None:
+			return None
 		x, y = pos
 		if self._map[y, x] == out_of_range_value:
 			return None
-		pos1 = min(self._terrain.neighbours(pos), key=lambda p: self._map[p[1], p[0]])
-		return tuple(pos1[i] - pos[i] for i in range(2))
+		return self._trace_path(pos)
 
 class Ai:
 	__slots__ = (
@@ -82,14 +97,30 @@ class Ai:
 			self._dijkstra_map.update(new_pos)
 			self._player_pos = new_pos
 
+	def update_goals(self, actor):
+		actor_pos = props.position[actor]
+		if (actor not in _actor_goal or _actor_goal[actor] != self._player_pos) and self.can_see(actor_pos, self._player_pos):
+			_actor_goal[actor] = self._player_pos
+			path = self._dijkstra_map.get_path(actor_pos)
+			if path is not None:
+				path = tuple(path)[1:]
+				_actor_path[actor] = path
+			elif actor in _actor_path:
+				_actor_path.remove(actor)
+
 	def take_action(self, actor):
+		self.update_goals(actor)
 		while self._taking_turn == actor:
 			actor_pos = props.position[actor]
-			delta = self._dijkstra_map.move_from(actor_pos)
-			if delta is None or not (self._player_pos is not None and self.can_see(actor_pos, self._player_pos)):
+			if actor not in _actor_path:
 				break
+			path = _actor_path[actor]
+			if len(path) == 0:
+				break
+			delta = tuple(path[0][i] - actor_pos[i] for i in range(2))
 			action = actions.Move(actor, delta)
 			if action.ap is not None and action.ap < props.action_points_this_turn[actor]:
+				_actor_path[actor] = path[1:]
 				events.act.trigger(actor, action)
 			else:
 				break
