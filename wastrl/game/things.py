@@ -1,6 +1,7 @@
 from .. import data
 from . import properties as props
 from .effects import damage as effect_damage
+from .effects import explosion as effect_explosion
 from .effects import smoke as effect_smoke
 
 def Thing(init, *other_inits):
@@ -24,6 +25,10 @@ _missile = {
 
 _device = {
 	props.graphics: props.Graphics(char='?', colour=0xffffff)
+}
+
+_intrinsic = {
+	props.name_article: ""
 }
 
 explosion = {
@@ -81,6 +86,28 @@ road = Thing({
 	props.walk_over_ap: 0.5
 })
 
+hand_to_hand = Thing(_intrinsic, {
+	props.name: "hand to hand",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (5, 10)
+	)
+})
+
+teeth = Thing(_intrinsic, {
+	props.name: "teeth",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (1, 5)
+	)
+})
+
 def city():
 	return Thing({
 		props.name: "city",
@@ -101,7 +128,7 @@ def armoured_car():
 			move_range = 10,
 			fire_range = 0,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (1, 5),
 			radius = 1
 		)
@@ -114,7 +141,7 @@ def tank():
 			move_range = 5,
 			fire_range = 0,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (3, 10),
 			radius = 1
 		)
@@ -127,7 +154,7 @@ def cannon():
 			move_range = 5,
 			fire_range = 5,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (1, 5),
 			radius = 1
 		)
@@ -140,7 +167,7 @@ def artillery():
 			move_range = 0,
 			fire_range = 10,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (1, 10),
 			radius = 1
 		)
@@ -153,7 +180,7 @@ def missile_of_kaboom():
 			move_range = 0,
 			fire_range = 15,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (5, 20),
 			radius = 1
 		)
@@ -166,7 +193,7 @@ def missile_of_fire_ball():
 			move_range = 0,
 			fire_range = 15,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (10, 25),
 			radius = 2
 		)
@@ -179,7 +206,7 @@ def missile_of_nuclear_warhead():
 			move_range = 0,
 			fire_range = 30,
 		),
-		effect_damage.activates_as: effect_damage.Params(
+		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (50, 100),
 			radius = 8
 		)
@@ -213,7 +240,10 @@ def ratling():
 		props.graphics: props.Graphics(char='r', colour=0xffffff),
 		props.action_points: 3,
 		props.population: 10,
-		props.inventory: set()
+		props.inventory: set(),
+		props.intrinsics: {
+			teeth
+		}
 	})
 
 def player():
@@ -223,5 +253,8 @@ def player():
 		props.is_player: True,
 		props.action_points: 5,
 		props.population: 100,
-		props.inventory: set()
+		props.inventory: set(),
+		props.intrinsics: {
+			hand_to_hand
+		}
 	})

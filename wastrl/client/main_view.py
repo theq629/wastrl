@@ -76,13 +76,15 @@ class PlayerInterfaceManager:
 	__slots__ = (
 		'_display',
 		'_dialog_keybindings',
-		'_inventory_keys'
+		'_inventory_keys',
+		'_reserved_things'
 	)
 
 	def __init__(self, display, dialog_keybindings):
 		self._display = display
 		self._dialog_keybindings = dialog_keybindings
 		self._inventory_keys = {}
+		self._reserved_things = set()
 
 	def menu(self, items=(), name_value=lambda x: x, select_handler=None, select_multi=False, **kwargs):
 		named_items = [(k, name_value(v)) for k, v in items]
@@ -149,9 +151,9 @@ class PlayerInterfaceManager:
 		return tuple((k, t) for k, t in zip(keys_for_inventory_menu, things))
 
 	def keyify_inventory(self, inventory):
-		for thing in self._inventory_keys:
-			if thing not in inventory:
-				del self._inventory_keys[thing]
+		missing = (t for t in self._inventory_keys if t not in inventory and t not in self._reserved_things)
+		for thing in missing:
+			del self._inventory_keys[thing]
 
 		for thing in inventory:
 			if thing not in self._inventory_keys:
@@ -164,6 +166,11 @@ class PlayerInterfaceManager:
 					self._inventory_keys[thing] = keys_for_inventory_menu[i]
 
 		return sorted((self._inventory_keys[t], t) for t in inventory)
+
+	def reserve_keys(self, things):
+		self._reserved_things.update(things)
+		self.keyify_inventory(things)
+
 
 class PlayerController:
 	__slots__ = (
@@ -190,6 +197,7 @@ class PlayerController:
 		self._finish_targeting_callback = None
 		events.take_turn.on.add(self.watch_turn)
 		self.setup_keys()
+		self._interface_manager.reserve_keys(props.intrinsics[self._player])
 
 	def setup_keys(self):
 		self._event_target.on_click[commands.move_to_click].add(self.command_move_to_click)
@@ -241,14 +249,19 @@ class PlayerController:
 					self.start_targeting(lambda t: handle_finish(thing_to_activate, t), points=(move_points, fire_points))
 				else:
 					handle_finish(thing_to_activate)
-			self._interface_manager.activate_window(set(props.inventory[self._player]), handle_start)
+			activatable = set(props.inventory[self._player]) | set(props.intrinsics[self._player])
+			self._interface_manager.activate_window(activatable, handle_start)
 
 	def command_mover(self, delta):
 		def handle():
 			if self._targeting:
 				self._map_win.targeting = tuple(self._map_win.targeting[i] + delta[i] for i in range(2))
 			elif self._is_our_turn:
-				events.act.trigger(self._player, actions.Move(self._player, delta))
+				pos = tuple(props.position[self._player][i] + delta[i] for i in range(2))
+				if any(t in props.is_blocking for t in props.things_at[pos]) and len(props.intrinsics[self._player]) > 0:
+					events.act.trigger(self._player, actions.Activate(self._player, next(iter(props.intrinsics[self._player])), pos))
+				else:
+					events.act.trigger(self._player, actions.Move(self._player, delta))
 		return handle
 
 	def command_move_to_click(self, screen_pos):

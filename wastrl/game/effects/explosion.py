@@ -1,10 +1,19 @@
+import collections
 from ... import data
 from .. import properties as props
 from .. import things
 from .. import events
+from .. import utils
 from . import smoke as effect_smoke
 
+Params = collections.namedtuple('Params', (
+	'damage',
+	'radius'
+))
+
 chance_of_smoke = 0.25
+
+activates_as = data.ValuedProperty()
 
 _explosion_times = data.ValuedProperty()
 _smoke_times = data.ValuedProperty()
@@ -29,6 +38,18 @@ def explode(points, rng):
 		explosion = make_explosion(rng)
 		props.position[explosion] = pos
 		_explosion_times[explosion] = rng.randint(2, 3)
+
+@events.activate.on.handle()
+def handle_activation(thing, actor, target_pos, rng):
+	if thing in activates_as:
+		params = activates_as[thing]
+		damage = rng.randint(*params.damage)
+		poses = tuple(utils.iter_radius(target_pos, params.radius))
+		explode(poses, rng)
+		for pos in poses:
+			target_things = tuple(props.things_at[pos])
+			for target_thing in target_things:
+				events.attack.trigger(actor, target_thing, damage)
 
 @events.update.on.handle()
 def handle_momentary(rng):
