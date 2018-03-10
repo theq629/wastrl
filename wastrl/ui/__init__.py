@@ -256,6 +256,12 @@ class View:
 			key_name = event.char if event.key == 'CHAR' else event.key
 			if event.shift:
 				key_name = "shift+" + key_name
+			if event.control:
+				key_name = "control+" + key_name
+			if event.alt:
+				key_name = "alt+" + key_name
+			if event.meta:
+				key_name = "meta+" + key_name
 			if not self._on_key._trigger(key_name):
 				for win in self._windows:
 					if win._on_key._trigger(key_name):
