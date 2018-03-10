@@ -90,14 +90,16 @@ class PlayerInterfaceManager:
 		'_display',
 		'_dialog_keybindings',
 		'_inventory_keys',
-		'_reserved_things'
+		'_reserved_things',
+		'dialog_max_width'
 	)
 
-	def __init__(self, display, dialog_keybindings):
+	def __init__(self, display, dialog_keybindings, dialog_max_width):
 		self._display = display
 		self._dialog_keybindings = dialog_keybindings
 		self._inventory_keys = {}
 		self._reserved_things = set()
+		self.dialog_max_width = dialog_max_width
 
 	def menu(self, items=(), name_value=lambda x: x, select_handler=None, select_multi=False, **kwargs):
 		named_items = [(k, name_value(v)) for k, v in items]
@@ -115,7 +117,7 @@ class PlayerInterfaceManager:
 		self._display.views.add(basic_ui.ViewWithKeys(
 			win_maker = lambda *args, **kwargs: basic_ui.MenuWindow(*args, select_handler=handle, select_multi=select_multi, **kwargs),
 			keybindings = self._dialog_keybindings,
-			max_width = 80,
+			max_width = self.dialog_max_width,
 			value = named_items,
 			**kwargs
 		))
@@ -603,7 +605,7 @@ class MainView(ui.View):
 		self.on_key[commands.quit].add(self.quit)
 		self.on_key[commands.help].add(self.help)
 		self._msg_handler = MessageHandler(self._player)
-		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs']), self._msg_handler, self._map_win)
+		PlayerController(self._player, self._game, self, PlayerInterfaceManager(display, full_keybindings['dialogs'], dialog_max_width), self._msg_handler, self._map_win)
 
 		events.act.on.add(self.take_player_action)
 		events.win.on.add(self.win, priority=100)
@@ -648,7 +650,7 @@ class MainView(ui.View):
 			title = "Really quit",
 			win_maker = lambda *args, **kwargs: basic_ui.MenuWindow(*args, select_handler=self.handle_quit_result, **kwargs),
 			keybindings = self._full_keybindings['dialogs'],
-			max_width = 80,
+			max_width = self._dialog_max_width,
 			value = (("y", "Yes"), ("n", "No"))
 		))
 
@@ -663,6 +665,6 @@ class MainView(ui.View):
 			title = "Help",
 			win_maker = basic_ui.MenuWindow,
 			keybindings = self._full_keybindings['dialogs'],
-			max_width = 80,
+			max_width = self._dialog_max_width,
 			value = key_items
 		))

@@ -33,7 +33,7 @@ def get_config_file_path(name, file_name):
 	return path
 
 def load_config():
-	sections = { "display", "tdl_font", "debug" }
+	sections = { "display", "tdl_font", "ui", "debug" }
 	path = get_config_file_path("config", "main")
 
 	parser = configparser.ConfigParser()
@@ -86,6 +86,14 @@ def normalize_font_opts(opts):
 			norm_opts[key] = opts.getboolean(key.lower())
 	return norm_opts
 
+def normalize_ui_opts(opts):
+	norm_opts = {}
+	if 'dialog_max_width' in opts:
+		norm_opts['dialog_max_width'] = int(opts['dialog_max_width'])
+	else:
+		norm_opts['dialog_max_width'] = 80
+	return norm_opts
+
 def normalize_debug_opts(opts):
 	norm_opts = {}
 	if 'log_events':
@@ -97,6 +105,7 @@ def normalize_config(config):
 	changes = (
 		('display', normalize_display_opts),
 		('tdl_font', normalize_font_opts),
+		('ui', normalize_ui_opts),
 		('debug', normalize_debug_opts)
 	)
 	for key, changer in changes:
@@ -148,19 +157,19 @@ def main():
 
 	with ui.Display(screen_dim=resolution, fullscreen=fullscreen, title="Wastrl", font_opts=config['tdl_font']) as disp:
 		def start_game(seed=None, do_intro=True):
-			loading_view = basic_ui.LoadingView("Creating game", "Please wait while the game is being created.")
+			loading_view = basic_ui.LoadingView("Creating game", "Please wait while the game is being created.", max_width=config['ui']['dialog_max_width'])
 			disp.views.add(loading_view)
 			if seed is None:
 				seed = int(time.time() * 1000)
 			the_game = game.Game(seed)
-			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'])
+			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'], dialog_max_width=config['ui']['dialog_max_width'])
 			loading_view.close()
 			disp.views.add(view)
 			if do_intro:
 				text = texts.make_helpful_intro(keybindings['main'], commands.help)
-				intro_view = basic_ui.ViewWithKeys("Wastrl", text, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=80)
+				intro_view = basic_ui.ViewWithKeys("Wastrl", text, basic_ui.TextWindow, keybindings=keybindings['dialogs'], max_width=config['ui']['dialog_max_width'])
 				disp.views.add(intro_view)
 		if args.start_new_game:
 			start_game(seed=args.rng_seed, do_intro=False)
 		else:
-			disp.views.add(menu.Menu(disp, keybindings, start_game, keybindings=keybindings['dialogs']))
+			disp.views.add(menu.Menu(disp, keybindings, start_game, keybindings=keybindings['dialogs'], dialog_max_width=config['ui']['dialog_max_width']))
