@@ -13,10 +13,13 @@ from . import texts
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 def hex_to_rgb(x):
-	b = x & 0x0000ff
-	g = (x & 0x00ff00) >> 8
-	r = (x & 0xff0000) >> 16
-	return (r, g, b)
+	if isinstance(x, tuple):
+		return x
+	else:
+		b = x & 0x0000ff
+		g = (x & 0x00ff00) >> 8
+		r = (x & 0xff0000) >> 16
+		return (r, g, b)
 
 class MessageHandler:
 	__slots__ = (
