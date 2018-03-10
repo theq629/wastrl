@@ -9,6 +9,7 @@ d = drop
 a = activate
 ENTER = select_target
 t = auto_target
+TAB = auto_target
 mouse+LEFT = move_to_click
 v = look
 mouse+RIGHT = mouse_look
