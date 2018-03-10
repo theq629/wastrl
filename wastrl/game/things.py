@@ -144,13 +144,14 @@ fire_attack = Thing(_intrinsic, {
 
 def city():
 	return Thing({
-		props.name: "city",
+		props.name: "city ruin",
 		props.graphics: props.Graphics(char='#', colour=0xaaaaaa)
 	})
 
 def goal():
 	return Thing({
 		props.name: "Wastrl",
+		props.name_article: "",
 		props.graphics: props.Graphics(char='#', colour=0xffffff),
 		props.is_goal: True
 	})
