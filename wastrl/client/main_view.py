@@ -314,28 +314,7 @@ class PlayerController:
 
 	def get_target_range(self, thing):
 		act_range = props.activation_target_range[thing]
-
-		move_points = set()
-		def touch(pos, dist):
-			move_points.add(pos)
-			return True
-		tilemap.dijkstra(
-			graph = self._game.terrain,
-			starts = (props.position[self._player],),
-			touch = touch,
-			cost = game_utils.walk_cost(self._game.terrain),
-			max_dist = act_range.move_range
-		)
-
-		fire_range_2 = act_range.fire_range**2
-		fire_points = set()
-		for x in range(max(0, min(x for x, _ in move_points) - act_range.fire_range), min(self._game.terrain.dim[0] - 1, max(x for x, _ in move_points) + act_range.fire_range + 1)):
-			for y in range(max(0, min(y for _, y in move_points) - act_range.fire_range), min(self._game.terrain.dim[1] - 1, max(y for _, y in move_points) + act_range.fire_range + 1)):
-				pos = x, y
-				if any(sum((p[i] - pos[i])**2 for i in range(2)) <= fire_range_2 for p in move_points):
-					fire_points.add(pos)
-
-		return move_points, fire_points
+		return game_utils.get_ranges((props.position[self._player],), self._game.terrain, act_range.move_range, act_range.fire_range)
 
 	def start_targeting(self, callback, points=None):
 		self._map_win.start_targeting(points)
