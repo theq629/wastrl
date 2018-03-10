@@ -82,9 +82,11 @@ class Get(Base):
 
 	def trigger(self, rng):
 		for thing in self._things:
+			pos = props.position[thing]
 			props.position.remove(thing)
 			props.inventory[self._actor].add(thing)
 			events.get.trigger(self._actor, thing)
+			events.move.trigger(thing, pos, None)
 
 class Drop(Base):
 	__slots__ = (
