@@ -11,6 +11,7 @@ ai_activation_range = 40
 guard_wakeup_range = 4
 
 out_of_range_value = float('inf')
+guard_wakeup_range_2 = guard_wakeup_range**2
 
 _actor_goal = data.ValuedProperty()
 _actor_path = data.ValuedProperty()
@@ -103,6 +104,11 @@ class Ai:
 			if actor in props.is_alive:
 				self._dijkstra_map.update(new_pos)
 				self._player_pos = new_pos
+				for guard in tuple(props.is_guarding_city):
+					guard_pos = props.position[guard]
+					if sum((self._player_pos[i] - guard_pos[i])**2 for i in range(2)) < guard_wakeup_range_2:
+						props.is_guarding_city.remove(guard)
+						events.guard_wakeup.trigger(guard)
 			else:
 				self._player_pos = None
 
@@ -141,18 +147,9 @@ class Ai:
 			path = tuple(path)[1:]
 		return path
 
-	def try_actor_for_guard(self, actor, wakeup_range_2=guard_wakeup_range**2):
-		actor_pos = props.position[actor]
-		if self._player_pos is not None and sum((self._player_pos[i] - actor_pos[i])**2 for i in range(2)) < wakeup_range_2:
-			props.is_guarding_city.remove(actor)
-			events.guard_wakeup.trigger(actor)
-			return True
-		return False
-
 	def try_action(self, actor):
 		if actor in props.is_guarding_city:
-			if not self.try_actor_for_guard(actor):
-				return
+			return
 
 		actor_pos = props.position[actor]
 		can_see_player = self.can_see(actor_pos, self._player_pos)
