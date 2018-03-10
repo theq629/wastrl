@@ -7,7 +7,7 @@ from .. import utils
 from . import smoke as effect_smoke
 
 burn_down_prob = 0.9
-spread_prob = 0.5
+spread_prob = 0.75
 go_out_prob = 0.1
 smoke_prob = 0.1
 
