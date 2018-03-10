@@ -161,7 +161,7 @@ class PaginatedWindow(Window, abc.ABC):
 		self._start_pos = 0
 
 	def scroll_to_end(self):
-		self._start_pos = self._total_lines - self._page_size
+		self._start_pos = max(0, self._total_lines - self._page_size)
 
 	def setup_keys(self):
 		self.on_key[commands.line_up].add(lambda: self._move_page(-1))
