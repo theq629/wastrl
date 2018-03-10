@@ -224,7 +224,6 @@ def gen(rng, dim=(500, 150), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	make_guaranteed_paths(terrain, height, dim, starting_point, ending_point, num_guaranteed_paths, num_mountain_ranges, walk_pather, rng)
 	make_deserts(terrain, height, dim, num_deserts, height_pather, rng)
 	city_points = make_cities(terrain, dim, num_cities, rng, range_dist)
-	city_points += (ending_point,)
 	make_roads(terrain, height, city_points, dim, walk_pather, rng)
 
 	return terrain, starting_point, ending_point, city_points, mountain_spines

@@ -120,6 +120,17 @@ teeth = Thing(_intrinsic, {
 	)
 })
 
+huge_teeth = Thing(_intrinsic, {
+	props.name: "huge teeth",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (5, 10)
+	)
+})
+
 bite = Thing(_intrinsic, {
 	props.name: "bite",
 	props.activation_target_range: props.ActivationTargetRange(
@@ -127,7 +138,7 @@ bite = Thing(_intrinsic, {
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (1, 5)
+		damage = (3, 10)
 	)
 })
 
@@ -145,7 +156,8 @@ fire_attack = Thing(_intrinsic, {
 def city():
 	return Thing({
 		props.name: "city ruin",
-		props.graphics: props.Graphics(char='#', colour=0xaaaaaa)
+		props.graphics: props.Graphics(char='#', colour=0xaaaaaa),
+		props.blocks_local_vision: True
 	})
 
 def goal():
@@ -284,6 +296,30 @@ def ratling():
 		props.inventory: set(),
 		props.intrinsics: {
 			teeth
+		}
+	})
+
+def megarat():
+	return Thing(_creature, {
+		props.name: "megarat",
+		props.graphics: props.Graphics(char='R', colour=0xffffff),
+		props.action_points: 10,
+		props.population: 20,
+		props.inventory: set(),
+		props.intrinsics: {
+			huge_teeth
+		}
+	})
+
+def giant_ant():
+	return Thing(_creature, {
+		props.name: "giant ant",
+		props.graphics: props.Graphics(char='a', colour=0xbbbbbb),
+		props.action_points: 10,
+		props.population: 10,
+		props.inventory: set(),
+		props.intrinsics: {
+			bite
 		}
 	})
 

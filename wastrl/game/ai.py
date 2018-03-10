@@ -7,6 +7,9 @@ from . import events
 from . import actions
 from . import utils
 
+ai_activation_range = 40
+guard_wakeup_range = 4
+
 out_of_range_value = float('inf')
 
 _actor_goal = data.ValuedProperty()
@@ -21,7 +24,7 @@ class DijkstraMap:
 		'_goal'
 	)
 
-	def __init__(self, terrain, max_dist_to_player=40):
+	def __init__(self, terrain, max_dist_to_player=ai_activation_range):
 		self.terrain = terrain
 		self.max_dist_to_player = max_dist_to_player
 		self._walk_map = self.make_walk_map(terrain)
@@ -138,7 +141,19 @@ class Ai:
 			path = tuple(path)[1:]
 		return path
 
+	def try_actor_for_guard(self, actor, wakeup_range_2=guard_wakeup_range**2):
+		actor_pos = props.position[actor]
+		if self._player_pos is not None and sum((self._player_pos[i] - actor_pos[i])**2 for i in range(2)) < wakeup_range_2:
+			props.is_guarding_city.remove(actor)
+			events.guard_wakeup.trigger(actor)
+			return True
+		return False
+
 	def try_action(self, actor):
+		if actor in props.is_guarding_city:
+			if not self.try_actor_for_guard(actor):
+				return
+
 		actor_pos = props.position[actor]
 		can_see_player = self.can_see(actor_pos, self._player_pos)
 

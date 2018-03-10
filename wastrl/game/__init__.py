@@ -166,7 +166,7 @@ class Game:
 		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
 		ai.Ai(self.rng, self.terrain)
 
-		thingsgen.gen(self.terrain, mountain_spines, self.rng)
+		thingsgen.gen(self.terrain, mountain_spines, city_points, self.rng)
 
 		for point in city_points:
 			utils.spawn(things.city(), point)

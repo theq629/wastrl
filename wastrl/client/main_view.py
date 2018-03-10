@@ -28,6 +28,7 @@ class MessageHandler:
 		events.activate.on.add(self.handle_activate, priority=-1)
 		events.get.on.add(self.handle_get, priority=100)
 		events.drop.on.add(self.handle_drop, priority=100)
+		events.guard_wakeup.on.add(self.handle_guard_wakeup, priority=100)
 
 	def message(self, message, *args, **kwargs):
 		msg_line = message.format(*args, **kwargs) + "\n"
@@ -67,8 +68,17 @@ class MessageHandler:
 		if actor == self.player:
 			self.message("You drop {thing}.", thing=self.name_thing(thing))
 
+	def handle_guard_wakeup(self, actor):
+		self.message("Something has awoken in the city ruins. It is {thing}.", thing=self.name_thing(actor))
+
 	def do_look(self, pos):
-		things = (props.terrain_at[pos],) + tuple(props.things_at[pos])
+		things_there = tuple(props.things_at[pos])
+		things_there_blocking_local = tuple(t for t in things_there if t in props.blocks_local_vision)
+		things = (props.terrain_at[pos],)
+		if len(things_there_blocking_local) > 0:
+			things += things_there_blocking_local
+		else:
+			things += things_there
 		if len(things) > 0:
 			ex_things = tuple(self.name_thing(t) for t in things)
 			self.message("You see {things}.", things=self.format_list(ex_things))
@@ -154,7 +164,7 @@ class PlayerInterfaceManager:
 		return tuple((k, t) for k, t in zip(keys_for_inventory_menu, things))
 
 	def keyify_inventory(self, inventory):
-		missing = (t for t in self._inventory_keys if t not in inventory and t not in self._reserved_things)
+		missing = tuple(t for t in self._inventory_keys if t not in inventory and t not in self._reserved_things)
 		for thing in missing:
 			del self._inventory_keys[thing]
 
