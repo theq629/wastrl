@@ -196,7 +196,7 @@ default_terrain_info = (
 	(100, things.mountains)
 )
 
-def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_lakes=20, num_rivers=20, num_cities=20, num_forests=30, num_deserts=60, terrain_info=default_terrain_info):
+def gen(rng, dim=(500, 150), num_mountain_ranges=5, num_guaranteed_paths=5, num_lakes=20, num_rivers=20, num_cities=20, num_forests=30, num_deserts=60, terrain_info=default_terrain_info):
 	margin = int(dim[1] / 4)
 	range_dist = int(dim[0] / (num_mountain_ranges + 1))
 	max_point_offset = int(range_dist / 10)
