@@ -157,7 +157,7 @@ def reset_data():
 class Game:
 	def __init__(self, seed):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
-		self.terrain, starting_point, ending_point, city_points = mapgen.gen(self.rng)
+		self.terrain, starting_point, ending_point, city_points, mountain_spines = mapgen.gen(self.rng)
 
 		reset_data()
 
@@ -166,7 +166,7 @@ class Game:
 		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
 		ai.Ai(self.rng, self.terrain)
 
-		thingsgen.gen(self.terrain, self.rng)
+		thingsgen.gen(self.terrain, mountain_spines, self.rng)
 
 		for point in city_points:
 			utils.spawn(things.city(), point)

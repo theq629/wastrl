@@ -120,6 +120,28 @@ teeth = Thing(_intrinsic, {
 	)
 })
 
+bite = Thing(_intrinsic, {
+	props.name: "bite",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (1, 5)
+	)
+})
+
+fire_attack = Thing(_intrinsic, {
+	props.name: "fire attack",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 0,
+		fire_range = 10,
+	),
+	effect_fire.activates_as: effect_fire.Params(
+		radius = 2
+	)
+})
+
 def city():
 	return Thing({
 		props.name: "city",
@@ -261,6 +283,19 @@ def ratling():
 		props.inventory: set(),
 		props.intrinsics: {
 			teeth
+		}
+	})
+
+def fire_ant():
+	return Thing(_creature, {
+		props.name: "fire ant",
+		props.graphics: props.Graphics(char='a', colour=0xff0000),
+		props.action_points: 10,
+		props.population: 10,
+		props.inventory: set(),
+		props.intrinsics: {
+			bite,
+			fire_attack
 		}
 	})
 

@@ -73,9 +73,11 @@ def make_base_heightmap(dim, noise):
 
 def carve_mountains(height, dim, num_mountain_ranges, pather, rng, max_dist_from_spine=15, min_radius=4, carve_height=4):
 	range_dist = int(dim[0] / (num_mountain_ranges + 1))
+	spines = []
 	for i in range(num_mountain_ranges):
 		pos_x = range_dist * (i + 1)
-		path = pather.get_path(pos_x, 0, pos_x, dim[1] - 1)
+		path = tuple(pather.get_path(pos_x, 0, pos_x, dim[1] - 1))
+		spines.append(path)
 		j = 0
 		while j < len(path):
 			x, y = path[j]
@@ -84,6 +86,7 @@ def carve_mountains(height, dim, num_mountain_ranges, pather, rng, max_dist_from
 			r = rng.randint(min_radius, max(min_radius, max_dist_from_spine - abs(dx)))
 			if is_valid_point(dim, (x + dx, y)):
 				tcod.heightmap_dig_hill(height, x + dx, y, r, carve_height)
+	return spines
 
 def carve_lakes(height, dim, num_lakes, pather, rng, min_length=5, max_length=20, max_r=10, min_radius=4, carve_depth=-1):
 	def iter_points():
@@ -203,7 +206,7 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	noise = tcod.noise.Noise(2, seed=rng)
 	height = make_base_heightmap(dim, noise)
 	height_pather = tcod.path.AStar(height)
-	carve_mountains(height, dim, num_mountain_ranges, height_pather, rng)
+	mountain_spines = carve_mountains(height, dim, num_mountain_ranges, height_pather, rng)
 	lake_points = carve_lakes(height, dim, num_mountain_ranges, height_pather, rng)
 	height[:] += 1
 	smooth(height, dim, rng)
@@ -224,4 +227,4 @@ def gen(rng, dim=(500, 250), num_mountain_ranges=5, num_guaranteed_paths=5, num_
 	city_points += (ending_point,)
 	make_roads(terrain, height, city_points, dim, walk_pather, rng)
 
-	return terrain, starting_point, ending_point, city_points
+	return terrain, starting_point, ending_point, city_points, mountain_spines

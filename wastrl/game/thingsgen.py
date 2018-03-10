@@ -2,30 +2,68 @@ from . import properties as props
 from . import things
 from . import utils
 
+table = (
+	(
+		((5, 5), things.ratling),
+	),
+	(
+		((5, 5), things.fire_ant),
+	),
+	(
+	),
+	(
+	),
+	(
+	),
+	(
+	)
+)
+
 def rand_point(dim, rng):
 	return rng.randint(0, dim[0] - 1), rng.randint(0, dim[1] - 1)
 
-def gen_things(thing_maker, terrain, rng, num):
-	num_done = 0
-	while num_done < num:
+def normalize_spine(path):
+	last_pos = path[0]
+	yield last_pos[0]
+	yield last_pos
+	for pos in path[1:]:
+		if pos[1] > last_pos[1]:
+			yield pos[0]
+		last_pos = pos
+
+def choose_points(to_gen, terrain, mountain_spines, rng):
+	mountain_spines = sorted(mountain_spines, key=lambda s: s[0][0], reverse=True)
+	mountain_spines = tuple(tuple(normalize_spine(p)) for p in mountain_spines)
+
+	need_points = [sum(n for n, m in area_spec) for area_spec in to_gen]
+	total_need_points = sum(need_points)
+
+	points = [[] for _ in need_points]
+	while total_need_points > 0:
 		point = rand_point(terrain.dim, rng)
 		if terrain[point] not in { things.mountains, things.water }:
-			npc = utils.spawn(thing_maker(), point)
-			num_done += 1
+			for i, spine in enumerate(mountain_spines):
+				if point[0] > spine[point[1]]:
+					if need_points[i] > 0:
+						need_points[i] -= 1
+						total_need_points -= 1
+						points[i].append(point)
+					break
 
-def gen(terrain, rng):
-	gen_things(things.armoured_car, terrain, rng, 100)
-	gen_things(things.tank, terrain, rng, 50)
-	gen_things(things.cannon, terrain, rng, 50)
-	gen_things(things.artillery, terrain, rng, 50)
+	return points
 
-	gen_things(things.missile_of_kaboom, terrain, rng, 100)
-	gen_things(things.missile_of_fire_bomb, terrain, rng, 50)
-	gen_things(things.missile_of_nuclear_warhead, terrain, rng, 10)
-	gen_things(things.device_of_mapping, terrain, rng, 50)
-	gen_things(things.device_of_restoration, terrain, rng, 50)
+def gen_for_area(to_gen, points):
+	points = iter(points)
+	for num, maker in to_gen:
+		for i in range(num):
+			thing = maker()
+			utils.spawn(thing, next(points))
 
-	gen_things(things.ratling, terrain, rng, 100)
+def gen(terrain, mountain_spines, rng):
+	to_gen = tuple(tuple((rng.randint(*n), m) for n, m in area_spec) for area_spec in table)
+	points = choose_points(to_gen, terrain, mountain_spines, rng)
+	for to_gen_for_area, area_points in zip(to_gen, points):
+		gen_for_area(to_gen_for_area, area_points)
 
 def set_starting_kit(player):
 	makers = [
