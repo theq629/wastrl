@@ -322,13 +322,9 @@ class Display:
 		'_running'
 	)
 
-	def __init__(self, screen_dim, fullscreen=False, title=None, font_path=None):
+	def __init__(self, screen_dim, fullscreen=False, title=None, font_opts=None):
 		self._dim = screen_dim
-		self._tdl_font_opts = {}
-		if font_path is not None:
-			self._tdl_font_opts['path'] = font_path
-			self._tdl_font_opts['greyscale'] = True
-			self._tdl_font_opts['altLayout'] = True
+		self._tdl_font_opts = font_opts
 		self._tdl_opts = {
 			'fullscreen': fullscreen,
 			'title': title
@@ -369,7 +365,7 @@ class Display:
 				self.close()
 
 	def _setup(self):
-		if len(self._tdl_font_opts) > 0:
+		if self._tdl_font_opts is not None and len(self._tdl_font_opts) > 0:
 			tdl.set_font(**self._tdl_font_opts)
 		self._root_console = tdl.init(*self._dim, **self._tdl_opts)
 		for view in self._views:

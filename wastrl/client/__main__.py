@@ -7,6 +7,7 @@ from .. import ui
 from ..ui import basic as basic_ui
 from ..ui import keys
 from .. import game
+from .. import data
 from . import main_view
 from . import menu
 from . import commands
@@ -19,11 +20,27 @@ def int_pair(s):
 	x, y = s.split(',')
 	return (int(x), int(y))
 
+def load_config():
+	sections = { "display", "tdl_font", "debug" }
+	path = os.path.join(appdirs.user_config_dir(prog_name, prog_author), "config")
+	if not os.path.exists(path):
+		print(f"warning: main config file does not exist: {path}", file=sys.stderr)
+
+	parser = configparser.ConfigParser()
+	parser.read(path)
+
+	for section in sections:
+		if section not in parser:
+			parser[section] = {}
+
+	return parser
+
 def load_keys():
 	sections = { "main", "dialogs" }
 	path = os.path.join(appdirs.user_config_dir(prog_name, prog_author), "keys")
 	if not os.path.exists(path):
 		print(f"warning: keys config file does not exist: {path}", file=sys.stderr)
+
 	keybindings = keys.CompoundKeybindings(sections)
 	keybindings.load(path)
 	try:
@@ -36,21 +53,60 @@ def load_keys():
 		print(f"warning: unknown command in keys file: {e}", file=sys.stderr)
 	return keybindings
 
+def normalize_display_opts(opts):
+	norm_opts = {}
+	for key in { 'width', 'height' }:
+		if key in opts:
+			norm_opts[key] = int(opts[key])
+	for key in { 'fullscreen' }:
+		if key in opts:
+			norm_opts[key] = opts.getboolean(key.lower())
+	return norm_opts
+
+def normalize_font_opts(opts):
+	norm_opts = {}
+	if 'path' in opts:
+		norm_opts['path'] = os.path.expanduser(opts['path'])
+	for key in { 'columns', 'rows' }:
+		if key in opts:
+			norm_opts[key] = int(opts[key])
+	for key in { 'greyscale', 'columnFirst', 'altLayout' }:
+		if key in opts:
+			norm_opts[key] = opts.getboolean(key.lower())
+	return norm_opts
+
+def normalize_debug_opts(opts):
+	norm_opts = {}
+	if 'log_events':
+		norm_opts['log_events'] = opts.getboolean('log_events')
+	return norm_opts
+
+def normalize_config(config):
+	config = dict(config)
+	changes = (
+		('display', normalize_display_opts),
+		('tdl_font', normalize_font_opts),
+		('debug', normalize_debug_opts)
+	)
+	for key, changer in changes:
+		config[key] = changer(config[key])
+	return config
+
 if __name__ == '__main__':
 	import argparse
 
 	parser = argparse.ArgumentParser(description="Wastrl")
 	parser.add_argument('-r', '--resolution', metavar="X,Y",
-		dest = "resolution", type = int_pair, default = (80, 50),
+		dest = "resolution", type = int_pair, default = None,
 		help = "Resolution of display in characters."
 	)
-	parser.add_argument('-F', '--font', metavar="PATH",
-		dest = "font_path", type = str, default = None,
-		help = "Path to font image file."
-	)
 	parser.add_argument('-f', '--fullscreen',
-		dest = "fullscreen", default = False, action = 'store_true',
+		dest = "fullscreen", default = None, action = 'store_true',
 		help = "Use fullscreen display."
+	)
+	parser.add_argument('-w', '--windowed',
+		dest = "windowed", default = None, action = 'store_true',
+		help = "Use windowed display."
 	)
 	parser.add_argument('-s', '--seed',
 		dest = "rng_seed", type = int, default = None,
@@ -62,9 +118,24 @@ if __name__ == '__main__':
 	)
 	args = parser.parse_args()
 
+	config = normalize_config(load_config())
 	keybindings = load_keys()
 
-	with ui.Display(screen_dim=args.resolution, fullscreen=args.fullscreen, title="Wastrl", font_path=args.font_path) as disp:
+	if args.resolution is not None:
+		resolution = args.resolution
+	else:
+		resolution = config['display']['width'], config['display']['height']
+	if args.windowed is not None:
+		fullscreen = False
+	elif args.fullscreen is not None:
+		fullscreen = True
+	else:
+		fullscreen = config['display']['fullscreen']
+
+	if config['debug']['log_events']:
+		data.event_debug = True
+
+	with ui.Display(screen_dim=resolution, fullscreen=fullscreen, title="Wastrl", font_opts=config['tdl_font']) as disp:
 		def start_game(seed=None, do_intro=True):
 			loading_view = basic_ui.LoadingView("Creating game", "Please wait while the game is being created.")
 			disp.views.add(loading_view)

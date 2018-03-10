@@ -1,0 +1,9 @@
+[display]
+width = 80
+height = 50
+fullscreen = false
+
+[tdl_font]
+path = arial12x12.png
+greyscale = yes
+altLayout = yes
