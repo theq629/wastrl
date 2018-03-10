@@ -52,8 +52,8 @@ def get_ranges(starts, terrain, move_range, fire_range):
 
 	fire_range_2 = fire_range**2
 	fire_points = set()
-	for x in range(max(0, min(x for x, _ in move_points) - fire_range), min(terrain.dim[0] - 1, max(x for x, _ in move_points) + fire_range + 1)):
-		for y in range(max(0, min(y for _, y in move_points) - fire_range), min(terrain.dim[1] - 1, max(y for _, y in move_points) + fire_range + 1)):
+	for x in range(max(0, min(x for x, _ in move_points) - fire_range), min(terrain.dim[0], max(x for x, _ in move_points) + fire_range + 1)):
+		for y in range(max(0, min(y for _, y in move_points) - fire_range), min(terrain.dim[1], max(y for _, y in move_points) + fire_range + 1)):
 			pos = x, y
 			if any(sum((p[i] - pos[i])**2 for i in range(2)) <= fire_range_2 for p in move_points):
 				fire_points.add(pos)
