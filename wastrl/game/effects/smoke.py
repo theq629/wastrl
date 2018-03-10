@@ -54,10 +54,11 @@ def handle_turn(rng):
 			_smoke_density[thing] -= 1
 			if density > 1:
 				pos = props.position[thing]
-				new_smoke = make_smoke(rng)
 				new_pos = move_smoke(pos, density, rng)
-				props.position[new_smoke] = new_pos
-				_smoke_density[new_smoke] = density - 1
-				events.move.trigger(thing, None, new_pos)
+				if not any(t in _smoke_density for t in props.things_at[new_pos]):
+					new_smoke = make_smoke(rng)
+					props.position[new_smoke] = new_pos
+					_smoke_density[new_smoke] = density - 1
+					events.move.trigger(thing, None, new_pos)
 	
 	return len(smoke_densities) > 0
