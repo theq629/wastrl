@@ -273,9 +273,14 @@ class PlayerController:
 				self._map_win.targeting = tuple(self._map_win.targeting[i] + delta[i] for i in range(2))
 			elif self._is_our_turn:
 				pos = tuple(props.position[self._player][i] + delta[i] for i in range(2))
-				if any(t in props.is_blocking for t in props.things_at[pos]) and len(props.intrinsics[self._player]) > 0:
-					events.act.trigger(self._player, actions.Activate(self._player, next(iter(props.intrinsics[self._player])), pos))
-				else:
+				attacked = False
+				try:
+					if any(t in props.is_blocking for t in props.things_at[pos]) and len(props.intrinsics[self._player]) > 0:
+						events.act.trigger(self._player, actions.Activate(self._player, next(iter(props.intrinsics[self._player])), pos))
+						attacked = True
+				except KeyError:
+					pass
+				if not attacked:
 					events.act.trigger(self._player, actions.Move(self._player, delta))
 		return handle
 

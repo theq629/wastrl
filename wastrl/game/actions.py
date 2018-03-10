@@ -49,7 +49,12 @@ class Move(Base):
 			return None
 		x, y = props.position[self._actor]
 		x, y = x + dx, y + dy
-		if any(t in props.is_blocking for t in props.things_at[x, y]):
+		if (x, y) not in props.things_at:
+			return None
+		try:
+			if any(t in props.is_blocking for t in props.things_at[x, y]):
+				return None
+		except KeyError:
 			return None
 		t = props.terrain_at[x, y]
 		try:

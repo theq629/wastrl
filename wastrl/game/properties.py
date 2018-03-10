@@ -4,7 +4,12 @@ from .. import data
 class MapProperty(data.BaseProperty):
 	__slots__ = (
 		'map',
+		'default'
 	)
+
+	def __init__(self, default=None):
+		self.map = None
+		self.default = default
 
 	def __contains__(self, pos):
 		try:
@@ -17,15 +22,21 @@ class MapProperty(data.BaseProperty):
 		try:
 			x, y = pos
 		except TypeError:
-			raise KeyError()
-		return self.map[pos]
+			return self.default
+		try:
+			return self.map[pos]
+		except:
+			return self.default
 
 	def __setitem__(self, pos, value):
 		try:
 			x, y = pos
 		except TypeError:
-			raise KeyError()
-		self.map[pos] = value
+			return self.default
+		try:
+			self.map[pos] = value
+		except:
+			return self.default
 
 	def clear(self):
 		pass
@@ -69,5 +80,5 @@ is_goal = data.SetProperty()
 is_player = data.SetProperty()
 
 terrain_at = MapProperty()
-things_at = MapProperty()
-blocked_at = MapProperty()
+things_at = MapProperty(set())
+blocked_at = MapProperty(False)

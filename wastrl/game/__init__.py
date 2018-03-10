@@ -162,6 +162,7 @@ class Game:
 		reset_data()
 
 		props.terrain_at.map = self.terrain
+		props.terrain_at.default = things.desert
 		props.things_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: set())
 		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
 		ai.Ai(self.rng, self.terrain)

@@ -32,15 +32,23 @@ class Tilemap:
 
 	def __getitem__(self, pos):
 		x, y = pos
+		if x < 0 or x >= self.dim[0] or y < 0 or y >= self.dim[1]:
+			raise KeyError()
 		return self._storage[y * self._dim[0] + x]
 
 	def __setitem__(self, pos, value):
 		x, y = pos
+		if x < 0 or x >= self.dim[0] or y < 0 or y >= self.dim[1]:
+			raise KeyError()
 		self._storage[y * self._dim[0] + x] = value
 
 	def fill(self, value):
 		for i in range(len(self._storage)):
 			self._storage[i] = value
+
+	def __contains__(self, pos):
+		x, y = pos
+		return x >= 0 and y >= 0 and x < self._dim[0] and y < self._dim[1]
 
 	def neighbours(self, pos):
 		x, y = pos
@@ -100,7 +108,8 @@ def _dijkstra(graph, starts, touch, cost, max_dist=None):
 
 	fringe = SearchFringe()
 	for start in starts:
-		fringe.put(start, 0)
+		if graph is None or start in graph:
+			fringe.put(start, 0)
 	while not fringe.is_empty():
 		node = fringe.pop()
 		node_dist = fringe.get(node)
