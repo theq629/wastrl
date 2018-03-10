@@ -75,7 +75,7 @@ class MessageHandler:
 		things_there = tuple(props.things_at[pos])
 		things_there_blocking_local = tuple(t for t in things_there if t in props.blocks_local_vision)
 		things = (props.terrain_at[pos],)
-		if len(things_there_blocking_local) > 0:
+		if pos != props.position[self.player] and len(things_there_blocking_local) > 0:
 			things += things_there_blocking_local
 		else:
 			things += things_there
