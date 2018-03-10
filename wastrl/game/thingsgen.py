@@ -169,6 +169,7 @@ def set_starting_kit(player):
 		things.missile_of_fire_bomb,
 		things.missile_of_nuclear_warhead,
 		things.missile_of_smoke,
+		things.missile_of_gas,
 		things.device_of_mapping,
 		things.device_of_restoration
 	]

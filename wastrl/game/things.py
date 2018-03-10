@@ -3,6 +3,7 @@ from . import properties as props
 from .effects import damage as effect_damage
 from .effects import explosion as effect_explosion
 from .effects import smoke as effect_smoke
+from .effects import gas as effect_gas
 from .effects import fire as effect_fire
 from .effects import desertify as effect_desertify
 
@@ -56,6 +57,14 @@ smoke = {
 	props.name: "smoke",
 	props.name_article: "some",
 	props.graphics: props.Graphics(char='&', colour=0xffffff),
+	props.is_visual: True,
+	props.blocks_vision: True
+}
+
+gas = {
+	props.name: "gas",
+	props.name_article: "some",
+	props.graphics: props.Graphics(char='&', colour=0x999999),
 	props.is_visual: True,
 	props.blocks_vision: True
 }
@@ -144,6 +153,17 @@ bite = Thing(_intrinsic, {
 
 fire_attack = Thing(_intrinsic, {
 	props.name: "fire attack",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 0,
+		fire_range = 10,
+	),
+	effect_fire.activates_as: effect_fire.Params(
+		radius = 2
+	)
+})
+
+gas_attack = Thing(_intrinsic, {
+	props.name: "gas attack",
 	props.activation_target_range: props.ActivationTargetRange(
 		move_range = 0,
 		fire_range = 10,
@@ -273,6 +293,18 @@ def missile_of_smoke():
 			fire_range = 15,
 		),
 		effect_smoke.activates_as: effect_smoke.Params(
+			radius = 3
+		)
+	})
+
+def missile_of_gas():
+	return Thing(_missile, {
+		props.name: "missile of gas",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_gas.activates_as: effect_gas.Params(
 			radius = 3
 		)
 	})
