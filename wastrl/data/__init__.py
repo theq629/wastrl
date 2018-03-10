@@ -2,6 +2,8 @@ import sys
 import traceback
 import collections
 
+event_debug = False
+
 class _HandlerCollection:
 	__slots__ = (
 		'_prepared',
@@ -37,19 +39,28 @@ class Event:
 	__slots__ = (
 		'_init_value',
 		'_fold_f',
-		'_on'
+		'_on',
+		'_name',
+		'debug'
 	)
 
-	def __init__(self, init_value=None, fold_f=lambda a, b: None):
+	def __init__(self, init_value=None, fold_f=lambda a, b: None, name=None, debug=None):
 		self._init_value = init_value
 		self._fold_f = fold_f
 		self._on = _HandlerCollection()
+		self._name = name
+		self.debug = event_debug if debug is None else debug
 
 	@property
 	def on(self):
 		return self._on
 
 	def trigger(self, *args, **kwargs):
+		if self.debug:
+			name_str = "" if self._name is None else " " + self._name
+			dbg_args = tuple(a.index if isinstance(a, Thing) else a for a in args)
+			dbg_kwargs = dict((k, a.index if isinstance(a, Thing) else a) for k, a in kwargs.items())
+			print(f"event{name_str}", dbg_args, dbg_kwargs, file=sys.stderr)
 		value = self._init_value
 		for _, f in self._on:
 			try:
