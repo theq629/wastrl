@@ -10,3 +10,4 @@ altLayout = yes
 
 [ui]
 dialog_max_width = 80
+status_bar_width = 20

@@ -92,6 +92,8 @@ def normalize_ui_opts(opts):
 		norm_opts['dialog_max_width'] = int(opts['dialog_max_width'])
 	else:
 		norm_opts['dialog_max_width'] = 80
+	if 'status_bar_width' in opts:
+		norm_opts['status_bar_width'] = int(opts['status_bar_width'])
 	return norm_opts
 
 def normalize_debug_opts(opts):
@@ -152,6 +154,12 @@ def main():
 	else:
 		fullscreen = config['display']['fullscreen']
 
+	main_view_opts = {
+		'dialog_max_width': config['ui']['dialog_max_width']
+	}
+	if 'status_bar_width' in config['ui']:
+		main_view_opts['bar_width'] = config['ui']['status_bar_width']
+
 	if config['debug']['log_events']:
 		data.event_debug = True
 
@@ -162,7 +170,7 @@ def main():
 			if seed is None:
 				seed = int(time.time() * 1000)
 			the_game = game.Game(seed)
-			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'], dialog_max_width=config['ui']['dialog_max_width'])
+			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'], **main_view_opts)
 			loading_view.close()
 			disp.views.add(view)
 			if do_intro:
