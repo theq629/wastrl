@@ -1,3 +1,6 @@
 __pycache__
 .mypy_cache
 venv
+wastrl.egg-info
+build
+dist
