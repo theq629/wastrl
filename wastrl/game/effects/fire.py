@@ -6,6 +6,7 @@ from .. import events
 from .. import utils
 from . import smoke as effect_smoke
 
+damage_range = (3, 10)
 burn_down_prob = 0.9
 spread_prob = 0.75
 go_out_prob = 0.1
@@ -45,6 +46,8 @@ def handle_turn(rng):
 	fires = tuple(_fire.items())
 	for fire, strength in fires:
 		pos = props.position[fire]
+		for thing in tuple(t for t in props.things_at[pos] if t in props.is_alive):
+			events.take_damage.trigger(thing, rng.randint(*damage_range))
 		if rng.uniform(0, 1) < burn_down_prob:
 			props.terrain_at[pos] = things.desert
 		if rng.uniform(0, 1) < smoke_prob:
