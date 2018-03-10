@@ -10,6 +10,7 @@ from . import events
 from . import utils
 from . import ai
 from . import tilemap
+from .logic import fov as logic_fov
 import sys # TODO: improve logging
 
 class TurnManager:

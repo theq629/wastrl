@@ -75,6 +75,8 @@ blocks_vision = data.SetProperty()
 blocks_local_vision = data.SetProperty()
 is_flamable = data.SetProperty()
 is_guarding_city = data.SetProperty()
+fov = data.ValuedProperty()
+seen_fov = data.ValuedProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

@@ -98,8 +98,8 @@ def normalize_ui_opts(opts):
 
 def normalize_debug_opts(opts):
 	norm_opts = {}
-	if 'log_events':
-		norm_opts['log_events'] = opts.getboolean('log_events')
+	norm_opts['log_events'] = opts.getboolean('log_events')
+	norm_opts['ignore_fov'] = opts.getboolean('ignore_fov')
 	return norm_opts
 
 def normalize_config(config):
@@ -162,6 +162,7 @@ def main():
 
 	if config['debug']['log_events']:
 		data.event_debug = True
+	main_view_opts['ignore_fov'] = config['debug']['ignore_fov']
 
 	with ui.Display(screen_dim=resolution, fullscreen=fullscreen, title="Wastrl", font_opts=config['tdl_font']) as disp:
 		def start_game(seed=None, do_intro=True):

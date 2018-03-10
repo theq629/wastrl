@@ -341,6 +341,8 @@ def player():
 		props.name: "band of people",
 		props.graphics: props.Graphics(char='@', colour=0xffffff),
 		props.is_player: True,
+		props.fov: set(),
+		props.seen_fov: set(),
 		props.action_points: 5,
 		props.population: 100,
 		props.inventory: set(),

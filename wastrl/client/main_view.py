@@ -12,6 +12,12 @@ from . import texts
 
 keys_for_inventory_menu = tuple("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
+def hex_to_rgb(x):
+	b = x & 0x0000ff
+	g = (x & 0x00ff00) >> 8
+	r = (x & 0xff0000) >> 16
+	return (r, g, b)
+
 class MessageHandler:
 	__slots__ = (
 		'player',
@@ -319,7 +325,7 @@ class PlayerController:
 
 	def get_target_range(self, thing):
 		act_range = props.activation_target_range[thing]
-		return game_utils.get_ranges((props.position[self._player],), self._game.terrain, act_range.move_range, act_range.fire_range)
+		return game_utils.get_ranges((props.position[self._player],), act_range.move_range, act_range.fire_range)
 
 	def start_targeting(self, callback, points=None):
 		self._map_win.start_targeting(points)
@@ -416,6 +422,7 @@ class MapWin(ui.Window):
 	__slots__ = (
 		'_game',
 		'_player',
+		'_ignore_fov',
 		'_player_actions',
 		'_view_controller',
 		'_free_view',
@@ -428,10 +435,11 @@ class MapWin(ui.Window):
 		'_target_fire_points'
 	)
 
-	def __init__(self, game, player, *args, **kwargs):
+	def __init__(self, game, player, ignore_fov=False, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._game = game
 		self._player = player
+		self._ignore_fov = ignore_fov
 		self.on_redraw.add(self.handle_redraw)
 		self._player_actions = []
 		self._view_controller = ViewController(self._player, self.on_key)
@@ -456,6 +464,8 @@ class MapWin(ui.Window):
 		world_dim = self._game.terrain.dim
 		self.world_offset = tuple(view_centre[i] - int(self.dim[i] / 2) for i in range(2))
 		screen_bounds = tuple((max(0, -self.world_offset[i]), min(self.dim[i], world_dim[i] - self.world_offset[i])) for i in range(2))
+		fov_points = props.fov[self._player]
+		seen_points = props.seen_fov[self._player]
 
 		# TODO: cache
 		# TODO: make sure creatures are on top
@@ -471,21 +481,26 @@ class MapWin(ui.Window):
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_pos = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
-				terrain = self._game.terrain[world_x, world_y]
-				graphic = props.graphics[terrain]
-				bg = 0x000000
-				if self.targeting is not None and world_pos == self.targeting:
-					bg = 0xcc0000
-				elif self.targeting is not None and world_pos in self._target_move_points:
-					bg = 0x440000
-				elif self.targeting is not None and world_pos in self._target_fire_points:
-					bg = 0x330000
-				elif world_pos in self._player_can_move_to:
-					bg = 0x111111
-				thing_graphic = things_to_draw.get((screen_x, screen_y))
-				if thing_graphic is not None:
-					graphic = thing_graphic
-				console.draw_char(screen_x, screen_y, char=graphic.char, fg=graphic.colour, bg=bg)
+				if self._ignore_fov or world_pos in seen_points:
+					terrain = self._game.terrain[world_x, world_y]
+					graphic = props.graphics[terrain]
+					bg = 0x000000
+					if self.targeting is not None and world_pos == self.targeting:
+						bg = 0xcc0000
+					elif self.targeting is not None and world_pos in self._target_move_points:
+						bg = 0x440000
+					elif self.targeting is not None and world_pos in self._target_fire_points:
+						bg = 0x330000
+					elif world_pos in self._player_can_move_to:
+						bg = 0x111111
+					thing_graphic = things_to_draw.get((screen_x, screen_y))
+					if thing_graphic is not None:
+						graphic = thing_graphic
+					fg = graphic.colour
+					if world_pos not in fov_points:
+						fg = hex_to_rgb(fg)
+						fg = tuple(int(x * 0.25) for x in fg)
+					console.draw_char(screen_x, screen_y, char=graphic.char, fg=fg, bg=bg)
 
 	def is_on_screen(self, world_pos):
 		world_x, world_y = world_pos
@@ -566,7 +581,7 @@ class MainView(ui.View):
 		'_msg_handler'
 	)
 
-	def __init__(self, display, full_keybindings, the_game, bar_width=20, dialog_max_width=80, *args, **kwargs):
+	def __init__(self, display, full_keybindings, the_game, ignore_fov=False, bar_width=20, dialog_max_width=80, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._display = display
 		self._full_keybindings = full_keybindings
@@ -575,7 +590,7 @@ class MainView(ui.View):
 		self._bar_width = bar_width
 		self._dialog_max_width = dialog_max_width
 		self._status_win = StatusWin(self._player)
-		self._map_win = MapWin(self._game, self._player, keybindings=self.keybindings)
+		self._map_win = MapWin(self._game, self._player, ignore_fov=ignore_fov, keybindings=self.keybindings)
 		log_colours = basic_ui.default_colours._replace(
 			background = 0x222222,
 			text = 0x888888
