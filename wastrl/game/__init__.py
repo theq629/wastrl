@@ -70,10 +70,10 @@ class TurnManager:
 
 	def _handle_action(self, actor, action):
 		if actor != self._taking_turn:
-			print(f"warning: actor {actor.index} acting out of turn")
+			print(f"warning: actor {actor} acting out of turn")
 		else:
 			if action.ap is None or action.ap > props.action_points_this_turn[actor]:
-				print(f"warning: actor {actor.index} requested impossible action")
+				print(f"warning: actor {actor} requested impossible action")
 				if actor not in props.is_player:
 					_to_act_this_turn.remove(self._taking_turn)
 			else:
@@ -175,7 +175,7 @@ class Game:
 		utils.spawn(player, starting_point)
 		self._player = player
 
-		print("player:", player.index, file=sys.stderr)
+		print("player:", player, file=sys.stderr)
 
 		thingsgen.set_starting_kit(player) # TODO: debugging
 

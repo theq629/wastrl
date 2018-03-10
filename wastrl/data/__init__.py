@@ -58,9 +58,7 @@ class Event:
 	def trigger(self, *args, **kwargs):
 		if self.debug:
 			name_str = "" if self._name is None else " " + self._name
-			dbg_args = tuple(a.index if isinstance(a, Thing) else a for a in args)
-			dbg_kwargs = dict((k, a.index if isinstance(a, Thing) else a) for k, a in kwargs.items())
-			print(f"event{name_str}", dbg_args, dbg_kwargs, file=sys.stderr)
+			print(f"event{name_str}", args, kwargs, file=sys.stderr)
 		value = self._init_value
 		for _, f in self._on:
 			try:
@@ -217,25 +215,18 @@ class OrderedSetProperty(BaseProperty):
 			except KeyError:
 				pass
 
-class Thing:
-	_next_thing_index = 0
+_next_thing_index = 0
 
-	__slots__ = (
-		'_index',
-	)
-
-	def __init__(self, setup={}):
-		self._index = Thing._next_thing_index
-		Thing._next_thing_index += 1
-		for property, value in setup.items():
-			if hasattr(property, '__setitem__'):
-				property[self] = value
-			elif value:
-				property.add(self)
-
-	@property
-	def index(self):
-		return self._index
+def Thing(setup={}):
+	global _next_thing_index
+	thing = _next_thing_index
+	_next_thing_index += 1
+	for property, value in setup.items():
+		if hasattr(property, '__setitem__'):
+			property[thing] = value
+		elif value:
+			property.add(thing)
+	return thing
 
 def reset():
 	BaseProperty.all.clear()
