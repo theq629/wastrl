@@ -7,6 +7,7 @@ from .effects import fire as effect_fire
 from .effects import desertify as effect_desertify
 
 def Thing(init, *other_inits):
+	init = dict(init.items())
 	init.update(*other_inits)
 	return data.Thing(init)
 
