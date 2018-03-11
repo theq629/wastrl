@@ -24,7 +24,7 @@ class Tilemap:
 
 	def __init__(self, dim, init=lambda _: None):
 		self._dim = dim
-		self._storage = [init((x, y)) for x in range(dim[0]) for y in range(dim[1])]
+		self._storage = [init((x, y)) for y in range(dim[1]) for x in range(dim[0])]
 
 	@property
 	def dim(self):
