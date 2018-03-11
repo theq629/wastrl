@@ -195,6 +195,7 @@ def goal():
 def rifiles():
 	return Thing(_weapon, {
 		props.name: "rifiles",
+		props.name_article: "",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 10,
 			fire_range = 0,
@@ -260,6 +261,7 @@ def cannon():
 def saturation_artillery():
 	return Thing(_weapon, {
 		props.name: "saturation artillery",
+		props.name_article: "",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 10,
@@ -273,6 +275,7 @@ def saturation_artillery():
 def artillery():
 	return Thing(_weapon, {
 		props.name: "artillery",
+		props.name_article: "",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 15,
