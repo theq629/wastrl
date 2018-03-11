@@ -154,6 +154,7 @@ table = (
 	),
 	Area(
 		normal = [
+			((3, 5), things.laser_bot),
 			((0, 2), things.rifles),
 			((1, 2), things.gatling_gun),
 			((1, 2), things.armoured_car),
@@ -195,6 +196,7 @@ table = (
 				((0, 1), things.missile_of_nuclear_warhead),
 			],
 			guardian = [
+				things.nuclear_robot
 			]
 		)
 	),

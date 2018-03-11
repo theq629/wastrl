@@ -186,6 +186,40 @@ gas_attack = Thing(_intrinsic, {
 	)
 })
 
+local_gas_attack = Thing(_intrinsic, {
+	props.name: "gas",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 0,
+		fire_range = 0,
+	),
+	effect_gas.activates_as: effect_gas.Params(
+		radius = 3
+	)
+})
+
+gas_attack = Thing(_intrinsic, {
+	props.name: "gas attack",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 5,
+		fire_range = 5,
+	),
+	effect_gas.activates_as: effect_gas.Params(
+		radius = 2
+	)
+})
+
+laser_eyes = Thing(_intrinsic, {
+	props.name: "laser eyes",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 0,
+		fire_range = 15,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (20, 30),
+		radius = 1
+	)
+})
+
 def city():
 	return Thing({
 		props.name: "city ruin",
@@ -486,6 +520,77 @@ def fire_ant():
 		props.intrinsics: {
 			bite,
 			fire_attack
+		}
+	})
+
+def skunk():
+	return Thing(_creature, {
+		props.name: "skunk",
+		props.graphics: props.Graphics(char='s', colour=0x555555),
+		props.action_points: 10,
+		props.population: 15,
+		props.inventory: set(),
+		props.gas_immunity: True,
+		props.intrinsics: {
+			bite,
+			local_gas_attack
+		}
+	})
+
+def dire_skunk():
+	return Thing(_creature, {
+		props.name: "dire skunk",
+		props.graphics: props.Graphics(char='s', colour=0xff5555),
+		props.action_points: 10,
+		props.population: 15,
+		props.inventory: set(),
+		props.gas_immunity: True,
+		props.intrinsics: {
+			bite,
+			local_gas_attack,
+			gas_attack
+		}
+	})
+
+def laser_bot():
+	return Thing(_creature, {
+		props.name: "laser bot",
+		props.graphics: props.Graphics(char='b', colour=0xbbbbbb),
+		props.action_points: 10,
+		props.population: 30,
+		props.inventory: set(),
+		props.intrinsics: {
+			laser_eyes
+		}
+	})
+
+def warrior_bot():
+	return Thing(_creature, {
+		props.name: "warrior bot",
+		props.graphics: props.Graphics(char='b', colour=0xffffbb),
+		props.action_points: 10,
+		props.population: 40,
+		props.inventory: {
+			gatling_gun()
+		},
+		props.intrinsics: {
+			laser_eyes
+		}
+	})
+
+def nuclear_robot():
+	return Thing(_creature, {
+		props.name: "nuclear robot",
+		props.graphics: props.Graphics(char='b', colour=0xeeeeee),
+		props.action_points: 10,
+		props.population: 30,
+		props.inventory: {
+			missile_of_nuclear_warhead(),
+			missile_of_nuclear_warhead(),
+			missile_of_nuclear_warhead(),
+		},
+		props.intrinsics: {
+			laser_eyes
 		}
 	})
 
