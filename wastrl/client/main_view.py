@@ -66,8 +66,7 @@ class MessageHandler:
 		self.message("{actor} dies.", actor=self.capitalize(self.name_thing(actor)))
 
 	def handle_activate(self, thing, actor, target_pos, _rng):
-		if actor == self.player:
-			self.message("You activate {thing}.", thing=self.name_thing(thing))
+		self.message("{actor} activate{s} {thing}.", actor=self.capitalize("you" if actor == self.player else self.name_thing(actor)), s="" if actor == self.player else "s", thing=self.name_thing(thing))
 
 	def handle_get(self, actor, thing):
 		if actor == self.player:
