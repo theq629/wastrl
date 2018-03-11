@@ -20,7 +20,6 @@ class Menu(ui.View):
 		self._dialog_max_width = dialog_max_width
 		self._menu_win = self.make_menu_win()
 		self.windows.add(self._menu_win)
-		#self.on_frame.add(self.handle_frame) # TODO
 		self.on_resize.add(self.resize)
 
 	def make_menu_win(self):
