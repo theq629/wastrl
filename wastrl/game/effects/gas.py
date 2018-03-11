@@ -39,6 +39,12 @@ def start(points, rng):
 		_gas_density[gas] = rng.randint(5, 10)
 		events.move.trigger(gas, None, pos)
 
+@events.examine.on.handle(1)
+def examine_activatable(thing, detailed):
+	if detailed and thing in activates_as:
+		params = activates_as[thing]
+		return f"(gas :{params.radius})"
+
 @events.activate.on.handle()
 def handle_activation(thing, actor, target_pos, rng):
 	if thing in activates_as:

@@ -21,4 +21,4 @@ def base_examine(thing, detailed):
 def examine_activatable(thing, detailed):
 	if detailed and thing in props.activation_target_range:
 		params = props.activation_target_range[thing]
-		return f"[{params.move_range}:{params.fire_range}]"
+		return f"[{params.move_range}+{params.fire_range}]"

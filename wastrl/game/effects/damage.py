@@ -12,6 +12,13 @@ Params = collections.namedtuple('Params', (
 
 activates_as = data.ValuedProperty()
 
+@events.examine.on.handle(1)
+def examine_activatable(thing, detailed):
+	if detailed and thing in activates_as:
+		params = activates_as[thing]
+		dmg_str = "-".join(str(x) for x in params.damage)
+		return f"(damage {dmg_str}:{params.radius})"
+
 @events.activate.on.handle()
 def handle_activation(thing, actor, target_pos, rng):
 	if thing in activates_as:

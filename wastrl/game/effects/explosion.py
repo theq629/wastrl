@@ -43,6 +43,13 @@ def explode(points, rng):
 		props.position[explosion] = pos
 		_explosion_times[explosion] = rng.randint(2, 3)
 
+@events.examine.on.handle(1)
+def examine_activatable(thing, detailed):
+	if detailed and thing in activates_as:
+		params = activates_as[thing]
+		dmg_str = "-".join(str(x) for x in params.damage)
+		return f"(explosion {dmg_str}:{params.radius})"
+
 @events.activate.on.handle()
 def handle_activation(thing, actor, target_pos, rng):
 	if thing in activates_as:
