@@ -4,6 +4,8 @@ A roguelike/TBS about getting a band of people across a post-apocalyptic wastela
 
 Mostly an experiment in using traditional roguelike mechanics in more general TBS wargame-like setting.
 
+See `GAMEPLAY.md` for more about gameplay.
+
 ## Platforms
 
 Tested on Linux. Should run on OSX and Windows too.
