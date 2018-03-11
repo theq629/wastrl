@@ -13,7 +13,8 @@ Params = collections.namedtuple('Params', (
 ))
 
 chance_of_smoke = 0.25
-chance_of_fire = 0.1
+chance_of_fire = 0.01
+chance_of_fire_on_flamable = 0.1
 
 activates_as = data.ValuedProperty()
 
@@ -35,7 +36,10 @@ def make_explosion_smoke(rng):
 
 def explode(points, rng):
 	for pos in points:
-		if rng.uniform(0, 1) < chance_of_fire:
+		u = rng.uniform(0, 1)
+		if u < chance_of_fire:
+			effect_fire.start((pos,), rng)
+		elif u < chance_of_fire_on_flamable and props.terrain_at[pos] in props.is_flamable:
 			effect_fire.start((pos,), rng)
 		if rng.uniform(0, 1) < chance_of_smoke:
 			effect_smoke.start((pos,), rng)
