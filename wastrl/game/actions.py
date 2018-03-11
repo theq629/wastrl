@@ -132,29 +132,33 @@ class Activate(Base):
 		super().__init__()
 
 	def _is_valid(self):
-		actor_pos = props.position[self._actor]
-		act_range = props.activation_target_range[self._thing]
-		fire_range_2 = act_range.fire_range**2
+		if self._thing not in props.activation_target_range:
+			return self._target_pos is None or (self._actor in props.position and props.position[self._actor] == self._target_pos)
 
-		if sum((actor_pos[i] - self._target_pos[i])**2 for i in range(2)) > (act_range.move_range / min_terrain_cost + act_range.fire_range)**2:
-			return False
+		else:
+			actor_pos = props.position[self._actor]
+			act_range = props.activation_target_range[self._thing]
+			fire_range_2 = act_range.fire_range**2
 
-		move_points = set()
-		def touch(pos, dist):
-			move_points.add(pos)
-			return True
-		tilemap.dijkstra(
-			starts = (actor_pos,),
-			touch = touch,
-			cost = utils.walk_cost_prop,
-			max_dist = act_range.move_range
-		)
+			if sum((actor_pos[i] - self._target_pos[i])**2 for i in range(2)) > (act_range.move_range / min_terrain_cost + act_range.fire_range)**2:
+				return False
 
-		for point in move_points:
-			r = sum((point[i] - self._target_pos[i])**2 for i in range(2))
-			if r <= fire_range_2:
+			move_points = set()
+			def touch(pos, dist):
+				move_points.add(pos)
 				return True
-		return False
+			tilemap.dijkstra(
+				starts = (actor_pos,),
+				touch = touch,
+				cost = utils.walk_cost_prop,
+				max_dist = act_range.move_range
+			)
+
+			for point in move_points:
+				r = sum((point[i] - self._target_pos[i])**2 for i in range(2))
+				if r <= fire_range_2:
+					return True
+			return False
 
 	def _calc_ap(self):
 		if self._is_valid():
