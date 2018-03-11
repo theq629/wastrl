@@ -160,7 +160,7 @@ class Ai:
 			actor_pos = props.position[actor]
 
 			if can_see_player and actor in props.intrinsics:
-				can_use = tuple(props.intrinsics[actor])
+				can_use = tuple(props.intrinsics[actor]) + tuple(props.inventory[actor])
 				num_can_use = len(can_use)
 				if num_can_use > 0:
 					to_use = can_use[self._rng.randint(0, num_can_use - 1)]
