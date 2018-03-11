@@ -338,6 +338,9 @@ def set_starting_kit(player):
 		things.missile_of_nuclear_warhead,
 		things.missile_of_smoke,
 		things.missile_of_gas,
+		things.device_of_teleport,
+		things.device_of_super_teleport,
+		things.device_of_teleport_away,
 	]
 	for make in makers:
 		thing = make()

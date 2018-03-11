@@ -6,6 +6,8 @@ from .effects import smoke as effect_smoke
 from .effects import gas as effect_gas
 from .effects import fire as effect_fire
 from .effects import desertify as effect_desertify
+from .effects import teleport as effect_teleport
+from .effects import teleport_away as effect_teleport_away
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -461,6 +463,36 @@ def missile_of_gas():
 		effect_gas.activates_as: effect_gas.Params(
 			radius = 3
 		)
+	})
+
+def device_of_super_teleport():
+	return Thing(_device, {
+		props.name: "device of super teleport",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 100,
+		),
+		effect_teleport.activates_as: True
+	})
+
+def device_of_teleport():
+	return Thing(_device, {
+		props.name: "device of teleport",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_teleport.activates_as: True
+	})
+
+def device_of_teleport_away():
+	return Thing(_device, {
+		props.name: "device of teleport away",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_teleport_away.activates_as: True
 	})
 
 def device_of_mapping():
