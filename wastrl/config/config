@@ -4,7 +4,7 @@ height = 60
 fullscreen = false
 
 [tdl_font]
-path = arial12x12.png
+path = consolas12x12_gs_tc.png
 greyscale = yes
 altLayout = yes
 
