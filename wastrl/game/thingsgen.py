@@ -161,10 +161,15 @@ def gen(terrain, mountain_spines,city_points, rng):
 
 def set_starting_kit(player):
 	makers = [
+		things.rifiles,
+		things.gatling_gun,
 		things.armoured_car,
 		things.tank,
 		things.cannon,
 		things.artillery,
+		things.saturation_artillery,
+		things.ray_gun,
+		things.repulsor,
 		things.missile_of_kaboom,
 		things.missile_of_fire_bomb,
 		things.missile_of_nuclear_warhead,

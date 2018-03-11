@@ -114,7 +114,8 @@ hand_to_hand = Thing(_intrinsic, {
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (5, 10)
+		damage = (5, 5),
+		radius = 0
 	)
 })
 
@@ -125,7 +126,8 @@ teeth = Thing(_intrinsic, {
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (1, 5)
+		damage = (1, 5),
+		radius = 0
 	)
 })
 
@@ -136,7 +138,8 @@ huge_teeth = Thing(_intrinsic, {
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (5, 10)
+		damage = (5, 10),
+		radius = 1
 	)
 })
 
@@ -147,7 +150,8 @@ bite = Thing(_intrinsic, {
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (3, 10)
+		damage = (3, 10),
+		radius = 0
 	)
 })
 
@@ -188,6 +192,32 @@ def goal():
 		props.is_goal: True
 	})
 
+def rifiles():
+	return Thing(_weapon, {
+		props.name: "rifiles",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 10,
+			fire_range = 0,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (5, 10),
+			radius = 1
+		)
+	})
+
+def gatling_gun():
+	return Thing(_weapon, {
+		props.name: "gatling gun",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 10,
+			fire_range = 0,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (1, 10),
+			radius = 2
+		)
+	})
+
 def armoured_car():
 	return Thing(_weapon, {
 		props.name: "armoured car",
@@ -196,7 +226,7 @@ def armoured_car():
 			fire_range = 0,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (1, 5),
+			damage = (5, 15),
 			radius = 1
 		)
 	})
@@ -206,10 +236,10 @@ def tank():
 		props.name: "tank",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 5,
-			fire_range = 0,
+			fire_range = 1,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (3, 10),
+			damage = (10, 15),
 			radius = 1
 		)
 	})
@@ -227,15 +257,54 @@ def cannon():
 		)
 	})
 
-def artillery():
+def saturation_artillery():
 	return Thing(_weapon, {
-		props.name: "artillery",
+		props.name: "saturation artillery",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 0,
 			fire_range = 10,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
 			damage = (1, 10),
+			radius = 4
+		)
+	})
+
+def artillery():
+	return Thing(_weapon, {
+		props.name: "artillery",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_explosion.activates_as: effect_explosion.Params(
+			damage = (1, 20),
+			radius = 1
+		)
+	})
+
+def ray_gun():
+	return Thing(_weapon, {
+		props.name: "ray gun",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 10,
+			fire_range = 0,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (10, 20),
+			radius = 1
+		)
+	})
+
+def repulsor():
+	return Thing(_weapon, {
+		props.name: "repulsor",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 1,
+			fire_range = 0,
+		),
+		effect_damage.activates_as: effect_damage.Params(
+			damage = (10, 30),
 			radius = 1
 		)
 	})
