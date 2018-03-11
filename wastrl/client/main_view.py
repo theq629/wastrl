@@ -176,7 +176,7 @@ class PlayerInterfaceManager:
 		for thing in missing:
 			del self._inventory_keys[thing]
 
-		for thing in inventory:
+		for thing in sorted(inventory, key=lambda t: props.name[t] if t in props.name else t):
 			if thing not in self._inventory_keys:
 				i = None
 				for j, key in enumerate(keys_for_inventory_menu):
