@@ -11,7 +11,7 @@ pip install ..
 version="$(pip show wastrl | grep '^Version:' | sed -e 's|^[A-Za-z]\+: *||g')"
 echo "packaging version $version"
 
-sed -e "s|{version}|$version|g" "readme.txt" > "temp/README"
+python finish_readme.py readme.txt "$version" ../GAMEPLAY.md > temp/README
 
 pyinstaller \
 	--name "wastrl-$version" \
