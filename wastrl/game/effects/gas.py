@@ -58,6 +58,7 @@ def handle_turn(rng):
 
 	for thing, density in gas_densities:
 		if density <= 0:
+			events.move.trigger(thing, props.position[thing], None)
 			data.BaseProperty.all.remove(thing)
 		elif rng.uniform(0, 1) < 0.5:
 			_gas_density[thing] -= 1
@@ -70,6 +71,6 @@ def handle_turn(rng):
 					new_gas = make_gas(rng)
 					props.position[new_gas] = new_pos
 					_gas_density[new_gas] = density - 1
-					events.move.trigger(thing, None, new_pos)
+					events.move.trigger(new_gas, None, new_pos)
 	
 	return len(gas_densities) > 0

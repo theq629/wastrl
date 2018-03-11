@@ -41,12 +41,14 @@ def handle_activation(thing, actor, target_pos, rng):
 			marker = make_marker(rng)
 			props.position[marker] = pos
 			_marker_times[marker] = marker_life
+			events.move.trigger(marker, None, pos)
 
 @events.update.on.handle()
 def handle_momentary(rng):
 	marker_times = list(_marker_times.items())
 	for thing, ticks in marker_times:
 		if ticks <= 0:
+			events.move.trigger(thing, props.position[thing], None)
 			data.BaseProperty.all.remove(thing)
 		else:
 			_marker_times[thing] -= 1

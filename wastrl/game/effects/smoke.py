@@ -55,6 +55,7 @@ def handle_turn(rng):
 
 	for thing, density in smoke_densities:
 		if density <= 0:
+			events.move.trigger(thing, props.position[thing], None)
 			data.BaseProperty.all.remove(thing)
 		elif rng.uniform(0, 1) < 0.5:
 			_smoke_density[thing] -= 1
@@ -65,6 +66,6 @@ def handle_turn(rng):
 					new_smoke = make_smoke(rng)
 					props.position[new_smoke] = new_pos
 					_smoke_density[new_smoke] = density - 1
-					events.move.trigger(thing, None, new_pos)
+					events.move.trigger(new_smoke, None, new_pos)
 	
 	return len(smoke_densities) > 0

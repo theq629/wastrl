@@ -432,7 +432,8 @@ class MapWin(ui.Window):
 		'_known_targets',
 		'_cur_target_index',
 		'_target_move_points',
-		'_target_fire_points'
+		'_target_fire_points',
+		'_things_map_cache'
 	)
 
 	def __init__(self, game, player, ignore_fov=False, *args, **kwargs):
@@ -450,14 +451,39 @@ class MapWin(ui.Window):
 		self._cur_target_index = None
 		self._target_move_points = None
 		self._target_fire_points = None
+		self._things_map_cache = tilemap.Tilemap(game.terrain.dim, init=self.choose_thing_at_pos)
 		self.update_can_move_to()
-		events.move.on.add(self.watch_move)
+		events.move.on.add(self.watch_moves)
 		events.acted.on.add(self.watch_actions)
 		events.take_turn.on.add(self.watch_turns)
 
-	def watch_move(self, actor, move_from, move_to):
-		if actor == self._player:
+	def choose_thing_at_pos(self, pos):
+		def score_thing(thing):
+			if thing in props.is_player:
+				return 0
+			elif thing in props.is_visual:
+				return 1
+			elif thing in props.blocks_vision:
+				return 2
+			elif thing in props.blocks_local_vision:
+				return 3
+			elif thing in props.is_alive:
+				return 4
+			else:
+				return 5
+		try:
+			thing = min((t for t in props.things_at[pos] if t in props.graphics), key=score_thing)
+		except ValueError:
+			thing = None
+		return thing
+
+	def watch_moves(self, thing, move_from, move_to):
+		if thing == self._player:
 			self._view_controller.stop_free_view()
+		if move_from is not None:
+			self._things_map_cache[move_from] = self.choose_thing_at_pos(move_from)
+		if move_to is not None:
+			self._things_map_cache[move_to] = self.choose_thing_at_pos(move_to)
 
 	def handle_redraw(self, console):
 		view_centre = self._view_controller.view_centre
@@ -467,23 +493,12 @@ class MapWin(ui.Window):
 		fov_points = props.fov[self._player]
 		seen_points = props.seen_fov[self._player]
 
-		# TODO: cache
-		# TODO: make sure creatures are on top
-		things_to_draw = {}
-		for thing, graphic, (world_x, world_y) in props.graphics.join_keys(props.position):
-			if not thing in props.is_dead:
-				screen_x, screen_y = world_x - self.world_offset[0], world_y - self.world_offset[1]
-				if screen_x >= 0 and screen_x < self.dim[0] and screen_y >= 0 and screen_y < self.dim[1]:
-					things_to_draw[screen_x, screen_y] = graphic
-
 		console.clear()
 
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_pos = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
 				if self._ignore_fov or world_pos in seen_points:
-					terrain = self._game.terrain[world_x, world_y]
-					graphic = props.graphics[terrain]
 					bg = 0x000000
 					if self.targeting is not None and world_pos == self.targeting:
 						bg = 0xcc0000
@@ -493,13 +508,18 @@ class MapWin(ui.Window):
 						bg = 0x330000
 					elif world_pos in self._player_can_move_to:
 						bg = 0x111111
-					thing_graphic = things_to_draw.get((screen_x, screen_y))
-					if thing_graphic is not None:
-						graphic = thing_graphic
+
+					thing_here = self._things_map_cache[world_x, world_y]
+					if thing_here is not None and thing_here in props.graphics:
+						graphic = props.graphics[thing_here]
+					else:
+						graphic = props.graphics[self._game.terrain[world_x, world_y]]
+
 					fg = graphic.colour
 					if world_pos not in fov_points:
 						fg = hex_to_rgb(fg)
 						fg = tuple(int(x * 0.25) for x in fg)
+
 					console.draw_char(screen_x, screen_y, char=graphic.char, fg=fg, bg=bg)
 
 	def is_on_screen(self, world_pos):

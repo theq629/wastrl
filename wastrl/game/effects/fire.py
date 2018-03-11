@@ -66,6 +66,6 @@ def handle_turn(rng):
 			if rng.uniform(0, 1) < go_out_prob:
 				go_out = True
 		if go_out:
-			_fire.remove(fire)
 			events.move.trigger(fire, props.position[fire], None)
+			_fire.remove(fire)
 			props.position.remove(fire)

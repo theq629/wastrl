@@ -46,6 +46,7 @@ def explode(points, rng):
 		explosion = make_explosion(rng)
 		props.position[explosion] = pos
 		_explosion_times[explosion] = rng.randint(2, 3)
+		events.move.trigger(explosion, None, pos)
 
 @events.examine.on.handle(1)
 def examine_activatable(thing, detailed):
@@ -73,15 +74,19 @@ def handle_momentary(rng):
 
 	for thing, ticks in explosion_times:
 		if ticks <= 0:
+			pos = props.position[thing]
 			smoke = make_explosion_smoke(rng)
-			props.position[smoke] = props.position[thing]
+			props.position[smoke] = pos
 			_smoke_times[smoke] = rng.randint(2, 4)
+			events.move.trigger(thing, pos, None)
+			events.move.trigger(smoke, None, pos)
 			data.BaseProperty.all.remove(thing)
 		else:
 			_explosion_times[thing] -= 1
 
 	for thing, ticks in smoke_times:
 		if ticks <= 0:
+			events.move.trigger(thing, props.position[thing], None)
 			data.BaseProperty.all.remove(thing)
 		else:
 			_smoke_times[thing] -= 1
