@@ -49,25 +49,29 @@ _intrinsic = {
 damage_marker = {
 	props.name: "explosion",
 	props.graphics: props.Graphics(char='+', colour=0xaa0000),
-	props.is_visual: True
+	props.is_visual: True,
+	props.cant_get: True
 }
 
 explosion = {
 	props.name: "explosion",
 	props.graphics: props.Graphics(char='+', colour=0xaa0000),
-	props.is_visual: True
+	props.is_visual: True,
+	props.cant_get: True
 }
 explosion_smoke = {
 	props.name: "explosion smoke",
 	props.graphics: props.Graphics(char='+', colour=0xffffff),
 	props.is_visual: True,
+	props.cant_get: True
 }
 
 fire = {
 	props.name: "fire",
 	props.name_article: "some",
 	props.graphics: props.Graphics(char='&', colour=0xcc0000),
-	props.is_visual: True
+	props.is_visual: True,
+	props.cant_get: True
 }
 
 smoke = {
@@ -75,7 +79,8 @@ smoke = {
 	props.name_article: "some",
 	props.graphics: props.Graphics(char='&', colour=0xffffff),
 	props.is_visual: True,
-	props.blocks_vision: True
+	props.blocks_vision: True,
+	props.cant_get: True
 }
 
 gas = {
@@ -84,7 +89,8 @@ gas = {
 	props.graphics: props.Graphics(char='&', colour=0x999999),
 	props.is_visual: True,
 	props.blocks_vision: True,
-	props.suppresses_fire: True
+	props.suppresses_fire: True,
+	props.cant_get: True
 }
 
 mountains = Thing({
@@ -332,7 +338,7 @@ def gatling_gun():
 			fire_range = 0,
 		),
 		effect_damage.activates_as: effect_damage.Params(
-			damage = (1, 10),
+			damage = (5, 10),
 			radius = 2
 		)
 	})
