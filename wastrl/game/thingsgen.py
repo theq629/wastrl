@@ -283,7 +283,7 @@ def gen_cities(city_points, mountain_spines, rng, debug_log):
 		guard_counts = collections.defaultdict(int)
 		for num, maker in spec.things:
 			for _ in range(rng.randint(*num)):
-				city_point = city_points[rng.randint(0, len(city_points) - 1)]
+				city_point = city_points[rng.randint(0, len(city_points) - 2)]
 				thing = maker()
 				utils.spawn(thing, city_point)
 				thing_counts[props.name[thing]] += 1
