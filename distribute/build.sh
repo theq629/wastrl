@@ -11,6 +11,8 @@ rm -rf temp
 mkdir -p temp
 sed -e "s|{version}|$version|g" "readme.txt" > "temp/README"
 
+pip install .. --upgrade
+
 rm -rf "dist"
 pyinstaller \
 	--name "wastrl-$version" \
