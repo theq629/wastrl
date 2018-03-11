@@ -6,7 +6,8 @@ mkdir -p temp
 virtualenv temp/venv
 source temp/venv/bin/activate
 pip install -r requirements.txt
-pip install ..
+pip install -r ../requirements.txt
+pip install .. --upgrade --force-reinstall --no-cache-dir --no-deps
 
 version="$(pip show wastrl | grep '^Version:' | sed -e 's|^[A-Za-z]\+: *||g')"
 echo "packaging version $version"
