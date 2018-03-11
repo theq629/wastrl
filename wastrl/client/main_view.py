@@ -498,22 +498,22 @@ class MapWin(ui.Window):
 		for screen_x in range(*screen_bounds[0]):
 			for screen_y in range(*screen_bounds[1]):
 				world_x, world_y = world_pos = self.world_offset[0] + screen_x, self.world_offset[1] + screen_y
-				if self._ignore_fov or world_pos in seen_points:
-					bg = 0x000000
-					if self.targeting is not None and world_pos == self.targeting:
-						bg = 0xcc0000
-					elif self.targeting is not None and world_pos in self._target_move_points:
-						bg = 0x440000
-					elif self.targeting is not None and world_pos in self._target_fire_points:
-						bg = 0x330000
-					elif world_pos in self._player_can_move_to:
-						bg = 0x111111
+				bg = 0x000000
+				if self.targeting is not None and world_pos == self.targeting:
+					bg = 0xcc0000
+				elif self.targeting is not None and world_pos in self._target_move_points:
+					bg = 0x440000
+				elif self.targeting is not None and world_pos in self._target_fire_points:
+					bg = 0x330000
+				elif world_pos in self._player_can_move_to:
+					bg = 0x111111
 
-					thing_here = self._things_map_cache[world_x, world_y]
+				if self._ignore_fov or world_pos in seen_points:
+					thing_here = self._things_map_cache[world_pos]
 					if thing_here is not None and thing_here in props.graphics:
 						graphic = props.graphics[thing_here]
 					else:
-						graphic = props.graphics[self._game.terrain[world_x, world_y]]
+						graphic = props.graphics[self._game.terrain[world_pos]]
 
 					fg = graphic.colour
 					if world_pos not in fov_points:
@@ -521,6 +521,10 @@ class MapWin(ui.Window):
 						fg = tuple(int(x * 0.25) for x in fg)
 
 					console.draw_char(screen_x, screen_y, char=graphic.char, fg=fg, bg=bg)
+
+				elif self._target_fire_points is not None and world_pos in self._target_fire_points:
+					fg = 0x111111
+					console.draw_char(screen_x, screen_y, char='.', fg=fg, bg=bg)
 
 	def is_on_screen(self, world_pos):
 		world_x, world_y = world_pos
