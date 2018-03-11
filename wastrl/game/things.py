@@ -74,7 +74,8 @@ gas = {
 	props.name_article: "some",
 	props.graphics: props.Graphics(char='&', colour=0x999999),
 	props.is_visual: True,
-	props.blocks_vision: True
+	props.blocks_vision: True,
+	props.suppresses_fire: True
 }
 
 mountains = Thing({
