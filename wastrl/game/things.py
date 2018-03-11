@@ -29,17 +29,20 @@ _creature = {
 }
 
 _weapon = {
-	props.graphics: props.Graphics(char=')', colour=0xffffff)
+	props.graphics: props.Graphics(char=')', colour=0xffffff),
+	props.activation_ap: 5
 }
 
 _missile = {
 	props.graphics: props.Graphics(char='/', colour=0xffffff),
-	props.single_use: True
+	props.single_use: True,
+	props.activation_ap: 1
 }
 
 _device = {
 	props.graphics: props.Graphics(char='?', colour=0xffffff),
-	props.single_use: True
+	props.single_use: True,
+	props.activation_ap: 1
 }
 
 _intrinsic = {
@@ -139,6 +142,7 @@ road = Thing({
 
 hand_to_hand = Thing(_intrinsic, {
 	props.name: "hand to hand",
+	props.activation_ap: 1,
 	props.activation_target_range: props.ActivationTargetRange(
 		move_range = 1,
 		fire_range = 0,

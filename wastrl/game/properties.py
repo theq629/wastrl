@@ -84,6 +84,7 @@ suppresses_fire = data.SetProperty()
 fire_immunity = data.SetProperty()
 gas_immunity = data.SetProperty()
 cant_get = data.SetProperty()
+activation_ap = data.ValuedProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

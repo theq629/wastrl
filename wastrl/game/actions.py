@@ -162,7 +162,10 @@ class Activate(Base):
 
 	def _calc_ap(self):
 		if self._is_valid():
-			return 1
+			if self._thing in props.activation_ap:
+				return props.activation_ap[self._thing]
+			else:
+				return 1
 		else:
 			return None
 
