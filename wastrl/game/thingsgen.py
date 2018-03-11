@@ -345,6 +345,7 @@ def set_starting_kit(player):
 		things.device_of_mountainization,
 		things.device_of_recuperation,
 		things.device_of_major_recuperation,
+		things.device_of_speed,
 	]
 	for make in makers:
 		thing = make()

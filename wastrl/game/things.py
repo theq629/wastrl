@@ -11,6 +11,7 @@ from .effects import teleport_away as effect_teleport_away
 from .effects import tunnelling as effect_tunnelling
 from .effects import mountain_generation as effect_mountain_generation
 from .effects import recuperation as effect_recuperation
+from .effects import speed as effect_speed
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -533,6 +534,14 @@ def device_of_major_recuperation():
 		props.name: "device of major recuperation",
 		effect_recuperation.activates_as: effect_recuperation.Params(
 			amount = 50
+		)
+	})
+
+def device_of_speed():
+	return Thing(_device, {
+		props.name: "device of speedification",
+		effect_speed.activates_as: effect_speed.Params(
+			amount = 2
 		)
 	})
 
