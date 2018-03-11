@@ -60,7 +60,7 @@ class MessageHandler:
 		return string[0].upper() + string[1:]
 
 	def handle_take_damage(self, target, damage):
-		self.message("{target} takes {damage} damage.", target=self.capitalize(self.name_thing(target)), damage=damage)
+		self.message("{target} takes {damage} damage, and has {hp} HP left.", target=self.capitalize(self.name_thing(target)), damage=damage, hp=props.population[target])
 
 	def handle_die(self, actor):
 		self.message("{actor} dies.", actor=self.capitalize(self.name_thing(actor)))
