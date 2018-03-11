@@ -15,6 +15,7 @@ from .logic import fov as logic_fov
 from .logic import examine as logic_examine
 from .logic import mortality as logic_mortality
 from .logic import win_lose as logic_win_lose
+from .logic import single_use as logic_single_use
 import sys # TODO: improve logging
 
 @events.move.on.handle(-1)

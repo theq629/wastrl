@@ -77,6 +77,7 @@ is_flamable = data.SetProperty()
 is_guarding_city = data.SetProperty()
 fov = data.ValuedProperty()
 seen_fov = data.ValuedProperty()
+single_use = data.SetProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

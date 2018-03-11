@@ -1,3 +1,4 @@
+from .. import data
 from . import properties as props
 from . import events
 from . import tilemap
@@ -9,6 +10,16 @@ def spawn(thing, pos):
 	events.move.trigger(thing, None, pos)
 	if thing in props.action_points:
 		props.is_alive.add(thing)
+
+def unspawn(thing):
+	if thing in props.position:
+		pos = props.position[thing]
+		events.move.trigger(thing, pos, None)
+	for inv_thing in props.inventory:
+		inv = props.inventory[inv_thing]
+		if thing in inv:
+			inv.remove(thing)
+	data.BaseProperty.all.remove(thing)
 
 def walk_cost(terrain, blocked_cost=blocked_cost):
 	def cost(from_pos, pos):

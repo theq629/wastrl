@@ -24,11 +24,13 @@ _weapon = {
 }
 
 _missile = {
-	props.graphics: props.Graphics(char='/', colour=0xffffff)
+	props.graphics: props.Graphics(char='/', colour=0xffffff),
+	props.single_use: True
 }
 
 _device = {
-	props.graphics: props.Graphics(char='?', colour=0xffffff)
+	props.graphics: props.Graphics(char='?', colour=0xffffff),
+	props.single_use: True
 }
 
 _intrinsic = {
