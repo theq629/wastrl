@@ -6,4 +6,4 @@ Mostly an experiment in using traditional roguelike mechanics in more general TB
 
 Run wastrl-{version}.
 
-To configure, edit wastrl/config/*. Or copy those files to `~/.config/wastrl/` on Linux, or wherever the standard place to put config files is on other platforms.
+To configure, edit wastrl/config/*. Or copy those files to ~/.config/wastrl/ on Linux, or wherever the standard place to put config files is on other platforms.
