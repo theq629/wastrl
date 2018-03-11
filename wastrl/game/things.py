@@ -137,38 +137,85 @@ hand_to_hand = Thing(_intrinsic, {
 	)
 })
 
-teeth = Thing(_intrinsic, {
-	props.name: "teeth",
-	props.activation_target_range: props.ActivationTargetRange(
-		move_range = 1,
-		fire_range = 0,
-	),
-	effect_damage.activates_as: effect_damage.Params(
-		damage = (1, 5),
-		radius = 1
-	)
-})
-
-huge_teeth = Thing(_intrinsic, {
-	props.name: "huge teeth",
-	props.activation_target_range: props.ActivationTargetRange(
-		move_range = 1,
-		fire_range = 0,
-	),
-	effect_damage.activates_as: effect_damage.Params(
-		damage = (5, 10),
-		radius = 1
-	)
-})
-
-bite = Thing(_intrinsic, {
+rat_teeth = Thing(_intrinsic, {
 	props.name: "bite",
 	props.activation_target_range: props.ActivationTargetRange(
 		move_range = 1,
 		fire_range = 0,
 	),
 	effect_damage.activates_as: effect_damage.Params(
-		damage = (3, 10),
+		damage = (2, 5),
+		radius = 0
+	)
+})
+
+rat_teeth_extra = Thing(_intrinsic, {
+	props.name: "teeth",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (5, 10),
+		radius = 0
+	)
+})
+
+skunk_claws = Thing(_intrinsic, {
+	props.name: "claw",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (5, 10),
+		radius = 0
+	)
+})
+
+ant_sting = Thing(_intrinsic, {
+	props.name: "sting",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (7, 15),
+		radius = 0
+	)
+})
+
+mole_claws = Thing(_intrinsic, {
+	props.name: "claw",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (10, 20),
+		radius = 0
+	)
+})
+
+mole_quake = Thing(_intrinsic, {
+	props.name: "earthquake",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 0,
+	),
+	effect_mountain_generation.activates_as: effect_mountain_generation.Params(
+		radius = 4
+	)
+})
+
+robot_eyes = Thing(_intrinsic, {
+	props.name: "laser eyes",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 1,
+		fire_range = 5,
+	),
+	effect_damage.activates_as: effect_damage.Params(
+		damage = (12, 25),
 		radius = 0
 	)
 })
@@ -181,6 +228,17 @@ fire_attack = Thing(_intrinsic, {
 	),
 	effect_fire.activates_as: effect_fire.Params(
 		radius = 2
+	)
+})
+
+local_fire_attack = Thing(_intrinsic, {
+	props.name: "fire",
+	props.activation_target_range: props.ActivationTargetRange(
+		move_range = 0,
+		fire_range = 0,
+	),
+	effect_fire.activates_as: effect_fire.Params(
+		radius = 3
 	)
 })
 
@@ -606,66 +664,56 @@ def device_of_shield():
 		)
 	})
 
+_basic_col = 0xaaaaaa
+_harder_col = 0xffaaaa
+_guard_col = 0xff8888
+
 def ratling():
 	return Thing(_creature, {
 		props.name: "ratling",
-		props.graphics: props.Graphics(char='r', colour=0xffffff),
+		props.graphics: props.Graphics(char='r', colour=_basic_col),
 		props.action_points: 10,
 		props.max_population: 10,
 		props.inventory: set(),
 		props.intrinsics: {
-			teeth
+			rat_teeth
+		}
+	})
+
+def giant_rat():
+	return Thing(_creature, {
+		props.name: "giant rat",
+		props.graphics: props.Graphics(char='r', colour=_harder_col),
+		props.action_points: 5,
+		props.max_population: 15,
+		props.inventory: set(),
+		props.intrinsics: {
+			rat_teeth
 		}
 	})
 
 def megarat():
 	return Thing(_creature, {
 		props.name: "megarat",
-		props.graphics: props.Graphics(char='R', colour=0xffffff),
+		props.graphics: props.Graphics(char='R', colour=_guard_col),
 		props.action_points: 10,
-		props.max_population: 20,
+		props.max_population: 30,
 		props.inventory: set(),
 		props.intrinsics: {
-			huge_teeth
-		}
-	})
-
-def giant_ant():
-	return Thing(_creature, {
-		props.name: "giant ant",
-		props.graphics: props.Graphics(char='a', colour=0xbbbbbb),
-		props.action_points: 10,
-		props.max_population: 10,
-		props.inventory: set(),
-		props.intrinsics: {
-			bite
-		}
-	})
-
-def fire_ant():
-	return Thing(_creature, {
-		props.name: "fire ant",
-		props.graphics: props.Graphics(char='a', colour=0xff0000),
-		props.action_points: 10,
-		props.max_population: 10,
-		props.inventory: set(),
-		props.fire_immunity: True,
-		props.intrinsics: {
-			bite,
-			fire_attack
+			rat_teeth_extra
 		}
 	})
 
 def skunk():
 	return Thing(_creature, {
 		props.name: "skunk",
-		props.graphics: props.Graphics(char='s', colour=0x555555),
+		props.graphics: props.Graphics(char='s', colour=_basic_col),
 		props.action_points: 10,
-		props.max_population: 15,
+		props.max_population: 20,
 		props.inventory: set(),
 		props.gas_immunity: True,
 		props.intrinsics: {
-			bite,
+			skunk_claws,
 			local_gas_attack
 		}
 	})
@@ -673,57 +721,149 @@ def skunk():
 def dire_skunk():
 	return Thing(_creature, {
 		props.name: "dire skunk",
-		props.graphics: props.Graphics(char='s', colour=0xff5555),
+		props.graphics: props.Graphics(char='s', colour=_harder_col),
 		props.action_points: 10,
-		props.max_population: 15,
+		props.max_population: 25,
 		props.inventory: set(),
 		props.gas_immunity: True,
 		props.intrinsics: {
-			bite,
+			skunk_claws,
+			gas_attack
+		}
+	})
+
+def super_skunk():
+	return Thing(_creature, {
+		props.name: "super skunk",
+		props.graphics: props.Graphics(char='S', colour=_guard_col),
+		props.action_points: 5,
+		props.max_population: 40,
+		props.inventory: set(),
+		props.gas_immunity: True,
+		props.intrinsics: {
+			skunk_claws,
 			local_gas_attack,
 			gas_attack
+		}
+	})
+
+def giant_ant():
+	return Thing(_creature, {
+		props.name: "giant ant",
+		props.graphics: props.Graphics(char='a', colour=_basic_col),
+		props.action_points: 10,
+		props.max_population: 30,
+		props.inventory: set(),
+		props.intrinsics: {
+			ant_sting
+		}
+	})
+
+def fire_ant():
+	return Thing(_creature, {
+		props.name: "fire ant",
+		props.graphics: props.Graphics(char='a', colour=_harder_col),
+		props.action_points: 10,
+		props.max_population: 35,
+		props.inventory: set(),
+		props.fire_immunity: True,
+		props.intrinsics: {
+			ant_sting,
+			fire_attack
+		}
+	})
+
+def queen_ant():
+	return Thing(_creature, {
+		props.name: "queen ant",
+		props.graphics: props.Graphics(char='A', colour=_guard_col),
+		props.action_points: 5,
+		props.max_population: 60,
+		props.inventory: set(),
+		props.fire_immunity: True,
+		props.intrinsics: {
+			ant_sting,
+			local_fire_attack
+		}
+	})
+
+def mole():
+	return Thing(_creature, {
+		props.name: "mole",
+		props.graphics: props.Graphics(char='m', colour=_basic_col),
+		props.action_points: 10,
+		props.max_population: 40,
+		props.inventory: set(),
+		props.intrinsics: {
+			mole_claws
+		}
+	})
+
+def quake_mole():
+	return Thing(_creature, {
+		props.name: "quake mole",
+		props.graphics: props.Graphics(char='m', colour=_harder_col),
+		props.action_points: 10,
+		props.max_population: 45,
+		props.inventory: set(),
+		props.intrinsics: {
+			mole_quake,
+			mole_claws
+		}
+	})
+
+def doom_mole():
+	return Thing(_creature, {
+		props.name: "doom mole",
+		props.graphics: props.Graphics(char='M', colour=_guard_col),
+		props.action_points: 5,
+		props.max_population: 80,
+		props.inventory: set(),
+		props.intrinsics: {
+			mole_quake,
+			mole_claws
 		}
 	})
 
 def laser_bot():
 	return Thing(_creature, {
 		props.name: "laser bot",
-		props.graphics: props.Graphics(char='b', colour=0xbbbbbb),
+		props.graphics: props.Graphics(char='b', colour=_basic_col),
 		props.action_points: 10,
-		props.max_population: 30,
+		props.max_population: 50,
 		props.inventory: set(),
 		props.intrinsics: {
-			laser_eyes
+			robot_eyes
 		}
 	})
 
 def warrior_bot():
 	return Thing(_creature, {
 		props.name: "warrior bot",
-		props.graphics: props.Graphics(char='b', colour=0xffffbb),
+		props.graphics: props.Graphics(char='b', colour=_harder_col),
 		props.action_points: 10,
-		props.max_population: 40,
+		props.max_population: 50,
 		props.inventory: {
 			gatling_gun()
 		},
 		props.intrinsics: {
-			laser_eyes
+			robot_eyes
 		}
 	})
 
 def nuclear_robot():
 	return Thing(_creature, {
 		props.name: "nuclear robot",
-		props.graphics: props.Graphics(char='b', colour=0xeeeeee),
-		props.action_points: 10,
-		props.max_population: 30,
+		props.graphics: props.Graphics(char='b', colour=_guard_col),
+		props.action_points: 5,
+		props.max_population: 100,
 		props.inventory: {
 			missile_of_nuclear_warhead(),
 			missile_of_nuclear_warhead(),
 			missile_of_nuclear_warhead(),
 		},
 		props.intrinsics: {
-			laser_eyes
+			robot_eyes
 		}
 	})
 

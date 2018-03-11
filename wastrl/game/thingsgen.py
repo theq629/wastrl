@@ -17,20 +17,11 @@ City = collections.namedtuple('City', (
 table = (
 	Area(
 		normal = [
-			((5, 5), things.ratling),
-			((3, 5), things.rifles),
-			((1, 3), things.missile_of_kaboom),
-			((0, 1), things.gatling_gun),
+			((3, 5), things.ratling),
+			((1, 2), things.giant_rat),
 		],
 		city = City(
 			things = [
-				((1, 1), things.rifles),
-				((1, 1), things.gatling_gun),
-				((1, 1), things.missile_of_kaboom),
-				((0, 1), things.missile_of_bigger_kaboom),
-				((0, 1), things.missile_of_smoke),
-				((0, 1), things.missile_of_gas),
-				((0, 1), things.cannon),
 			],
 			guardian = [
 				things.megarat,
@@ -39,161 +30,50 @@ table = (
 	),
 	Area(
 		normal = [
-			((2, 3), things.giant_ant),
-			((2, 3), things.fire_ant),
-			((0, 2), things.rifles),
-			((3, 5), things.gatling_gun),
-			((1, 2), things.armoured_car),
-			((1, 2), things.cannon),
-			((1, 1), things.missile_of_kaboom),
-			((1, 1), things.missile_of_bigger_kaboom),
-			((1, 1), things.missile_of_smoke),
-			((1, 1), things.missile_of_gas),
+			((3, 5), things.skunk),
+			((1, 2), things.dire_skunk),
 		],
 		city = City(
 			things = [
-				((0, 1), things.rifles),
-				((0, 1), things.gatling_gun),
-				((0, 1), things.armoured_car),
-				((0, 1), things.cannon),
-				((0, 1), things.tank),
-				((0, 1), things.artillery),
-				((0, 1), things.saturation_artillery),
-				((0, 1), things.missile_of_kaboom),
-				((0, 1), things.missile_of_bigger_kaboom),
-				((0, 1), things.missile_of_smoke),
-				((0, 1), things.missile_of_gas),
 			],
 			guardian = [
+				things.super_skunk
 			]
 		)
 	),
 	Area(
 		normal = [
-			((0, 2), things.rifles),
-			((1, 2), things.gatling_gun),
-			((3, 5), things.armoured_car),
-			((3, 5), things.cannon),
-			((1, 2), things.tank),
-			((1, 2), things.artillery),
-			((0, 1), things.saturation_artillery),
-			((0, 1), things.missile_of_kaboom),
-			((0, 1), things.missile_of_bigger_kaboom),
-			((0, 1), things.missile_of_smoke),
-			((0, 1), things.missile_of_gas),
-			((1, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_guidedness),
+			((3, 5), things.giant_ant),
+			((1, 2), things.fire_ant),
 		],
 		city = City(
 			things = [
-				((0, 1), things.rifles),
-				((0, 1), things.gatling_gun),
-				((0, 1), things.armoured_car),
-				((0, 1), things.cannon),
-				((0, 1), things.tank),
-				((0, 1), things.artillery),
-				((0, 1), things.saturation_artillery),
-				((0, 1), things.ray_gun),
-				((0, 1), things.repulsor),
-				((0, 1), things.missile_of_kaboom),
-				((0, 1), things.missile_of_bigger_kaboom),
-				((0, 1), things.missile_of_smoke),
-				((0, 1), things.missile_of_gas),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.missile_of_guidedness),
 			],
 			guardian = [
+				things.queen_ant
 			]
 		)
 	),
 	Area(
 		normal = [
-			((0, 2), things.rifles),
-			((1, 2), things.gatling_gun),
-			((1, 2), things.armoured_car),
-			((1, 2), things.cannon),
-			((3, 5), things.tank),
-			((3, 5), things.artillery),
-			((2, 4), things.saturation_artillery),
-			((0, 1), things.ray_gun),
-			((0, 1), things.repulsor),
-			((0, 1), things.missile_of_kaboom),
-			((0, 1), things.missile_of_bigger_kaboom),
-			((0, 2), things.missile_of_smoke),
-			((0, 2), things.missile_of_gas),
-			((0, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_guidedness),
-			((1, 2), things.missile_of_fire_bomb),
-			((1, 2), things.missile_of_cluster_bomb),
-			((0, 1), things.missile_of_nuclear_warhead),
+			((3, 5), things.mole),
+			((1, 2), things.quake_mole),
 		],
 		city = City(
 			things = [
-				((0, 1), things.rifles),
-				((0, 1), things.gatling_gun),
-				((0, 1), things.armoured_car),
-				((0, 1), things.cannon),
-				((0, 1), things.tank),
-				((0, 1), things.artillery),
-				((0, 1), things.saturation_artillery),
-				((1, 1), things.ray_gun),
-				((0, 1), things.repulsor),
-				((0, 1), things.missile_of_kaboom),
-				((0, 1), things.missile_of_bigger_kaboom),
-				((0, 1), things.missile_of_smoke),
-				((0, 1), things.missile_of_gas),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.missile_of_guidedness),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.missile_of_cluster_bomb),
-				((0, 1), things.missile_of_nuclear_warhead),
 			],
 			guardian = [
+				things.doom_mole
 			]
 		)
 	),
 	Area(
 		normal = [
 			((3, 5), things.laser_bot),
-			((0, 2), things.rifles),
-			((1, 2), things.gatling_gun),
-			((1, 2), things.armoured_car),
-			((1, 2), things.cannon),
-			((2, 3), things.tank),
-			((2, 3), things.artillery),
-			((2, 4), things.saturation_artillery),
-			((2, 4), things.ray_gun),
-			((2, 4), things.repulsor),
-			((0, 1), things.missile_of_kaboom),
-			((0, 1), things.missile_of_bigger_kaboom),
-			((0, 2), things.missile_of_smoke),
-			((0, 2), things.missile_of_gas),
-			((0, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_guidedness),
-			((0, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_cluster_bomb),
-			((1, 3), things.missile_of_nuclear_warhead),
+			((1, 3), things.warrior_bot),
 		],
 		city = City(
 			things = [
-				((0, 1), things.rifles),
-				((0, 1), things.gatling_gun),
-				((0, 1), things.armoured_car),
-				((0, 1), things.cannon),
-				((0, 1), things.tank),
-				((0, 1), things.artillery),
-				((0, 1), things.saturation_artillery),
-				((0, 1), things.ray_gun),
-				((0, 1), things.repulsor),
-				((0, 1), things.missile_of_kaboom),
-				((0, 1), things.missile_of_bigger_kaboom),
-				((0, 1), things.missile_of_smoke),
-				((0, 1), things.missile_of_gas),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.missile_of_guidedness),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.missile_of_cluster_bomb),
-				((0, 1), things.missile_of_nuclear_warhead),
 			],
 			guardian = [
 				things.nuclear_robot
@@ -202,24 +82,12 @@ table = (
 	),
 	Area(
 		normal = [
-			((1, 2), things.rifles),
-			((1, 2), things.gatling_gun),
-			((1, 2), things.armoured_car),
-			((1, 2), things.cannon),
-			((1, 2), things.tank),
-			((1, 2), things.artillery),
-			((1, 2), things.saturation_artillery),
-			((1, 2), things.ray_gun),
-			((1, 2), things.repulsor),
-			((0, 1), things.missile_of_kaboom),
-			((0, 1), things.missile_of_bigger_kaboom),
-			((0, 2), things.missile_of_smoke),
-			((0, 2), things.missile_of_gas),
-			((0, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_guidedness),
-			((0, 2), things.missile_of_fire_bomb),
-			((0, 2), things.missile_of_cluster_bomb),
-			((1, 3), things.missile_of_nuclear_warhead),
+			((0, 2), things.giant_rat),
+			((0, 2), things.dire_skunk),
+			((0, 2), things.fire_ant),
+			((0, 2), things.quake_mole),
+			((1, 2), things.warrior_bot),
+			((1, 1), things.nuclear_robot),
 		],
 		city = City(
 			things = [
@@ -295,12 +163,13 @@ def gen_cities(city_points, mountain_spines, rng, debug_log):
 		spec = spec.city
 		thing_counts = collections.defaultdict(int)
 		guard_counts = collections.defaultdict(int)
+		for num, maker in spec.things:
+			for _ in range(rng.randint(*num)):
+				city_point = city_points[rng.randint(0, len(city_points) - 1)]
+				thing = maker()
+				utils.spawn(thing, city_point)
+				thing_counts[props.name[thing]] += 1
 		for city_point in city_points:
-			for num, maker in spec.things:
-				for _ in range(rng.randint(*num)):
-					thing = maker()
-					utils.spawn(thing, city_point)
-					thing_counts[props.name[thing]] += 1
 			if len(spec.guardian) > 0:
 				guardian = spec.guardian[rng.randint(0, len(spec.guardian) - 1)]()
 				utils.spawn(guardian, city_point)
