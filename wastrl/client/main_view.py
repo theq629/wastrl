@@ -45,7 +45,7 @@ class MessageHandler:
 		self.changed = True
 
 	def name_thing(self, thing):
-		return events.examine.trigger(thing)
+		return events.examine.trigger(thing, False)
 
 	def format_list(self, items):
 		items = list(items)
@@ -166,10 +166,7 @@ class PlayerInterfaceManager:
 		)
 
 	def name_for_thing(self, thing):
-		if thing in props.name:
-			return props.name[thing]
-		else:
-			return "<unknown>"
+		return events.examine.trigger(thing, True)
 
 	def keyify_things(self, things):
 		return tuple((k, t) for k, t in zip(keys_for_inventory_menu, things))

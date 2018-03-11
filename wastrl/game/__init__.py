@@ -135,7 +135,7 @@ def update_things_at(thing, move_from, move_to):
 		props.blocked_at[move_to] |= thing in props.is_blocking
 
 @events.examine.on.handle(0)
-def base_examine(thing):
+def base_examine(thing, detailed):
 	if thing not in props.name:
 		return ""
 	else:
@@ -149,6 +149,12 @@ def base_examine(thing):
 		if article is not None:
 			name = " ".join((article, name))
 		return name
+
+@events.examine.on.handle(1)
+def examine_activatable(thing, detailed):
+	if detailed and thing in props.activation_target_range:
+		params = props.activation_target_range[thing]
+		return f"[{params.move_range}:{params.fire_range}]"
 
 def reset_data():
 	all_things = set(props.position) | set(t for i in props.inventory.values() for t in i)
