@@ -27,6 +27,7 @@ class Fover:
 		self.setup_terrain(terrain)
 		events.move.on.add(self.watch_moves, priority=1)
 		events.acted.on.add(self.watch_acted)
+		events.take_turn.on.add(self.watch_take_turn)
 		events.terrain_change.on.add(self.watch_terrain_change)
 		if player in props.position:
 			self.update_fov(props.position[player])
@@ -41,6 +42,10 @@ class Fover:
 		x, y = pos
 		self._map.transparent[y, x] = props.terrain_at[pos] not in props.blocks_vision
 		self._force_update = True
+
+	def watch_take_turn(self, actor):
+		if actor == self._player and self._player in props.position:
+			self.update_fov(props.position[self._player])
 
 	def watch_moves(self, thing, move_from, move_to):
 		if thing == self._player and self._player in props.position:
@@ -88,6 +93,14 @@ class NumpyMapSet(data.BaseProperty):
 		except TypeError:
 			return False
 		return self.map[y, x]
+
+	def add(self, pos):
+		x, y = pos
+		self.map[y, x] = True
+
+	def remove(self, pos):
+		x, y = pos
+		self.map[y, x] = False
 
 	def __getitem__(self, pos):
 		try:

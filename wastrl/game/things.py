@@ -12,6 +12,7 @@ from .effects import tunnelling as effect_tunnelling
 from .effects import mountain_generation as effect_mountain_generation
 from .effects import recuperation as effect_recuperation
 from .effects import speed as effect_speed
+from .effects import reveal_map as effect_reveal_map
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -559,7 +560,14 @@ def device_of_desertification():
 
 def device_of_mapping():
 	return Thing(_device, {
-		props.name: "device of mapping"
+		props.name: "device of mapping",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 100,
+		),
+		effect_reveal_map.activates_as: effect_reveal_map.Params(
+			radius = 20
+		)
 	})
 
 def ratling():
