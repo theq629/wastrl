@@ -12,6 +12,7 @@ from .effects import tunnelling as effect_tunnelling
 from .effects import mountain_generation as effect_mountain_generation
 from .effects import recuperation as effect_recuperation
 from .effects import speed as effect_speed
+from .effects import slow as effect_slow
 from .effects import reveal_map as effect_reveal_map
 from .effects import shield as effect_shield
 
@@ -544,6 +545,19 @@ def device_of_speed():
 		props.name: "device of speedification",
 		effect_speed.activates_as: effect_speed.Params(
 			amount = 2
+		)
+	})
+
+def device_of_slow():
+	return Thing(_device, {
+		props.name: "device of slowification",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_slow.activates_as: effect_slow.Params(
+			amount = 0.5,
+			turns = 3
 		)
 	})
 
