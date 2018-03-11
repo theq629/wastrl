@@ -482,6 +482,7 @@ def fire_ant():
 		props.action_points: 10,
 		props.population: 10,
 		props.inventory: set(),
+		props.fire_immunity: True,
 		props.intrinsics: {
 			bite,
 			fire_attack

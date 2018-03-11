@@ -80,6 +80,8 @@ seen_fov = data.ValuedProperty()
 single_use = data.SetProperty()
 is_from_starter_kit = data.SetProperty()
 suppresses_fire = data.SetProperty()
+fire_immunity = data.SetProperty()
+gas_immunity = data.SetProperty()
 
 is_goal = data.SetProperty()
 is_player = data.SetProperty()

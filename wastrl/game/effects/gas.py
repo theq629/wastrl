@@ -64,7 +64,7 @@ def handle_turn(rng):
 			_gas_density[thing] -= 1
 			if density > 1:
 				pos = props.position[thing]
-				for other_thing in tuple(t for t in props.things_at[pos] if t in props.is_alive):
+				for other_thing in tuple(t for t in props.things_at[pos] if t in props.is_alive and t not in props.gas_immunity):
 					events.take_damage.trigger(other_thing, rng.randint(*damage_range))
 				new_pos = move_gas(pos, density, rng)
 				if not any(t in _gas_density for t in props.things_at[new_pos]):
