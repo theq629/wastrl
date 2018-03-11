@@ -51,7 +51,7 @@ def handle_turn(rng):
 			go_out = True
 		else:
 			for thing in tuple(t for t in props.things_at[pos] if t in props.is_alive and t not in props.fire_immunity):
-				events.take_damage.trigger(thing, rng.randint(*damage_range))
+				events.send_damage.trigger(thing, rng.randint(*damage_range))
 			if rng.uniform(0, 1) < burn_down_prob:
 				props.terrain_at[pos] = things.desert
 			if rng.uniform(0, 1) < smoke_prob:
