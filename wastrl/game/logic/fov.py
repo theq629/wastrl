@@ -43,7 +43,7 @@ class Fover:
 		self._force_update = True
 
 	def watch_moves(self, thing, move_from, move_to):
-		if thing == self._player:
+		if thing == self._player and self._player in props.position:
 			self.update_fov(move_to)
 		else:
 			if move_to is not None and thing in props.blocks_vision:
