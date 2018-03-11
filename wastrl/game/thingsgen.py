@@ -17,13 +17,15 @@ table = (
 	Area(
 		normal = [
 			((5, 5), things.ratling),
+			((3, 5), things.rifles),
+			((0, 1), things.gatling_gun)
 		],
 		city = City(
 			things = [
-				((0, 2), things.missile_of_kaboom),
-				((0, 1), things.missile_of_fire_bomb),
-				((0, 1), things.cannon),
-				((0, 1), things.artillery)
+				((1, 1), things.rifles),
+				((1, 1), things.gatling_gun),
+				((0, 1), things.armoured_car),
+				((0, 1), things.cannon)
 			],
 			guardian = [
 				things.megarat
@@ -33,10 +35,21 @@ table = (
 	Area(
 		normal = [
 			((2, 3), things.giant_ant),
-			((2, 3), things.fire_ant)
+			((2, 3), things.fire_ant),
+			((0, 2), things.rifles),
+			((3, 5), things.gatling_gun),
+			((1, 2), things.armoured_car),
+			((1, 2), things.cannon)
 		],
 		city = City(
 			things = [
+				((0, 1), things.rifles),
+				((0, 1), things.gatling_gun),
+				((0, 1), things.armoured_car),
+				((0, 1), things.cannon),
+				((0, 1), things.tank),
+				((0, 1), things.artillery),
+				((0, 1), things.saturation_artillery)
 			],
 			guardian = [
 			]
@@ -44,9 +57,25 @@ table = (
 	),
 	Area(
 		normal = [
+			((0, 2), things.rifles),
+			((1, 2), things.gatling_gun),
+			((3, 5), things.armoured_car),
+			((3, 5), things.cannon),
+			((1, 2), things.tank),
+			((1, 2), things.artillery),
+			((0, 1), things.saturation_artillery)
 		],
 		city = City(
 			things = [
+				((0, 1), things.rifles),
+				((0, 1), things.gatling_gun),
+				((0, 1), things.armoured_car),
+				((0, 1), things.cannon),
+				((0, 1), things.tank),
+				((0, 1), things.artillery),
+				((0, 1), things.saturation_artillery),
+				((0, 1), things.ray_gun),
+				((0, 1), things.repulsor)
 			],
 			guardian = [
 			]
@@ -54,9 +83,27 @@ table = (
 	),
 	Area(
 		normal = [
+			((0, 2), things.rifles),
+			((1, 2), things.gatling_gun),
+			((1, 2), things.armoured_car),
+			((1, 2), things.cannon),
+			((3, 5), things.tank),
+			((3, 5), things.artillery),
+			((2, 4), things.saturation_artillery),
+			((0, 1), things.ray_gun),
+			((0, 1), things.repulsor)
 		],
 		city = City(
 			things = [
+				((0, 1), things.rifles),
+				((0, 1), things.gatling_gun),
+				((0, 1), things.armoured_car),
+				((0, 1), things.cannon),
+				((0, 1), things.tank),
+				((0, 1), things.artillery),
+				((0, 1), things.saturation_artillery),
+				((1, 1), things.ray_gun),
+				((0, 1), things.repulsor)
 			],
 			guardian = [
 			]
@@ -64,9 +111,27 @@ table = (
 	),
 	Area(
 		normal = [
+			((0, 2), things.rifles),
+			((1, 2), things.gatling_gun),
+			((1, 2), things.armoured_car),
+			((1, 2), things.cannon),
+			((2, 3), things.tank),
+			((2, 3), things.artillery),
+			((2, 4), things.saturation_artillery),
+			((2, 4), things.ray_gun),
+			((2, 4), things.repulsor)
 		],
 		city = City(
 			things = [
+				((0, 1), things.rifles),
+				((0, 1), things.gatling_gun),
+				((0, 1), things.armoured_car),
+				((0, 1), things.cannon),
+				((0, 1), things.tank),
+				((0, 1), things.artillery),
+				((0, 1), things.saturation_artillery),
+				((0, 1), things.ray_gun),
+				((0, 1), things.repulsor)
 			],
 			guardian = [
 			]
@@ -74,6 +139,15 @@ table = (
 	),
 	Area(
 		normal = [
+			((1, 2), things.rifles),
+			((1, 2), things.gatling_gun),
+			((1, 2), things.armoured_car),
+			((1, 2), things.cannon),
+			((1, 2), things.tank),
+			((1, 2), things.artillery),
+			((1, 2), things.saturation_artillery),
+			((1, 2), things.ray_gun),
+			((1, 2), things.repulsor)
 		],
 		city = City(
 			things = [
