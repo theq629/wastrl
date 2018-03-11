@@ -678,6 +678,14 @@ def device_of_shield():
 		)
 	})
 
+def device_of_super_shield():
+	return Thing(_device, {
+		props.name: "device of super shield",
+		effect_shield.activates_as: effect_shield.Params(
+			turns = 10000
+		)
+	})
+
 _basic_col = 0xaaaaaa
 _harder_col = 0xffaaaa
 _guard_col = 0xff8888

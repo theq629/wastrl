@@ -338,6 +338,7 @@ def set_starting_kit(player):
 		things.device_of_desertification,
 		things.device_of_mapping,
 		things.device_of_shield,
+		things.device_of_super_shield,
 	]
 	for make in makers:
 		thing = make()
