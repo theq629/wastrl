@@ -8,6 +8,8 @@ from .effects import fire as effect_fire
 from .effects import desertify as effect_desertify
 from .effects import teleport as effect_teleport
 from .effects import teleport_away as effect_teleport_away
+from .effects import tunnelling as effect_tunnelling
+from .effects import mountain_generation as effect_mountain_generation
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -493,6 +495,28 @@ def device_of_teleport_away():
 			fire_range = 15,
 		),
 		effect_teleport_away.activates_as: True
+	})
+
+def device_of_tunnellation():
+	return Thing(_device, {
+		props.name: "device of tunnellation",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_tunnelling.activates_as: True
+	})
+
+def device_of_mountainization():
+	return Thing(_device, {
+		props.name: "device of mountainization",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 20,
+		),
+		effect_mountain_generation.activates_as: effect_mountain_generation.Params(
+			radius = 4
+		)
 	})
 
 def device_of_mapping():

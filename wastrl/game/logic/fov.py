@@ -12,7 +12,8 @@ class Fover:
 		'_dim',
 		'_map',
 		'fov',
-		'seen'
+		'seen',
+		'_force_update'
 	)
 
 	def __init__(self, player, terrain):
@@ -20,12 +21,15 @@ class Fover:
 		self._dim = terrain.dim
 		self._map = tcod.map.Map(*terrain.dim)
 		self._map.transparent[:] = True
+		self._force_update = False
 		self.fov = NumpyMapSet(self._map.fov)
 		self.seen = set()
 		self.setup_terrain(terrain)
-		events.move.on.add(self.update_fov, priority=1)
+		events.move.on.add(self.watch_player_move, priority=1)
+		events.acted.on.add(self.watch_acted)
+		events.terrain_change.on.add(self.watch_terrain_change)
 		if player in props.position:
-			self.update_fov(player, None, props.position[player])
+			self.update_fov(props.position[player])
 
 	def setup_terrain(self, terrain):
 		for x in range(0, terrain.dim[0]):
@@ -33,10 +37,24 @@ class Fover:
 				if terrain[x, y] in props.blocks_vision:
 					self._map.transparent[y, x] = False
 
-	def update_fov(self, actor, move_from, move_to):
+	def watch_terrain_change(self, pos):
+		x, y = pos
+		self._map.transparent[y, x] = props.terrain_at[pos] not in props.blocks_vision
+		self._force_update = True
+
+	def watch_player_move(self, actor, move_from, move_to):
 		if actor == self._player:
-			self._map.compute_fov(*move_to, radius=fov_range, algorithm=tcod.FOV_BASIC)
-			self.update_seen(move_to)
+			self.update_fov(move_to)
+
+	def watch_acted(self, actor):
+		if self._force_update:
+			if self._player in props.position:
+				self.update_fov(props.position[self._player])
+			self._force_update = False
+
+	def update_fov(self, pos):
+			self._map.compute_fov(*pos, radius=fov_range, algorithm=tcod.FOV_BASIC)
+			self.update_seen(pos)
 
 	def update_seen(self, centre):
 		for x in range(max(0, centre[0] - fov_range), min(self._dim[0], centre[0] + fov_range + 1)):

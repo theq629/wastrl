@@ -341,6 +341,8 @@ def set_starting_kit(player):
 		things.device_of_teleport,
 		things.device_of_super_teleport,
 		things.device_of_teleport_away,
+		things.device_of_tunnellation,
+		things.device_of_mountainization,
 	]
 	for make in makers:
 		thing = make()
