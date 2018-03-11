@@ -121,7 +121,7 @@ hand_to_hand = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (5, 5),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -133,7 +133,7 @@ teeth = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (1, 5),
-		radius = 0
+		radius = 1
 	)
 })
 
