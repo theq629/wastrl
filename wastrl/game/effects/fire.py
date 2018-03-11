@@ -6,7 +6,7 @@ from .. import events
 from .. import utils
 from . import smoke as effect_smoke
 
-damage_range = (3, 10)
+damage_range = (20, 30)
 burn_down_prob = 0.9
 spread_prob = 0.75
 go_out_prob = 0.1

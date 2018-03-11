@@ -5,7 +5,7 @@ from .. import things
 from .. import events
 from .. import utils
 
-damage_range = (3, 10)
+damage_range = (10, 20)
 
 Params = collections.namedtuple('Params', (
 	'radius'
