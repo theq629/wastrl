@@ -281,6 +281,7 @@ class PlayerController:
 				else:
 					handle_finish(thing_to_activate)
 			activatable = set(props.inventory[self._player]) | set(props.intrinsics[self._player])
+			activatable = set(t for t in activatable if t not in props.activation_ap or props.activation_ap[t] <= props.action_points_this_turn[self._player])
 			self._interface_manager.activate_window(activatable, handle_start)
 
 	def command_mover(self, delta):
