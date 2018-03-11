@@ -198,9 +198,9 @@ def goal():
 		props.is_goal: True
 	})
 
-def rifiles():
+def rifles():
 	return Thing(_weapon, {
-		props.name: "rifiles",
+		props.name: "rifles",
 		props.name_article: "",
 		props.activation_target_range: props.ActivationTargetRange(
 			move_range = 10,
