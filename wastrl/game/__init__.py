@@ -62,6 +62,10 @@ class Game:
 
 		self.turn_manager = logic_turns.TurnManager(self.rng)
 
+		fover = logic_fov.Fover(self._player, self.terrain)
+		props.fov[self._player] = fover.fov
+		props.seen_fov[self._player] = fover.seen
+
 	def update(self):
 		changed = False
 		while self._player in props.is_alive:
