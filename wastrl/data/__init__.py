@@ -44,7 +44,7 @@ class Event:
 		'debug'
 	)
 
-	def __init__(self, init_value=None, fold_f=lambda a, b: None, name=None, debug=None):
+	def __init__(self, init_value=None, fold_f=lambda a, b: None, name=None, debug=True):
 		self._init_value = init_value
 		self._fold_f = fold_f
 		self._on = _HandlerCollection()
@@ -57,7 +57,7 @@ class Event:
 
 	def trigger(self, *args, **kwargs):
 		global event_debug
-		if self.debug or event_debug:
+		if self.debug and event_debug:
 			name_str = "" if self._name is None else " " + self._name
 			print(f"event{name_str}", args, kwargs, file=sys.stderr)
 		value = self._init_value
