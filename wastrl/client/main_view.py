@@ -482,12 +482,15 @@ class MapWin(ui.Window):
 			self._things_map_cache[pos] = self.choose_thing_at_pos(pos)
 
 	def watch_moves(self, thing, move_from, move_to):
-		if thing == self._player:
-			self._view_controller.stop_free_view()
 		if move_from is not None:
 			self.update_thing_at_pos(move_from)
 		if move_to is not None and move_to in props.things_at:
 			self.update_thing_at_pos(move_to)
+		if thing == self._player:
+			self._view_controller.stop_free_view()
+			if self._player in props.fov:
+				for pos in props.fov[self._player]:
+					self._things_map_cache[pos] = self.choose_thing_at_pos(pos)
 
 	def handle_redraw(self, console):
 		view_centre = self._view_controller.view_centre

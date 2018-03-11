@@ -22,7 +22,7 @@ class Fover:
 		self._map = tcod.map.Map(*terrain.dim)
 		self._map.transparent[:] = True
 		self._force_update = False
-		self.fov = NumpyMapSet(self._map.fov)
+		self.fov = set()
 		self.seen = set()
 		self.setup_terrain(terrain)
 		events.move.on.add(self.watch_moves, priority=1)
@@ -69,55 +69,12 @@ class Fover:
 
 	def update_fov(self, pos):
 			self._map.compute_fov(*pos, radius=fov_range, algorithm=tcod.FOV_BASIC)
-			self.update_seen(pos)
+			self.update_sets(pos)
 
-	def update_seen(self, centre):
+	def update_sets(self, centre):
+		self.fov.clear()
 		for x in range(max(0, centre[0] - fov_range), min(self._dim[0], centre[0] + fov_range + 1)):
 			for y in range(max(0, centre[1] - fov_range), min(self._dim[1], centre[1] + fov_range + 1)):
 				if self._map.fov[y, x]:
+					self.fov.add((x, y))
 					self.seen.add((x, y))
-
-class NumpyMapSet(data.BaseProperty):
-	__slots__ = (
-		'map',
-		'default'
-	)
-
-	def __init__(self, map, default=None):
-		self.map = map
-		self.default = default
-
-	def __contains__(self, pos):
-		try:
-			x, y = pos
-		except TypeError:
-			return False
-		return self.map[y, x]
-
-	def add(self, pos):
-		x, y = pos
-		self.map[y, x] = True
-
-	def remove(self, pos):
-		x, y = pos
-		self.map[y, x] = False
-
-	def __getitem__(self, pos):
-		try:
-			x, y = pos
-		except TypeError:
-			return self.default
-		try:
-			return self.map[y, x]
-		except:
-			return self.default
-
-	def __setitem__(self, pos, value):
-		try:
-			x, y = pos
-		except TypeError:
-			return self.default
-		try:
-			self.map[y, x] = value
-		except:
-			return self.default
