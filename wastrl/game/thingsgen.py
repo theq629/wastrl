@@ -1,3 +1,4 @@
+import sys
 import collections
 from . import properties as props
 from . import things
@@ -269,38 +270,52 @@ def sort_city_points(city_points, mountain_spines):
 		city_points_in_area[put_in].append(point)
 	return city_points_in_area
 
-def gen_normal(terrain, mountain_spines, city_points, rng):
-	def gen_for_area(to_gen, points):
+def gen_normal(terrain, mountain_spines, city_points, rng, debug_log):
+	def gen_for_area(area_i, to_gen, points):
 		points = iter(points)
+		thing_counts = collections.defaultdict(int)
 		for num, maker in to_gen:
 			for i in range(num):
 				thing = maker()
 				utils.spawn(thing, next(points))
+				thing_counts[props.name[thing]] += 1
+		if debug_log:
+			things_str = " ".join(f"{c}x {n}" for n, c in thing_counts.items())
+			print(f"normal things in {area_i}: {things_str}", file=sys.stderr)
 	to_gen = tuple(tuple((rng.randint(*n), m) for n, m in area_spec.normal) for area_spec in table)
 	points = choose_points(to_gen, terrain, mountain_spines, city_points, rng)
-	for to_gen_for_area, area_points in zip(to_gen, points):
-		gen_for_area(to_gen_for_area, area_points)
+	for area_i, (to_gen_for_area, area_points) in enumerate(zip(to_gen, points)):
+		gen_for_area(area_i, to_gen_for_area, area_points)
 
-def gen_cities(city_points, mountain_spines, rng):
+def gen_cities(city_points, mountain_spines, rng, debug_log):
 	city_points_in_area = sort_city_points(city_points, mountain_spines)
-	for city_points, spec in zip(city_points_in_area, table):
+	for area_i, (city_points, spec) in enumerate(zip(city_points_in_area, table)):
 		spec = spec.city
+		thing_counts = collections.defaultdict(int)
+		guard_counts = collections.defaultdict(int)
 		for city_point in city_points:
 			for num, maker in spec.things:
 				for _ in range(rng.randint(*num)):
 					thing = maker()
 					utils.spawn(thing, city_point)
+					thing_counts[props.name[thing]] += 1
 			if len(spec.guardian) > 0:
 				guardian = spec.guardian[rng.randint(0, len(spec.guardian) - 1)]()
 				utils.spawn(guardian, city_point)
 				props.is_guarding_city.add(guardian)
+				guard_counts[props.name[guardian]] += 1
+		if debug_log:
+			things_str = " ".join(f"{c}x {n}" for n, c in thing_counts.items())
+			print(f"city things in {area_i}: {things_str}", file=sys.stderr)
+			guards_str = " ".join(f"{c}x {n}" for n, c in guard_counts.items())
+			print(f"city guards in {area_i}: {guards_str}", file=sys.stderr)
 
-def gen(terrain, mountain_spines,city_points, rng):
+def gen(terrain, mountain_spines,city_points, rng, debug_log=False):
 	city_points = set(city_points)
 	mountain_spines = sorted(mountain_spines, key=lambda s: s[0][0], reverse=True)
 	mountain_spines = tuple(tuple(normalize_spine(p)) for p in mountain_spines)
-	gen_normal(terrain, mountain_spines, city_points, rng)
-	gen_cities(city_points, mountain_spines, rng)
+	gen_normal(terrain, mountain_spines, city_points, rng, debug_log=debug_log)
+	gen_cities(city_points, mountain_spines, rng, debug_log=debug_log)
 
 def set_starting_kit(player):
 	makers = [

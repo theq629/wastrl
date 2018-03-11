@@ -34,7 +34,7 @@ def reset_data():
 		data.BaseProperty.all.remove(thing)
 
 class Game:
-	def __init__(self, seed, starter_kit=False):
+	def __init__(self, seed, starter_kit=False, log_things_gen=False):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points, mountain_spines = mapgen.gen(self.rng)
 
@@ -46,7 +46,7 @@ class Game:
 		props.blocked_at.map = tilemap.Tilemap(self.terrain.dim, init=lambda _: False)
 		ai.Ai(self.rng, self.terrain)
 
-		thingsgen.gen(self.terrain, mountain_spines, city_points, self.rng)
+		thingsgen.gen(self.terrain, mountain_spines, city_points, self.rng, debug_log=log_things_gen)
 
 		for point in city_points:
 			utils.spawn(things.city(), point)
