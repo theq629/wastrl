@@ -145,7 +145,7 @@ rat_teeth = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (2, 5),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -157,7 +157,7 @@ rat_teeth_extra = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (5, 10),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -169,7 +169,7 @@ skunk_claws = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (5, 10),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -181,7 +181,7 @@ ant_sting = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (7, 15),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -193,7 +193,7 @@ mole_claws = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (10, 20),
-		radius = 0
+		radius = 1
 	)
 })
 
@@ -216,7 +216,7 @@ robot_eyes = Thing(_intrinsic, {
 	),
 	effect_damage.activates_as: effect_damage.Params(
 		damage = (12, 25),
-		radius = 0
+		radius = 1
 	)
 })
 
