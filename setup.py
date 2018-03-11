@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name = "wastrl",
-	version = "0.0.1",
+	version = "1.0.0",
 	description = "Wastrl seven-day roguelike",
 	author = "Max Whitney",
 	author_email = "mwhitney@alumni.sfu.ca",
