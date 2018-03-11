@@ -32,3 +32,7 @@ Where `{version}` is the version number to use for filenames. This will generate
 ## Config
 
 Copy `wastrl/config/*` to `~/.config/wastrl/` on Linux, or wherever the standard place to put config files is on other platforms.
+
+## Resources
+
+Fonts are from `https://github.com/bhelyer/libtcod-d/tree/master/data/fonts` and are apparently in the public domain.
