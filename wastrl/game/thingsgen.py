@@ -114,6 +114,7 @@ table = (
 				((1, 2), things.missile_of_fire_bomb),
 				((0, 1), things.missile_of_smoke),
 				((0, 1), things.missile_of_guidedness),
+				((0, 1), things.missile_of_cluster_bomb),
 			],
 			guardian = [
 				things.queen_ant

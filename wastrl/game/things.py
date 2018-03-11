@@ -438,7 +438,7 @@ def missile_of_kaboom():
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (15, 25),
+			damage = (10, 20),
 			radius = 1
 		)
 	})
@@ -451,7 +451,7 @@ def missile_of_bigger_kaboom():
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (20, 30),
+			damage = (20, 60),
 			radius = 2
 		)
 	})
@@ -464,7 +464,7 @@ def missile_of_cluster_bomb():
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (0, 25),
+			damage = (5, 30),
 			radius = 3
 		)
 	})
@@ -477,7 +477,7 @@ def missile_of_guidedness():
 			fire_range = 20,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (25, 35),
+			damage = (50, 60),
 			radius = 1
 		)
 	})
@@ -490,7 +490,7 @@ def missile_of_fire_bomb():
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (10, 25),
+			damage = (10, 30),
 			radius = 2
 		),
 		effect_fire.activates_as: effect_fire.Params(
