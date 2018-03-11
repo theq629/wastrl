@@ -561,6 +561,19 @@ def device_of_slow():
 		)
 	})
 
+def device_of_petrify():
+	return Thing(_device, {
+		props.name: "device of petrification",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_slow.activates_as: effect_slow.Params(
+			amount = 1.0,
+			turns = 5
+		)
+	})
+
 def device_of_desertification():
 	return Thing(_device, {
 		props.name: "device of desertification",
