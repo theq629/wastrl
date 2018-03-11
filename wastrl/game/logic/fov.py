@@ -25,7 +25,7 @@ class Fover:
 		self.fov = NumpyMapSet(self._map.fov)
 		self.seen = set()
 		self.setup_terrain(terrain)
-		events.move.on.add(self.watch_player_move, priority=1)
+		events.move.on.add(self.watch_moves, priority=1)
 		events.acted.on.add(self.watch_acted)
 		events.terrain_change.on.add(self.watch_terrain_change)
 		if player in props.position:
@@ -42,9 +42,19 @@ class Fover:
 		self._map.transparent[y, x] = props.terrain_at[pos] not in props.blocks_vision
 		self._force_update = True
 
-	def watch_player_move(self, actor, move_from, move_to):
-		if actor == self._player:
+	def watch_moves(self, thing, move_from, move_to):
+		if thing == self._player:
 			self.update_fov(move_to)
+		else:
+			if move_to is not None and thing in props.blocks_vision:
+				x, y = move_to
+				self._map.transparent[y, x] = False
+				self._force_update = True
+			if move_from is not None:
+				x, y = move_from
+				if not self._map.transparent[y, x] and not (props.terrain_at[move_from] in props.blocks_vision or any(t in props.blocks_vision for t in props.things_at[move_from])):
+					self._map.transparent[y, x] = True
+				self._force_update = True
 
 	def watch_acted(self, actor):
 		if self._force_update:
