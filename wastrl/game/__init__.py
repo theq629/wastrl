@@ -35,10 +35,10 @@ def reset_data():
 
 class Game:
 	def __init__(self, seed, starter_kit=False, log_things_gen=False):
+		reset_data()
+
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points, mountain_spines = mapgen.gen(self.rng)
-
-		reset_data()
 
 		props.terrain_at.map = self.terrain
 		props.terrain_at.default = things.desert
