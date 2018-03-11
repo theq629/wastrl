@@ -32,7 +32,7 @@ def reset_data():
 		data.BaseProperty.all.remove(thing)
 
 class Game:
-	def __init__(self, seed):
+	def __init__(self, seed, starter_kit=False):
 		self.rng = tcod.random.Random(tcod.random.MERSENNE_TWISTER, seed=seed)
 		self.terrain, starting_point, ending_point, city_points, mountain_spines = mapgen.gen(self.rng)
 
@@ -55,7 +55,8 @@ class Game:
 
 		print("player:", player, file=sys.stderr)
 
-		thingsgen.set_starting_kit(player) # TODO: debugging
+		if starter_kit:
+			thingsgen.set_starting_kit(player)
 
 		self.turn_manager = logic_turns.TurnManager(self.rng)
 

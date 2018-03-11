@@ -100,6 +100,7 @@ def normalize_debug_opts(opts):
 	norm_opts = {}
 	norm_opts['log_events'] = opts.getboolean('log_events')
 	norm_opts['ignore_fov'] = opts.getboolean('ignore_fov')
+	norm_opts['starter_kit'] = opts.getboolean('starter_kit')
 	return norm_opts
 
 def normalize_config(config):
@@ -170,7 +171,7 @@ def main():
 			disp.views.add(loading_view)
 			if seed is None:
 				seed = int(time.time() * 1000)
-			the_game = game.Game(seed)
+			the_game = game.Game(seed, starter_kit=config['debug']['starter_kit'])
 			view = main_view.MainView(disp, keybindings, the_game, keybindings=keybindings['main'], **main_view_opts)
 			loading_view.close()
 			disp.views.add(view)
