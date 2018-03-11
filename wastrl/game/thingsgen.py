@@ -324,4 +324,7 @@ def set_starting_kit(player):
 	]
 	for make in makers:
 		thing = make()
+		if thing in props.single_use:
+			props.single_use.remove(thing)
+		props.is_from_starter_kit.add(thing)
 		props.inventory[player].add(thing)

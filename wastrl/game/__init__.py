@@ -16,6 +16,7 @@ from .logic import examine as logic_examine
 from .logic import mortality as logic_mortality
 from .logic import win_lose as logic_win_lose
 from .logic import single_use as logic_single_use
+from .logic import starter_kit as logic_starter_kit
 import sys # TODO: improve logging
 
 @events.move.on.handle(-1)
