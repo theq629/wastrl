@@ -482,7 +482,7 @@ class MapWin(ui.Window):
 			self._view_controller.stop_free_view()
 		if move_from is not None:
 			self._things_map_cache[move_from] = self.choose_thing_at_pos(move_from)
-		if move_to is not None:
+		if move_to is not None and move_to in props.things_at:
 			self._things_map_cache[move_to] = self.choose_thing_at_pos(move_to)
 
 	def handle_redraw(self, console):
