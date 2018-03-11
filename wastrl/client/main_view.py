@@ -249,7 +249,7 @@ class PlayerController:
 
 	def command_get(self):
 		if self._is_our_turn:
-			things_here = set(t for t in props.things_at[props.position[self._player]] if t != self._player)
+			things_here = set(t for t in props.things_at[props.position[self._player]] if t != self._player and not t in props.cant_get)
 			def handle(things_to_get):
 				events.act.trigger(self._player, actions.Get(self._player, things_to_get))
 			self._interface_manager.get_window(things_here, handle)

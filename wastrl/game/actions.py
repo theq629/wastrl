@@ -80,7 +80,7 @@ class Get(Base):
 		super().__init__()
 
 	def _calc_ap(self):
-		if self._actor in props.inventory and all(t in props.position and props.position[t] == props.position[self._actor] for t in self._things):
+		if self._actor in props.inventory and all(t in props.position and props.position[t] == props.position[self._actor] and not t in props.cant_get for t in self._things):
 			return 1
 		else:
 			return None

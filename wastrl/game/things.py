@@ -91,6 +91,7 @@ mountains = Thing({
 	props.name: "mountains",
 	props.name_article: "",
 	props.graphics: props.Graphics(char='^', colour=0xcfc19a),
+	props.cant_get: True,
 	props.blocks_vision: True
 })
 grassland = Thing({
@@ -98,12 +99,14 @@ grassland = Thing({
 	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0x10ad80),
 	props.walk_over_ap: 1,
+	props.cant_get: True,
 	props.is_flamable: True
 })
 desert = Thing({
 	props.name: "desert",
 	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0xffcf6d),
+	props.cant_get: True,
 	props.walk_over_ap: 1
 })
 forest = Thing({
@@ -111,18 +114,21 @@ forest = Thing({
 	props.name_article: "",
 	props.graphics: props.Graphics(char='&', colour=0x345132),
 	props.walk_over_ap: 2,
+	props.cant_get: True,
 	props.is_flamable: True
 })
 water = Thing({
 	props.name: "water",
 	props.name_article: "",
-	props.graphics: props.Graphics(char='~', colour=0x22b6f2)
+	props.graphics: props.Graphics(char='~', colour=0x22b6f2),
+	props.cant_get: True
 })
 road = Thing({
 	props.name: "road",
 	props.name_article: "",
 	props.graphics: props.Graphics(char='.', colour=0x222222),
-	props.walk_over_ap: 0.5
+	props.walk_over_ap: 0.5,
+	props.cant_get: True
 })
 
 hand_to_hand = Thing(_intrinsic, {
@@ -291,7 +297,8 @@ def city():
 	return Thing({
 		props.name: "city ruin",
 		props.graphics: props.Graphics(char='#', colour=0xaaaaaa),
-		props.blocks_local_vision: True
+		props.blocks_local_vision: True,
+		props.cant_get: True
 	})
 
 def goal():
@@ -299,7 +306,8 @@ def goal():
 		props.name: "Wastrl",
 		props.name_article: "",
 		props.graphics: props.Graphics(char='#', colour=0xffffff),
-		props.is_goal: True
+		props.is_goal: True,
+		props.cant_get: True
 	})
 
 def rifles():
