@@ -10,6 +10,8 @@ def spawn(thing, pos):
 	events.move.trigger(thing, None, pos)
 	if thing in props.action_points:
 		props.is_alive.add(thing)
+	if thing in props.max_population:
+		props.population[thing] = props.max_population[thing]
 
 def unspawn(thing):
 	if thing in props.position:

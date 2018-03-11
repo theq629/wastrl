@@ -10,6 +10,7 @@ from .effects import teleport as effect_teleport
 from .effects import teleport_away as effect_teleport_away
 from .effects import tunnelling as effect_tunnelling
 from .effects import mountain_generation as effect_mountain_generation
+from .effects import recuperation as effect_recuperation
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -18,7 +19,7 @@ def Thing(init, *other_inits):
 
 _creature = {
 	props.action_points: 1,
-	props.population: 1,
+	props.max_population: 1,
 	props.inventory: set(),
 	props.is_blocking: True
 }
@@ -519,14 +520,25 @@ def device_of_mountainization():
 		)
 	})
 
+def device_of_recuperation():
+	return Thing(_device, {
+		props.name: "device of recuperation",
+		effect_recuperation.activates_as: effect_recuperation.Params(
+			amount = 20
+		)
+	})
+
+def device_of_major_recuperation():
+	return Thing(_device, {
+		props.name: "device of major recuperation",
+		effect_recuperation.activates_as: effect_recuperation.Params(
+			amount = 50
+		)
+	})
+
 def device_of_mapping():
 	return Thing(_device, {
 		props.name: "device of mapping"
-	})
-
-def device_of_restoration():
-	return Thing(_device, {
-		props.name: "device of restoration"
 	})
 
 def ratling():
@@ -534,7 +546,7 @@ def ratling():
 		props.name: "ratling",
 		props.graphics: props.Graphics(char='r', colour=0xffffff),
 		props.action_points: 10,
-		props.population: 10,
+		props.max_population: 10,
 		props.inventory: set(),
 		props.intrinsics: {
 			teeth
@@ -546,7 +558,7 @@ def megarat():
 		props.name: "megarat",
 		props.graphics: props.Graphics(char='R', colour=0xffffff),
 		props.action_points: 10,
-		props.population: 20,
+		props.max_population: 20,
 		props.inventory: set(),
 		props.intrinsics: {
 			huge_teeth
@@ -558,7 +570,7 @@ def giant_ant():
 		props.name: "giant ant",
 		props.graphics: props.Graphics(char='a', colour=0xbbbbbb),
 		props.action_points: 10,
-		props.population: 10,
+		props.max_population: 10,
 		props.inventory: set(),
 		props.intrinsics: {
 			bite
@@ -570,7 +582,7 @@ def fire_ant():
 		props.name: "fire ant",
 		props.graphics: props.Graphics(char='a', colour=0xff0000),
 		props.action_points: 10,
-		props.population: 10,
+		props.max_population: 10,
 		props.inventory: set(),
 		props.fire_immunity: True,
 		props.intrinsics: {
@@ -584,7 +596,7 @@ def skunk():
 		props.name: "skunk",
 		props.graphics: props.Graphics(char='s', colour=0x555555),
 		props.action_points: 10,
-		props.population: 15,
+		props.max_population: 15,
 		props.inventory: set(),
 		props.gas_immunity: True,
 		props.intrinsics: {
@@ -598,7 +610,7 @@ def dire_skunk():
 		props.name: "dire skunk",
 		props.graphics: props.Graphics(char='s', colour=0xff5555),
 		props.action_points: 10,
-		props.population: 15,
+		props.max_population: 15,
 		props.inventory: set(),
 		props.gas_immunity: True,
 		props.intrinsics: {
@@ -613,7 +625,7 @@ def laser_bot():
 		props.name: "laser bot",
 		props.graphics: props.Graphics(char='b', colour=0xbbbbbb),
 		props.action_points: 10,
-		props.population: 30,
+		props.max_population: 30,
 		props.inventory: set(),
 		props.intrinsics: {
 			laser_eyes
@@ -625,7 +637,7 @@ def warrior_bot():
 		props.name: "warrior bot",
 		props.graphics: props.Graphics(char='b', colour=0xffffbb),
 		props.action_points: 10,
-		props.population: 40,
+		props.max_population: 40,
 		props.inventory: {
 			gatling_gun()
 		},
@@ -639,7 +651,7 @@ def nuclear_robot():
 		props.name: "nuclear robot",
 		props.graphics: props.Graphics(char='b', colour=0xeeeeee),
 		props.action_points: 10,
-		props.population: 30,
+		props.max_population: 30,
 		props.inventory: {
 			missile_of_nuclear_warhead(),
 			missile_of_nuclear_warhead(),
@@ -658,7 +670,7 @@ def player():
 		props.fov: set(),
 		props.seen_fov: set(),
 		props.action_points: 5,
-		props.population: 100,
+		props.max_population: 100,
 		props.inventory: set(),
 		props.intrinsics: {
 			hand_to_hand
