@@ -110,6 +110,12 @@ class PlayerInterfaceManager:
 		self.dialog_max_width = dialog_max_width
 
 	def menu(self, items=(), name_value=lambda x: x, select_handler=None, select_multi=False, **kwargs):
+		def fix_key(key):
+			if key.lower() != key:
+				return "shift+" + key.lower()
+			else:
+				return key
+		items = tuple((fix_key(k), v) for k, v in items)
 		named_items = [(k, name_value(v)) for k, v in items]
 		if select_handler is None:
 			handle = None
