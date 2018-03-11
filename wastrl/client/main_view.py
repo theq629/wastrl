@@ -38,6 +38,7 @@ class MessageHandler:
 		events.get.on.add(self.handle_get, priority=100)
 		events.drop.on.add(self.handle_drop, priority=100)
 		events.guard_wakeup.on.add(self.handle_guard_wakeup, priority=100)
+		events.bad_action.on.add(self.handle_bad_action)
 
 	def message(self, message, *args, **kwargs):
 		msg_line = message.format(*args, **kwargs) + "\n"
@@ -78,6 +79,10 @@ class MessageHandler:
 
 	def handle_guard_wakeup(self, actor):
 		self.message("Something has awoken in the city ruins. It is {thing}.", thing=self.name_thing(actor))
+
+	def handle_bad_action(self, actor, action):
+		if actor == self.player:
+			self.message("You can't do that!")
 
 	def do_look(self, pos):
 		things_there = tuple(props.things_at[pos])

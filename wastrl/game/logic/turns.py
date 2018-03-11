@@ -64,6 +64,7 @@ class TurnManager:
 		else:
 			if action.ap is None or action.ap > props.action_points_this_turn[actor]:
 				print(f"warning: actor {actor} requested impossible action")
+				events.bad_action.trigger(actor, action)
 				if actor not in props.is_player:
 					_to_act_this_turn.remove(self._taking_turn)
 			else:
