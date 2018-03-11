@@ -35,6 +35,12 @@ _intrinsic = {
 	props.name_article: ""
 }
 
+damage_marker = {
+	props.name: "explosion",
+	props.graphics: props.Graphics(char='+', colour=0xaa0000),
+	props.is_visual: True
+}
+
 explosion = {
 	props.name: "explosion",
 	props.graphics: props.Graphics(char='+', colour=0xaa0000),

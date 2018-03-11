@@ -2,8 +2,10 @@ import collections
 from ... import data
 from .. import properties as props
 from .. import events
+from .. import things
 from .. import utils
-from . import explosion
+
+marker_life = 10
 
 Params = collections.namedtuple('Params', (
 	'damage',
@@ -11,6 +13,12 @@ Params = collections.namedtuple('Params', (
 ))
 
 activates_as = data.ValuedProperty()
+
+_marker_times = data.ValuedProperty()
+
+def make_marker(rng):
+	template = dict(things.damage_marker)
+	return things.Thing(template)
 
 @events.examine.on.handle(1)
 def examine_activatable(thing, detailed):
@@ -28,5 +36,18 @@ def handle_activation(thing, actor, target_pos, rng):
 			damage = rng.randint(*params.damage)
 			target_things = tuple(props.things_at[pos])
 			for target_thing in target_things:
-				if target_things != actor:
+				if target_thing != actor:
 					events.attack.trigger(actor, target_thing, damage)
+			marker = make_marker(rng)
+			props.position[marker] = pos
+			_marker_times[marker] = marker_life
+
+@events.update.on.handle()
+def handle_momentary(rng):
+	marker_times = list(_marker_times.items())
+	for thing, ticks in marker_times:
+		if ticks <= 0:
+			data.BaseProperty.all.remove(thing)
+		else:
+			_marker_times[thing] -= 1
+	return len(marker_times) > 0
