@@ -1,4 +1,4 @@
 all:
 
 clean:
-	rm -rf dist temp *.spec *.zip
+	rm -rf dist temp *.spec *.tar.gz *.zip

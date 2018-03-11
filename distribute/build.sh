@@ -21,8 +21,8 @@ pyinstaller \
 	--add-data 'temp/README:.' \
 	start-wastrl.py
 
-rm -f "wastrl-$version.zip"
+rm -f "wastrl-$version.tar.gz"
 {
 	cd "dist"
-	zip -r "../wastrl-$version.zip" "wastrl-$version"
+	tar -zcvf "../wastrl-$version.tar.gz" "wastrl-$version"
 }
