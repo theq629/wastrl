@@ -1,19 +1,18 @@
 set -e
 
-version="$1"
-
-if [ ! "$version" ]; then
-	echo "error: need to give version" 1>&2
-	exit 1
-fi
-
-rm -rf temp
+rm -rf temp dist
 mkdir -p temp
+
+virtualenv temp/venv
+source temp/venv/bin/activate
+pip install -r requirements.txt
+pip install ..
+
+version="$(pip show wastrl | grep '^Version:' | sed -e 's|^[A-Za-z]\+: *||g')"
+echo "packaging version $version"
+
 sed -e "s|{version}|$version|g" "readme.txt" > "temp/README"
 
-pip install .. --upgrade
-
-rm -rf "dist"
 pyinstaller \
 	--name "wastrl-$version" \
 	--noconfirm \
