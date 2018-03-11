@@ -326,7 +326,46 @@ def missile_of_kaboom():
 			fire_range = 15,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (5, 20),
+			damage = (15, 25),
+			radius = 1
+		)
+	})
+
+def missile_of_bigger_kaboom():
+	return Thing(_missile, {
+		props.name: "missile of bigger kaboom",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_explosion.activates_as: effect_explosion.Params(
+			damage = (20, 30),
+			radius = 2
+		)
+	})
+
+def missile_of_cluster_bomb():
+	return Thing(_missile, {
+		props.name: "missile of cluster bomb",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 15,
+		),
+		effect_explosion.activates_as: effect_explosion.Params(
+			damage = (0, 25),
+			radius = 3
+		)
+	})
+
+def missile_of_guidedness():
+	return Thing(_missile, {
+		props.name: "missile of guidedness",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 20,
+		),
+		effect_explosion.activates_as: effect_explosion.Params(
+			damage = (25, 35),
 			radius = 1
 		)
 	})
@@ -355,7 +394,7 @@ def missile_of_nuclear_warhead():
 			fire_range = 30,
 		),
 		effect_explosion.activates_as: effect_explosion.Params(
-			damage = (50, 100),
+			damage = (500, 1000),
 			radius = 8
 		),
 		effect_desertify.activates_as: effect_desertify.Params(
