@@ -13,6 +13,7 @@ from .effects import mountain_generation as effect_mountain_generation
 from .effects import recuperation as effect_recuperation
 from .effects import speed as effect_speed
 from .effects import reveal_map as effect_reveal_map
+from .effects import shield as effect_shield
 
 def Thing(init, *other_inits):
 	init = dict(init.items())
@@ -567,6 +568,14 @@ def device_of_mapping():
 		),
 		effect_reveal_map.activates_as: effect_reveal_map.Params(
 			radius = 20
+		)
+	})
+
+def device_of_shield():
+	return Thing(_device, {
+		props.name: "device of shield",
+		effect_shield.activates_as: effect_shield.Params(
+			turns = 5
 		)
 	})
 

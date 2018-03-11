@@ -9,7 +9,8 @@ def handle_damage(attackee, target, damage):
 @events.send_damage.on.handle()
 def handle_get_damage(target, damage):
 	props.population[target] -= damage
-	events.take_damage.trigger(target, damage)
+	if events.handle_damage.trigger(target, damage):
+		events.take_damage.trigger(target, damage)
 
 @events.take_damage.on.handle(1000)
 def handle_death(thing, damage):
