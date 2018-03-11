@@ -545,6 +545,18 @@ def device_of_speed():
 		)
 	})
 
+def device_of_desertification():
+	return Thing(_device, {
+		props.name: "device of desertification",
+		props.activation_target_range: props.ActivationTargetRange(
+			move_range = 0,
+			fire_range = 20,
+		),
+		effect_desertify.activates_as: effect_desertify.Params(
+			radius = 5
+		)
+	})
+
 def device_of_mapping():
 	return Thing(_device, {
 		props.name: "device of mapping"
