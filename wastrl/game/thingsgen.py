@@ -19,9 +19,21 @@ table = (
 		normal = [
 			((3, 5), things.ratling),
 			((1, 2), things.giant_rat),
+			((1, 2), things.rifles),
+			((0, 1), things.gatling_gun),
+			((0, 1), things.artillery),
+			((1, 2), things.missile_of_kaboom),
+			((0, 1), things.missile_of_smoke),
 		],
 		city = City(
 			things = [
+				((1, 2), things.device_of_recuperation),
+				((1, 1), things.device_of_major_recuperation),
+				((1, 3), things.rifles),
+				((1, 2), things.gatling_gun),
+				((1, 1), things.artillery),
+				((2, 4), things.missile_of_kaboom),
+				((1, 2), things.missile_of_smoke),
 			],
 			guardian = [
 				things.megarat,
@@ -32,9 +44,22 @@ table = (
 		normal = [
 			((3, 5), things.skunk),
 			((1, 2), things.dire_skunk),
+			((1, 2), things.gatling_gun),
+			((0, 1), things.armoured_car),
+			((0, 1), things.artillery),
+			((0, 1), things.missile_of_kaboom),
+			((1, 1), things.missile_of_gas),
 		],
 		city = City(
 			things = [
+				((1, 2), things.device_of_recuperation),
+				((1, 1), things.device_of_major_recuperation),
+				((1, 3), things.gatling_gun),
+				((1, 2), things.armoured_car),
+				((1, 1), things.artillery),
+				((0, 1), things.missile_of_kaboom),
+				((1, 2), things.missile_of_gas),
+				((0, 1), things.missile_of_smoke),
 			],
 			guardian = [
 				things.super_skunk
@@ -45,9 +70,24 @@ table = (
 		normal = [
 			((3, 5), things.giant_ant),
 			((1, 2), things.fire_ant),
+			((1, 2), things.armoured_car),
+			((0, 1), things.tank),
+			((0, 1), things.artillery),
+			((0, 1), things.missile_of_kaboom),
+			((1, 1), things.missile_of_fire_bomb),
 		],
 		city = City(
 			things = [
+				((1, 2), things.device_of_recuperation),
+				((1, 1), things.device_of_major_recuperation),
+				((1, 3), things.armoured_car),
+				((1, 2), things.tank),
+				((1, 1), things.artillery),
+				((1, 1), things.saturation_artillery),
+				((0, 1), things.missile_of_bigger_kaboom),
+				((1, 2), things.missile_of_fire_bomb),
+				((0, 1), things.missile_of_smoke),
+				((0, 1), things.missile_of_guidedness),
 			],
 			guardian = [
 				things.queen_ant
@@ -58,9 +98,25 @@ table = (
 		normal = [
 			((3, 5), things.mole),
 			((1, 2), things.quake_mole),
+			((1, 2), things.tank),
+			((0, 1), things.ray_gun),
+			((1, 3), things.tank),
+			((1, 2), things.ray_gun),
+			((0, 1), things.saturation_artillery),
+			((0, 1), things.artillery),
+			((0, 1), things.missile_of_bigger_kaboom),
+			((0, 1), things.missile_of_cluster_bomb),
 		],
 		city = City(
 			things = [
+				((1, 2), things.device_of_recuperation),
+				((1, 1), things.device_of_major_recuperation),
+				((1, 1), things.artillery),
+				((1, 1), things.saturation_artillery),
+				((0, 1), things.missile_of_bigger_kaboom),
+				((0, 1), things.missile_of_nuclear_warhead),
+				((0, 1), things.missile_of_smoke),
+				((0, 1), things.missile_of_guidedness),
 			],
 			guardian = [
 				things.doom_mole
@@ -71,9 +127,24 @@ table = (
 		normal = [
 			((3, 5), things.laser_bot),
 			((1, 3), things.warrior_bot),
+			((1, 2), things.ray_gun),
+			((0, 1), things.repulsor),
+			((0, 1), things.saturation_artillery),
+			((0, 1), things.artillery),
+			((1, 1), things.missile_of_bigger_kaboom),
+			((1, 2), things.missile_of_nuclear_warhead),
 		],
 		city = City(
 			things = [
+				((1, 2), things.device_of_recuperation),
+				((1, 1), things.device_of_major_recuperation),
+				((1, 3), things.ray_gun),
+				((1, 2), things.repulsor),
+				((1, 1), things.artillery),
+				((1, 1), things.saturation_artillery),
+				((0, 1), things.missile_of_bigger_kaboom),
+				((0, 1), things.missile_of_smoke),
+				((0, 1), things.missile_of_guidedness),
 			],
 			guardian = [
 				things.nuclear_robot
