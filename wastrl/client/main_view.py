@@ -414,7 +414,7 @@ class StatusWin(ui.Window):
 			ap = props.action_points_this_turn[self._player]
 			ap_str = int(ap) if int(ap) == ap else "%0.2f" % (ap)
 			console.draw_str(1, 1, f"AP: {ap_str}", bg=bg)
-			console.draw_str(1, 2, f"Pop: {props.population[self._player]}", bg=bg)
+			console.draw_str(1, 2, f"HP: {props.population[self._player]}", bg=bg)
 		else:
 			console.draw_str(1, 1, f"DEAD", bg=bg)
 
