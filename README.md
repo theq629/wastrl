@@ -27,7 +27,7 @@ And run `wastrl`.
 	pip install -r requirements.txt
 	./build.sh {version}
 
-Where `{version}` is the version number to use for filenames. This will generate `
+Where `{version}` is the version number to use for filenames. This will generate `wastrl-{version}`.tar.gz.
 
 ## Config
 
